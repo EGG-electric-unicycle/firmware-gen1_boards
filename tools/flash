@@ -1,0 +1,2 @@
+sudo openocd -f ../openocd.cfg -c "init; halt; flash write_image erase main.bin 0x08000000; exit" 
+#sudo openocd -f ../openocd.cfg -c "init; halt; flash write_image erase v6_one_v117.bin 0x08000000; exit" 
