@@ -1,0 +1,147 @@
+
+
+../gcc/gcc-arm-none-eabi/bin/arm-none-eabi-gdb main.elf
+# target remote :3333
+# cont
+# ^C
+# print i
+# quit
+# set remote hardware-breakpoint-limit 6
+# set remote hardware-watchpoint-limit 4
+	
+
+I was just going through something similar, and came up with a basic example - and knowing I'll forget about it soon, I thought I'd better post it :) So I'll post it here, as it looks related to the question.
+
+Basically, in this example I wanted to get some variable values in particular places of the code; and have them output until the program crashes. So here is first a little program which is guaranteed to crash in a few steps, test.c:
+
+#include <stdio.h>
+#include <stdlib.h>
+
+int icount = 1; // default value
+
+main(int argc, char *argv[])
+{
+  int i;
+
+  if (argc == 2) {
+    icount = atoi(argv[1]);
+  }
+
+  i = icount;
+  while (i > -1) {
+    int b = 5 / i;
+    printf(" 5 / %d = %d \n", i, b );
+    i = i - 1;
+  }
+
+  printf("Finished\n");
+  return 0;
+}
+
+The only reason the program accepts command-line arguments is to be able to choose the number of steps before crashing - and to show that gdb ignores --args in batch mode. This I compile with:
+
+gcc -g test.c -o test.exe
+
+
+# http://sourceware.org/gdb/wiki/FAQ: to disable the
+# "---Type <return> to continue, or q <return> to quit---"
+# in batch mode:
+set width 0
+set height 0
+set verbose off
+
+# at entry point - cmd1
+b main
+commands 1
+  print argc
+  continue
+end
+
+# printf line - cmd2
+b test.c:17
+commands 2
+  p i
+  p b
+  continue
+end
+
+# int b = line - cmd3
+b test.c:16
+commands 3
+  p i
+  p b
+  continue
+end
+
+# show arguments for program
+show args
+printf "Note, however: in batch mode, arguments will be ignored!\n"
+
+# note: even if arguments are shown;
+# must specify cmdline arg for "run"
+# when running in batch mode! (then they are ignored)
+# below, we specify command line argument "2":
+run 2     # run
+
+#start # alternative to run: runs to main, and stops
+#continue
+
+
+
+Note that, if you intend to use it in batch mode, you have to "start up" the script at the end, with run or start or something similar.
+
+With this script in place, I can call gdb in batch mode - which will generate the following output in the terminal:
+
+$ gdb --batch --command=test.gdb --args ./test.exe 5
+Breakpoint 1 at 0x804844d: file test.c, line 10.
+Breakpoint 2 at 0x8048485: file test.c, line 17.
+Breakpoint 3 at 0x8048473: file test.c, line 16.
+Argument list to give program being debugged when it is started is "5".
+Note, however: in batch mode, arguments will be ignored!
+
+Breakpoint 1, main (argc=2, argv=0xbffff424) at test.c:10
+10    if (argc == 2) {
+$1 = 2
+
+Breakpoint 3, main (argc=2, argv=0xbffff424) at test.c:16
+16      int b = 5 / i;
+$2 = 2
+$3 = 134513899
+
+Breakpoint 2, main (argc=2, argv=0xbffff424) at test.c:17
+17      printf(" 5 / %d = %d \n", i, b );
+$4 = 2
+$5 = 2
+ 5 / 2 = 2 
+
+Breakpoint 3, main (argc=2, argv=0xbffff424) at test.c:16
+16      int b = 5 / i;
+$6 = 1
+$7 = 2
+
+Breakpoint 2, main (argc=2, argv=0xbffff424) at test.c:17
+17      printf(" 5 / %d = %d \n", i, b );
+$8 = 1
+$9 = 5
+ 5 / 1 = 5 
+
+Breakpoint 3, main (argc=2, argv=0xbffff424) at test.c:16
+16      int b = 5 / i;
+$10 = 0
+$11 = 5
+
+Program received signal SIGFPE, Arithmetic exception.
+0x0804847d in main (argc=2, argv=0xbffff424) at test.c:16
+16      int b = 5 / i;
+
+Note that while we specify command line argument 5, the loop still spins only two times (as is the specification of run in the gdb script); if run didn't have any arguments, it spins only once (the default value of the program) confirming that --args ./test.exe 5 is ignored.
+
+However, since now this is output in a single call, and without any user interaction, the command line output can easily be captured in a text file using bash redirection, say:
+
+gdb --batch --command=test.gdb --args ./test.exe 5 > out.txt
+
+There is also an example of using python for automating gdb in c - GDB auto stepping - automatic printout of lines, while free running?
+
+Hope this helps,
+Cheers!
+Then, I prepare the following script - the main trick here is to assign a command to each breakpoint, which will eventually continue (see also Automate gdb: show backtrace at every call to function puts). This script I call test.gdb:
