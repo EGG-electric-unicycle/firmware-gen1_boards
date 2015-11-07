@@ -12,9 +12,16 @@ About this Project
 OpenSource Electric Unicycle Firmware
 
 
-Installation Instructions
+Build Instructions
 -------------------------
-Nothing here yet.
+1. Get gcc-arm toolchain from https://launchpad.net/gcc-arm-embedded
+   (tested with gcc-arm-none-eabi-4_9-2015q2-20150609-linux)
+2. Unpack to a directory of your choice (but look at the relative reference)
+3. Make sure that the following path relative to the git root directory
+   exists and contains the gcc-arm toolchain:
+   ../gcc/gcc-arm-none-eabi
+   (alternatively you can make a local change to the makefile)
+4. In the repository root directory type 'make'
 
 
 Current Features
