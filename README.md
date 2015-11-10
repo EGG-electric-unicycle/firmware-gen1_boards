@@ -1,3 +1,7 @@
+About this Project
+------------------
+Project home page: https://github.com/generic-electric-unicycle/documentation/wiki
+
 Disclaimer
 ==========
 
@@ -5,12 +9,6 @@ This is a **DEVELOPER PREVIEW** intended for developers and testers only.
 **DO NOT RUN THIS CODE FOR NORMAL USE. DO NOT REQUEST ANY HELP OR SUPPORT.**
 
 We are **NOT** responsible for any damage this software may cause. 
-
-
-About this Project
-------------------
-OpenSource Electric Unicycle Firmware
-
 
 Build Instructions
 -------------------------
