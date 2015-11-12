@@ -28,13 +28,36 @@ void NVIC_Configuration(void);
 int main(void)
 {
 
+  initialize();
+
+
+   int i=0;
+
+   for(;;)
+   {
+      i++;
+   }
+}
+
+void SysTick_Handler(void) // runs every 10ms
+{
+#if 0
+  static unsigned int counter = 1;
+
+  // read throttle value and update PWM duty cycle every 10ms
+  update_duty_cycle (throttle_get_percent ()); // 1000 --> 100%
+#endif
+}
+
+void initialize (void)
+{
    /*!< At this stage the microcontroller clock setting is already configured, 
-        this is done through SystemInit() function which is called from startup
-        file (startup_stm32f10x_xx.s) before to branch to application main.
-        To reconfigure the default setting of SystemInit() function, refer to
-        system_stm32f10x.c file
-      */     
-       
+		this is done through SystemInit() function which is called from startup
+		file (startup_stm32f10x_xx.s) before to branch to application main.
+		To reconfigure the default setting of SystemInit() function, refer to
+		system_stm32f10x.c file
+	  */
+
    /* System clocks configuration ---------------------------------------------*/
    RCC_Configuration();
 
@@ -45,19 +68,24 @@ int main(void)
    GPIO_Configuration();
   
    /*if (!IMU_init(, IMU_FILTER_KALMAN)) {
-      // indicate IMU error (maybe via LEDs)
+	  // indicate IMU error (maybe via LEDs)
    }*/
   
 
+
+  gpio_init ();
+  brake_init ();
+  commutation_disable ();
+  pwm_init ();
+  hall_sensor_init ();
   
-   int i=0;
-
-   for(;;)
-   {
-      i++;
-   }
+  /* Setup SysTick Timer for 10 millisecond interrupts, also enables Systick and Systick-Interrupt */
+  if (SysTick_Config(SystemCoreClock / 100))
+  {
+    /* Capture error */
+    while (1);
+  }
 }
-
 
 /**
   * @brief  Configures the different system clocks.
