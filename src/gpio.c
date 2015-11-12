@@ -1,20 +1,41 @@
 
 #include "stm32f10x_rcc.h"
 #include "stm32f10x_gpio.h"
-#include "stm32f10x_rcc.h"
 
 /* Connections:
  *
- * PA2  (ADC12_IN7)     -- Current_signal
- * PA8  (TIM1_CH1)      -- Bridge_A-High
- * PA9  (TIM1_CH2)      -- Bridge_B-High
- * PA10 (TIM1_CH3)      -- Bridge_C-High
- * PB13 (TIM1_CH1N)     -- Bridge_A-Low
- * PB14 (TIM1_CH2N)     -- Bridge_B-Low
- * PB15 (TIM1_CH3N)     -- Bridge_C-Low
- * PA2  (TIM3_CH1)      -- Hall_sensor_A
- * PA1  (TIM3_CH2)      -- Hall_sensor_B
- * PA0  (TIM3_CH3)      -- Hall_sensor_C
+ * PIN				| IN/OUT|	Function
+ * -------------------------------------
+ *
+ * PA8  (TIM1_CH1)  | out	| Bridge_A-High
+ * PA9  (TIM1_CH2)  | out	| Bridge_B-High
+ * PA10 (TIM1_CH3)  | out	| Bridge_C-High
+ * PB13 (TIM1_CH1N) | out	| Bridge_A-Low
+ * PB14 (TIM1_CH2N) | out	| Bridge_B-Low
+ * PB15 (TIM1_CH3N) | out	| Bridge_C-Low
+ *
+ * PA2  (TIM2_CH3) 	| in	| Hall_sensor_A
+ * PA1  (TIM2_CH2) 	| in	| Hall_sensor_B
+ * PA0  (TIM2_CH1) 	| in	| Hall_sensor_C
+
+ * PA6  (ADC12_IN6) | in	| BMF_signal-Yellow_A
+ * PB0  (ADC12_IN8) | in	| BMF_signal-Green_B
+ * PB1  (ADC12_IN9) | in	| BMF_signal-Blue_C
+ *
+ * PA7  (ADC12_IN7)	| in	| Current_signal
+ *
+ * PB6  (I2C1_SCL)	| in/out| IMU_MPU6050-SCL
+ * PB7  (I2C1_SDA)	| in/out| IMU_MPU6050-SDA
+ *
+ * PA15 			| out	| LED_1-battery_indicator
+ * PB4	 			| out	| LED_2-battery_indicator
+ * PB5	 			| out	| LED_3-battery_indicator
+ * PB8	 			| out	| LED_4-battery_indicator
+ * PB9	 			| out	| LED-power_switcher
+ *
+ * PB3	 			| out	| Buzzer(??)
+ * PA4	 			| out	| PS_signal(calibrate_wheel??)
+ *
  */
 
 
