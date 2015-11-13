@@ -14,7 +14,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-TCPREFIX = ../gcc/gcc-arm-none-eabi/bin/arm-none-eabi-
+TCPREFIX = ../gcc/bin/arm-none-eabi-
 CC      = $(TCPREFIX)gcc
 LD      = $(TCPREFIX)ld -v
 CP      = $(TCPREFIX)objcopy
@@ -26,7 +26,8 @@ STM32FLASH = .../tools/stm32_flash.pl
 # -mfix-cortex-m3-ldrd should be enabled by default for Cortex M3.
 # CFLAGS -H show header files
 CFLAGS  = -Isrc -Isrc/spl/CMSIS -Isrc/spl/inc -mfloat-abi=soft -msoft-float -DSTM32F10X_MD -DUSE_STDPERIPH_DRIVER -c -fno-common -O0 -g -mcpu=cortex-m3 -mthumb
-LFLAGS  = -Tsrc/stm32_flash.ld -L../gcc/gcc-arm-none-eabi/lib/gcc/arm-none-eabi/current -lgcc -nostartfiles
+#LFLAGS  = -Tsrc/stm32_flash.ld -L../gcc/gcc-arm-none-eabi/lib/gcc/arm-none-eabi/current -lgcc -nostartfiles <---- do not works with this line ???
+LFLAGS  = -Tsrc/stm32_flash.ld -nostartfiles
 CPFLAGS = -Obinary
 ODFLAGS = -S
 

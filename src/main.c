@@ -17,7 +17,7 @@
 
 #include "stm32f10x.h"
 
-#include "IMU/imu.h"
+//#include "IMU/imu.h"
 
 /* Private function prototypes -----------------------------------------------*/
 void RCC_Configuration(void);
@@ -28,7 +28,7 @@ void NVIC_Configuration(void);
 int main(void)
 {
 
-  initialize();
+  //initialize();
 
 
    int i=0;
@@ -49,6 +49,7 @@ void SysTick_Handler(void) // runs every 10ms
 #endif
 }
 
+#if 0
 void initialize (void)
 {
    /*!< At this stage the microcontroller clock setting is already configured, 
@@ -86,6 +87,7 @@ void initialize (void)
     while (1);
   }
 }
+#endif
 
 /**
   * @brief  Configures the different system clocks.
