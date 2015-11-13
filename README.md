@@ -17,7 +17,8 @@ Build Instructions
 2. Unpack to a directory of your choice (but look at the relative reference)
 3. Make sure that the following path relative to the git root directory
    exists and contains the gcc-arm toolchain:
-   ../gcc/gcc-arm-none-eabi
+   ../gcc/arm-none-eabi
+   NOTE: on ../gcc folder you should have the folders: arm-none-eabi; bin; lib; share
    (alternatively you can make a local change to the makefile)
 4. In the repository root directory type 'make'
 
