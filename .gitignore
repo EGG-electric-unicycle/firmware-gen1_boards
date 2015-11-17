@@ -2,3 +2,4 @@
 *.elf
 *.lst
 *.o
+FLASH_RUN/*

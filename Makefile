@@ -150,7 +150,8 @@ STMEEEMULINCDIR = $(STMEEEMULDIR)/include
 # List C source files here. (C dependencies are automatically generated.)
 # use file-extension c for "c-only"-files
 ## Demo-Application:
-SRC = src/main.c 
+SRC = src/main.c \
+			src/gpio.c
 
 ## compiler- and libc-specific sources
 SRC += src/startup_stm32f10x_md.c
@@ -164,8 +165,8 @@ SRC += $(CMSISDEVDIR)/system_stm32f10x.c
 #SRC += $(STMSPDSRCDIR)/stm32f10x_adc.c
 #SRC += $(STMSPDSRCDIR)/stm32f10x_usart.c
 #SRC += $(STMSPDSRCDIR)/stm32f10x_flash.c
-#SRC += $(STMSPDSRCDIR)/stm32f10x_gpio.c
-#SRC += $(STMSPDSRCDIR)/stm32f10x_rcc.c
+SRC += $(STMSPDSRCDIR)/stm32f10x_gpio.c
+SRC += $(STMSPDSRCDIR)/stm32f10x_rcc.c
 #SRC += $(STMSPDSRCDIR)/stm32f10x_spi.c
 #SRC += $(STMSPDSRCDIR)/stm32f10x_rtc.c
 #SRC += $(STMSPDSRCDIR)/stm32f10x_bkp.c
