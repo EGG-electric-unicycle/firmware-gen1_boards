@@ -1,0 +1,1 @@
+sudo openocd -f tools/openocd.cfg -c "init; halt; flash write_image erase $1 0x08000000; reset; exit"
