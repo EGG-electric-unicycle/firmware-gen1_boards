@@ -14,19 +14,22 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-TCPREFIX = ../../gcc/gcc-arm-none-eabi/bin/arm-none-eabi-
-CC      = $(TCPREFIX)gcc
-LD      = $(TCPREFIX)ld -v
-CP      = $(TCPREFIX)objcopy
-OD      = $(TCPREFIX)objdump
-GDB     = $(TCPREFIX)gdb
+TCPREFIX  = ../../gcc/gcc-arm-none-eabi/
+BINPREFIX = bin/arm-none-eabi-
+CC      = $(TCPREFIX)$(BINPREFIX)gcc
+AS      = $(TCPREFIX)$(BINPREFIX)as 
+LD      = $(TCPREFIX)$(BINPREFIX)ld -v
+CP      = $(TCPREFIX)$(BINPREFIX)objcopy
+OD      = $(TCPREFIX)$(BINPREFIX)objdump
+GDB     = $(TCPREFIX)$(BINPREFIX)gdb
 
 STM32FLASH = tools/flash
 
 # -mfix-cortex-m3-ldrd should be enabled by default for Cortex M3.
 # CFLAGS -H show header files
+AFLAGS  = -Isrc -Isrc/spl/CMSIS -Isrc/spl/inc -c -g -mcpu=cortex-m3 -mthumb 
 CFLAGS  = -Isrc -Isrc/spl/CMSIS -Isrc/spl/inc -mfloat-abi=soft -msoft-float -DSTM32F10X_MD -DUSE_STDPERIPH_DRIVER -c -fno-common -O0 -g -mcpu=cortex-m3 -mthumb
-LFLAGS  = -Tsrc/stm32_flash.ld -L../../gcc/gcc-arm-none-eabi/lib/gcc/arm-none-eabi/current -lgcc -nostartfiles
+LFLAGS  = -Tsrc/stm32_flash.ld -L$(TCPREFIX)lib/gcc/arm-none-eabi/current -lgcc -nostartfiles
 CPFLAGS = -Obinary
 ODFLAGS = -S
 
@@ -59,8 +62,10 @@ main.elf: $(OBJECTS) src/startup_stm32f10x_md.o
 
 %.o: %.c
 	@echo ".compiling"
-	$(CC) $(CFLAGS) src/startup_stm32f10x_md.s -o src/startup_stm32f10x_md.o
 	$(CC) $(CFLAGS) $< -o $@
+
+startup_stm32f10x_md.o:
+	$(AS) $(ASFLAGS) src/startup_stm32f10x_md.s -o src/startup_stm32f10x_md.o
 
 debug:
 	$(GDB) --batch --command=debug.gdb main.elf
