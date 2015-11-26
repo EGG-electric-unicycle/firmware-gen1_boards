@@ -25,7 +25,7 @@ void SysTick_Handler(void) // runs every 10ms
   static unsigned int led_state_flag = 0;
 
   counter++;
-  if (counter > 10) // 1 second
+  if (counter > 100) // 1 second
   {
     if (led_state_flag == 0)
     {
