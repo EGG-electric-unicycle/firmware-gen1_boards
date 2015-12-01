@@ -10,7 +10,7 @@
 #include "stm32f10x_tim.h"
 #include "gpio.h"
 
-GPIO_InitTypeDef GPIO_InitStructure;
+extern GPIO_InitTypeDef GPIO_InitStructure;
 
 #define HALL_SENSORS_MASK ((1 << 0) | (1 << 1) | (1 << 2))
 
