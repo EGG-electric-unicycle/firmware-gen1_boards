@@ -6,4 +6,5 @@
  * Released under the GPL License, Version 3
  */
 
-void gpio_init (void);
+void pwm_init (void);
+void update_duty_cycle(unsigned int value);

@@ -51,6 +51,9 @@ void SysTick_Handler(void) // runs every 10ms
 void initialize (void)
 {
   gpio_init ();
+  commutation_disable ();
+  pwm_init ();
+  hall_sensor_init ();
   
   /* Setup SysTick Timer for 10 millisecond interrupts, also enables Systick and Systick-Interrupt */
   if (SysTick_Config(SystemCoreClock / 100))
@@ -63,6 +66,9 @@ void initialize (void)
 int main(void)
 {
   initialize();
+
+  motor_set_duty_cycle (100); // 100 --> 10%
+  motor_start();
 
   while (1) ;
 }

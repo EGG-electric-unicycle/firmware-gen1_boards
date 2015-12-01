@@ -6,4 +6,5 @@
  * Released under the GPL License, Version 3
  */
 
-void gpio_init (void);
+void hall_sensor_init (void);
+unsigned int get_hall_sensors_us (void);
