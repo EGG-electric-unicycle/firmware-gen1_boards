@@ -68,5 +68,5 @@ startup_stm32f10x_md.o:
 	$(AS) $(ASFLAGS) src/startup_stm32f10x_md.s -o src/startup_stm32f10x_md.o
 
 debug:
-	$(GDB) --batch --command=debug.gdb main.elf
+	$(GDB) --command=tools/debug.gdb src/main.elf
 
