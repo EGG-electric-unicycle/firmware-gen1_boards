@@ -96,8 +96,8 @@ void initialize (void)
   SetSysClockTo64(); //configure clock to 64 MHz (max possible speed)
   SystemCoreClockUpdate();
   gpio_init ();
-  commutation_disable ();
-  pwm_init ();
+  //commutation_disable ();
+  //pwm_init ();
   hall_sensor_init ();
 
   /* Setup SysTick Timer for 10 millisecond interrupts, also enables Systick and Systick-Interrupt */
@@ -113,8 +113,8 @@ int main(void)
 
   initialize();
 
-  motor_set_duty_cycle (100); // 100 --> 10%
-  motor_start();
+  //motor_set_duty_cycle (100); // 100 --> 10%
+  //motor_start();
 
   while (1) ;
 }
