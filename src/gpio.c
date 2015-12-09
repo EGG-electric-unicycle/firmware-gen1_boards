@@ -60,6 +60,8 @@ void gpio_init (void)
                           RCC_APB2Periph_GPIOB
                           , ENABLE);
 
+  RCC_APB1PeriphClockCmd( RCC_APB1Periph_TIM2, ENABLE);
+
   GPIO_PinRemapConfig(GPIO_Remap_SWJ_JTAGDisable, ENABLE);
 
   /* Configure pins for the battery indicator LEDs */
@@ -83,4 +85,5 @@ void gpio_init (void)
   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
   GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
   GPIO_Init(GPIOA, &GPIO_InitStructure);
+  
 }
