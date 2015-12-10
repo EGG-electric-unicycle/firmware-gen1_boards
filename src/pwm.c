@@ -8,9 +8,12 @@
 
 #include "stm32f10x.h"
 #include "stm32f10x_tim.h"
+#include "stm32f10x_rcc.h"
 
 void pwm_init (void)
 {
+  RCC_APB1PeriphClockCmd(RCC_APB2Periph_TIM1, ENABLE);
+
   /* Time Base configuration */
   TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
   TIM_TimeBaseStructure.TIM_Prescaler = 0;
@@ -55,7 +58,8 @@ void update_duty_cycle (unsigned int value)
    * 0.1% --> 1.2
    *
    */
-  value = (value * 1.2f);
+  //value = (value * 1.2f); HACK because seems that code is not doing math - seen on debug mode!!
+  value = 120; // 10%
   if (value <= 0)
   {
     value = 0;

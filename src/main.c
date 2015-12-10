@@ -19,10 +19,12 @@
 #include "stm32f10x_gpio.h"
 #include "gpio.h"
 
-void SysTick_Handler(void) // runs every 10ms
+void SysTick_Handler(void) // runs every 25ms
 {
   static unsigned int counter = 0;
   static unsigned int led_state_flag = 0;
+
+  //commutate ();
 
   counter++;
   if (counter > 100) // 1 second
@@ -96,12 +98,12 @@ void initialize (void)
   SetSysClockTo64(); //configure clock to 64 MHz (max possible speed)
   SystemCoreClockUpdate();
   gpio_init ();
-  commutation_disable ();
-  pwm_init ();
-  hall_sensor_init ();
+  //commutation_disable ();
+  //pwm_init ();
+  //hall_sensor_init ();
 
-  /* Setup SysTick Timer for 10 millisecond interrupts, also enables Systick and Systick-Interrupt */
-  if (SysTick_Config(SystemCoreClock / 100))
+  /* Setup SysTick Timer for 25 millisecond interrupts, also enables Systick and Systick-Interrupt */
+  if (SysTick_Config(SystemCoreClock / 200))
   {
     /* Capture error */
     while (1);
@@ -113,8 +115,8 @@ int main(void)
 
   initialize();
 
-  motor_set_duty_cycle (100); // 100 --> 10%
-  motor_start();
+  //motor_set_duty_cycle (100); // 100 --> 10%
+  //motor_start();
 
   while (1) ;
 }
