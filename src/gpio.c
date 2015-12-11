@@ -22,9 +22,9 @@
  * PA8  (TIM1_CH1)  		| out	| ??	| Bridge_A-High (green wire)
  * PA9  (TIM1_CH2)  		| out	| ??	| Bridge_B-High
  * PA10 (TIM1_CH3)  		| out	| ??	| Bridge_C-High
- * PB13 (TIM1_CH1N) 		| out	| ??	| Bridge_A-Low
- * PB14 (TIM1_CH2N) 		| out	| ??	| Bridge_B-Low
- * PB15 (TIM1_CH3N) 		| out	| ??	| Bridge_C-Low
+ * PB13 (TIM1_CH1N) 		| out	| yes	| Bridge_A-Low
+ * PB14 (TIM1_CH2N) 		| out	| yes	| Bridge_B-Low
+ * PB15 (TIM1_CH3N) 		| out	| yes	| Bridge_C-Low
  *
  * PA2  (TIM2_CH3) 		| in	| yes	| Hall_sensor_A
  * PA1  (TIM2_CH2) 		| in	| yes	| Hall_sensor_B
