@@ -45,8 +45,8 @@
  * PB8	 			| out	| yes	| LED_4-battery_indicator (active low: float to disable and GND to turn on)
  * PB9	 			| out 	| yes	| LED-power_switcher	  (active low: float to disable and GND to turn on)
  *
-* PB3	 			| out	| yes	| Buzzer 		  (active high: push pull)
- * PA4	 			| out	| ??	| PS_signal (calibrate_wheel)
+ * PB3	 			| out	| yes	| Buzzer 		  (active high: push pull)
+ * PA4	 			| out	| ??	| PS_signal 		  (calibrate_wheel)
  *
  */
 
@@ -63,7 +63,7 @@ void gpio_init (void)
   GPIO_PinRemapConfig(GPIO_Remap_SWJ_JTAGDisable, ENABLE);
 
   /* Configure pins for the battery indicator LEDs */
-  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_3 | GPIO_Pin_4 | GPIO_Pin_5 | GPIO_Pin_8 | GPIO_Pin_9;
+  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_4 | GPIO_Pin_5 | GPIO_Pin_8 | GPIO_Pin_9;
   GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_OD;
   GPIO_Init(GPIOB, &GPIO_InitStructure);
@@ -90,4 +90,16 @@ void gpio_init (void)
   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
   GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
   GPIO_Init(GPIOA, &GPIO_InitStructure);
+
+  /* Configure pins for the H bridge */
+  //GPIO Configuration: Channel 1, 2 and 3 as alternate function push-pull -- PWM
+  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8 | GPIO_Pin_9 | GPIO_Pin_10;
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
+  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+  GPIO_Init(GPIOA, &GPIO_InitStructure);
+
+  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_13 | GPIO_Pin_14 | GPIO_Pin_15;
+  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+  GPIO_Init(GPIOB, &GPIO_InitStructure);
 }

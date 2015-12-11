@@ -26,6 +26,8 @@ void SysTick_Handler(void) // runs every 25ms
 
   //commutate ();
 
+
+
   counter++;
   if (counter > 100) // 1 second
   {
@@ -35,8 +37,9 @@ void SysTick_Handler(void) // runs every 25ms
       GPIO_ResetBits(GPIOB, GPIO_Pin_4 | GPIO_Pin_5 | GPIO_Pin_8 | GPIO_Pin_9);
       GPIO_ResetBits(GPIOA, GPIO_Pin_15);
 
-      // Enable the buzzer
-      GPIO_SetBits(GPIOB, GPIO_Pin_3);
+
+      phase_c_l_on ();
+
 
       led_state_flag = 1;
     }
@@ -46,8 +49,9 @@ void SysTick_Handler(void) // runs every 25ms
       GPIO_SetBits(GPIOB, GPIO_Pin_4 | GPIO_Pin_5 | GPIO_Pin_8 | GPIO_Pin_9);
       GPIO_SetBits(GPIOA, GPIO_Pin_15);
 
-      // Disable the buzzer
-      GPIO_ResetBits(GPIOB, GPIO_Pin_3);
+
+      phase_c_l_off ();
+
 
       led_state_flag = 0;
     }
@@ -105,11 +109,11 @@ void initialize (void)
   SystemCoreClockUpdate();
   gpio_init ();
   //commutation_disable ();
-  //pwm_init ();
+  pwm_init ();
   //hall_sensor_init ();
 
   /* Setup SysTick Timer for xx millisecond interrupts, also enables Systick and Systick-Interrupt */
-  if (SysTick_Config(SystemCoreClock / 100))
+  if (SysTick_Config(SystemCoreClock / 1000))
   {
     /* Capture error */
     while (1);
@@ -120,6 +124,8 @@ int main(void)
 {
 
   initialize();
+
+  update_duty_cycle (100); // 10%
 
   //motor_set_duty_cycle (100); // 100 --> 10%
   //motor_start();
