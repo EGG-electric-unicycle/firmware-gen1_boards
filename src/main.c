@@ -31,17 +31,23 @@ void SysTick_Handler(void) // runs every 25ms
   {
     if (led_state_flag == 0)
     {
-      /* Enable the LEDs */
+      // Enable the LEDs
       GPIO_ResetBits(GPIOB, GPIO_Pin_4 | GPIO_Pin_5 | GPIO_Pin_8 | GPIO_Pin_9);
       GPIO_ResetBits(GPIOA, GPIO_Pin_15);
+
+      // Enable the buzzer
+      GPIO_SetBits(GPIOB, GPIO_Pin_3);
 
       led_state_flag = 1;
     }
     else
     {
-      /* Disable the LEDs */
+      // Disable the LEDs
       GPIO_SetBits(GPIOB, GPIO_Pin_4 | GPIO_Pin_5 | GPIO_Pin_8 | GPIO_Pin_9);
       GPIO_SetBits(GPIOA, GPIO_Pin_15);
+
+      // Disable the buzzer
+      GPIO_ResetBits(GPIOB, GPIO_Pin_3);
 
       led_state_flag = 0;
     }
@@ -102,8 +108,8 @@ void initialize (void)
   //pwm_init ();
   //hall_sensor_init ();
 
-  /* Setup SysTick Timer for 25 millisecond interrupts, also enables Systick and Systick-Interrupt */
-  if (SysTick_Config(SystemCoreClock / 200))
+  /* Setup SysTick Timer for xx millisecond interrupts, also enables Systick and Systick-Interrupt */
+  if (SysTick_Config(SystemCoreClock / 100))
   {
     /* Capture error */
     while (1);

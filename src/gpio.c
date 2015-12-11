@@ -39,14 +39,14 @@
  * PB6  (I2C1_SCL)		| in/out| ??	| IMU_MPU6050-SCL
  * PB7  (I2C1_SDA)		| in/out| ??	| IMU_MPU6050-SDA
  *
- * PA15 			| out	| ??	| LED_1-battery_indicator (active low)
- * PB4	 			| out	| yes	| LED_2-battery_indicator (active low)
- * PB5	 			| out	| ??	| LED_3-battery_indicator (active low)
- * PB8	 			| out	| ??	| LED_4-battery_indicator (active low)
- * PB9	 			| out	| yes	| LED-power_switcher (active low)
+ * PA15 			| out	| yes	| LED_1-battery_indicator (active low: float to disable and GND to turn on)
+ * PB4	 			| out	| yes	| LED_2-battery_indicator (active low: float to disable and GND to turn on)
+ * PB5	 			| out	| yes	| LED_3-battery_indicator (active low: float to disable and GND to turn on)
+ * PB8	 			| out	| yes	| LED_4-battery_indicator (active low: float to disable and GND to turn on)
+ * PB9	 			| out 	| yes	| LED-power_switcher	  (active low: float to disable and GND to turn on)
  *
- * PB3	 			| out	| ??	| Buzzer(??)
- * PA4	 			| out	| ??	| PS_signal(calibrate_wheel??)
+* PB3	 			| out	| yes	| Buzzer 		  (active high: push pull)
+ * PA4	 			| out	| ??	| PS_signal (calibrate_wheel)
  *
  */
 
@@ -54,34 +54,36 @@ GPIO_InitTypeDef GPIO_InitStructure;
 
 void gpio_init (void)
 {
-  GPIO_PinRemapConfig(GPIO_Remap_SWJ_JTAGDisable, ENABLE);
-
   /* Enable clocks */
   RCC_APB2PeriphClockCmd( RCC_APB2Periph_AFIO  |
                           RCC_APB2Periph_GPIOA |
                           RCC_APB2Periph_GPIOB
                           , ENABLE);
 
+  GPIO_PinRemapConfig(GPIO_Remap_SWJ_JTAGDisable, ENABLE);
+
   /* Configure pins for the battery indicator LEDs */
-  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_5 | GPIO_Pin_8 | GPIO_Pin_9;
+  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_3 | GPIO_Pin_4 | GPIO_Pin_5 | GPIO_Pin_8 | GPIO_Pin_9;
+  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_OD;
+  GPIO_Init(GPIOB, &GPIO_InitStructure);
+
+  /* Configure pins for the battery indicator LEDs */
+  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_15;
+  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_OD;
+  GPIO_Init(GPIOA, &GPIO_InitStructure);
+
+  /* Configure pins for the buzzer */
+  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_3;
   GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
   GPIO_Init(GPIOB, &GPIO_InitStructure);
 
-  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_4;
-  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
-  GPIO_Init(GPIOB, &GPIO_InitStructure);
-
-  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_15;
-  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
-  GPIO_Init(GPIOA, &GPIO_InitStructure);
-
-  // disable the LEDs
+  // disable the LEDs and the buzzer
   GPIO_SetBits(GPIOB, GPIO_Pin_4 | GPIO_Pin_5 | GPIO_Pin_8 | GPIO_Pin_9);
+  GPIO_ResetBits(GPIOB, GPIO_Pin_3);
   GPIO_SetBits(GPIOA, GPIO_Pin_15);
-  /***/
 
   /* Configure pins for the hall sensors */
   GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_2;
