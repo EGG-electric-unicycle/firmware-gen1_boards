@@ -12,6 +12,8 @@ We are **NOT** responsible for any damage this software may cause.
 
 Build Instructions
 -------------------------
+(this is just a short version, for more details and requirements checkout the Wiki: [Installation & Requirements](https://github.com/generic-electric-unicycle/documentation/wiki/Installation-Requirements) )
+
 #### Using GCC-Sources
 
 1. Get gcc-arm toolchain from https://launchpad.net/gcc-arm-embedded
