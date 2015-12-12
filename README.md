@@ -22,7 +22,7 @@ Build Instructions
    ../gcc/arm-none-eabi
    NOTE: on ../gcc folder you should have the folders: arm-none-eabi; bin; lib; share
    (alternatively you can make a local change to the makefile)
-4. Rename Makefile.src -> Makefile
+4. Rename Makefile to use correct path / libs: `mv Makefile.src Makefile`
 5. In the repository root directory type 'make'
 
 
