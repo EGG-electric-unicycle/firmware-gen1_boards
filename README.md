@@ -29,12 +29,12 @@ Build Instructions
 
 #### Using Launchpad-PPA (Ubuntu)
 
-1. `$ sudo add-apt-repository ppa:terry.guo/gcc-arm-embedded`
-2. `$ sudo apt-get update`
-3. `$ sudo apt-get install gcc-arm-none-eabi`
+1. `sudo add-apt-repository ppa:terry.guo/gcc-arm-embedded`
+2. `sudo apt-get update`
+3. `sudo apt-get install gcc-arm-none-eabi`
 4. Navigate to the repository root directory
-5. Rename Makefile to use correct path / libs: `$ mv Makefile.ppa Makefile`
-6. Build the Firmware: `$ make`
+5. Rename Makefile to use correct path / libs: `mv Makefile.ppa Makefile`
+6. Build the Firmware: `make`
 
 
 Flash Firmware to Controller
@@ -42,7 +42,7 @@ Flash Firmware to Controller
 1. Navigate to the `tools` folder in the repository
 2. Edit the file: `flash`
 3. Select matching "Driver" by uncomment one Option/Line
-4. Navigate back to the repository root directory and type `$ make flash`
+4. Navigate back to the repository root directory and type `make flash`
 5. Done
 
 
