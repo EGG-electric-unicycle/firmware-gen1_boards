@@ -12,7 +12,7 @@ We are **NOT** responsible for any damage this software may cause.
 
 Build Instructions
 -------------------------
-1. Using GCC-Sources
+#### Using GCC-Sources
 
 1. Get gcc-arm toolchain from https://launchpad.net/gcc-arm-embedded
    (tested with gcc-arm-none-eabi-4_9-2015q2-20150609-linux)
@@ -27,7 +27,7 @@ Build Instructions
 
 
 
-2. Using Launchpad-PPA (Ubuntu)
+#### Using Launchpad-PPA (Ubuntu)
 
 1. sudo add-apt-repository ppa:terry.guo/gcc-arm-embedded
 2. sudo apt-get update
