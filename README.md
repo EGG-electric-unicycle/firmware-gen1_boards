@@ -12,6 +12,8 @@ We are **NOT** responsible for any damage this software may cause.
 
 Build Instructions
 -------------------------
+1. Using GCC-Sources
+
 1. Get gcc-arm toolchain from https://launchpad.net/gcc-arm-embedded
    (tested with gcc-arm-none-eabi-4_9-2015q2-20150609-linux)
 2. Unpack to a directory of your choice (but look at the relative reference)
@@ -20,7 +22,27 @@ Build Instructions
    ../gcc/arm-none-eabi
    NOTE: on ../gcc folder you should have the folders: arm-none-eabi; bin; lib; share
    (alternatively you can make a local change to the makefile)
-4. In the repository root directory type 'make'
+4. Rename Makefile.src -> Makefile
+5. In the repository root directory type 'make'
+
+
+
+2. Using Launchpad-PPA (Ubuntu)
+
+1. sudo add-apt-repository ppa:terry.guo/gcc-arm-embedded
+2. sudo apt-get update
+3. sudo apt-get install gcc-arm-none-eabi
+4. Rename Makefile.ppa -> Makefile
+5. make
+
+
+Flash Firmware to Controller
+----------------------------
+1. Navigate to tools
+2. Edit the file: flash
+3. Select matching "Driver" by uncomment one Option
+4. Navigate to the repository root directory and type 'make flash'
+5. Done
 
 
 Current Features
