@@ -18,7 +18,7 @@ void pwm_init (void)
   TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
   TIM_TimeBaseStructure.TIM_Prescaler = 0;
   TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
-  TIM_TimeBaseStructure.TIM_Period = 1199; // 24MHz clock, 24MHz/1200 = 20KHz
+  TIM_TimeBaseStructure.TIM_Period = 1599; // 32MHz clock (PCLK1), 32MHz/1600 = 20KHz
   TIM_TimeBaseStructure.TIM_ClockDivision = 0;
   TIM_TimeBaseStructure.TIM_RepetitionCounter = 0;
   TIM_TimeBaseInit(TIM1, &TIM_TimeBaseStructure);
@@ -38,10 +38,10 @@ void pwm_init (void)
   TIM_OC3Init(TIM1, &TIM_OCInitStructure);
 
   /* configure ETR for current control */
-  TIM_ETRConfig (TIM1, TIM_ExtTRGPSC_OFF, TIM_ExtTRGPolarity_NonInverted, 0);
-  TIM_ClearOC1Ref (TIM1, TIM_OCClear_Enable);
-  TIM_ClearOC2Ref (TIM1, TIM_OCClear_Enable);
-  TIM_ClearOC3Ref (TIM1, TIM_OCClear_Enable);
+  //TIM_ETRConfig (TIM1, TIM_ExtTRGPSC_OFF, TIM_ExtTRGPolarity_NonInverted, 0);
+  //TIM_ClearOC1Ref (TIM1, TIM_OCClear_Enable);
+  //TIM_ClearOC2Ref (TIM1, TIM_OCClear_Enable);
+  //TIM_ClearOC3Ref (TIM1, TIM_OCClear_Enable);
 
   /* TIM1 counter enable */
   TIM_Cmd (TIM1, ENABLE);
@@ -58,7 +58,8 @@ void update_duty_cycle (unsigned int value)
    * 0.1% --> 1.2
    *
    */
-  //value = (value * 1.2f); HACK because seems that code is not doing math - seen on debug mode!!
+  //value = (value * 1.2f);
+  //HACK because seems that code is not doing math - seen on debug mode!!
   value = 120; // 10%
   if (value <= 0)
   {

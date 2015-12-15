@@ -105,12 +105,18 @@ void SetSysClockTo64(void)
 
 void initialize (void)
 {
+  gpio_init ();
+
+  //blocks while the PS_SIGNAL is low (there is a switch to control this signal
+  //this is used to block firmware from running if for example it do a short circuit on the H bridges.
+  while (!GPIO_ReadInputDataBit(GPIOA, PS_SIGNAL)) ;
+
   SetSysClockTo64(); //configure clock to 64 MHz (max possible speed)
   SystemCoreClockUpdate();
-  gpio_init ();
+
   //commutation_disable ();
   pwm_init ();
-  //hall_sensor_init ();
+  hall_sensor_init ();
 
   /* Setup SysTick Timer for xx millisecond interrupts, also enables Systick and Systick-Interrupt */
   if (SysTick_Config(SystemCoreClock / 1000))
