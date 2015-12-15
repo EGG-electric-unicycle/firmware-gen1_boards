@@ -1,1 +1,8 @@
-sudo openocd -f tools/openocd.cfg -c "init; halt; flash write_image erase $1 0x08000000; reset; exit"
+# Uncomment one Option to
+# select the matching "Driver"
+
+# STLink V2 - Clone
+#sudo openocd -f tools/STLinkV2_Clone/stlink-v2.cfg -c "init; halt; flash write_image erase $1 0x08000000; reset; exit"
+
+# FTDI - Link
+#sudo openocd -f tools/FTDI/openocd.cfg -c "init; halt; flash write_image erase $1 0x08000000; reset; exit"

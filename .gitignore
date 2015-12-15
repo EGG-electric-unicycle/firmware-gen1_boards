@@ -2,4 +2,6 @@
 *.elf
 *.lst
 *.o
+.cproject
+.project
 FLASH_RUN/*
