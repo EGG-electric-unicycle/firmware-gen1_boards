@@ -18,7 +18,7 @@ volatile unsigned int hall_sensors_time = 0;
 void TIM2_IRQHandler(void)
 {
   /* "Read" all sensors sequence and execute the BLDC coils commutation */
-  //commutate ();
+  commutate ();
 
   /* Save current time between each hall sensor signal change */
   hall_sensors_time = TIM_GetCapture1(TIM2);

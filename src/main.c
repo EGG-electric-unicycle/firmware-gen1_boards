@@ -117,10 +117,10 @@ int main(void)
 
   initialize();
 
-  update_duty_cycle (100); // 10%
+  update_duty_cycle (60); // 6%
 
   //motor_set_duty_cycle (100); // 100 --> 10%
-  //motor_start();
+  motor_start();
 
   while (1) ;
 }
