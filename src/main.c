@@ -19,44 +19,30 @@
 #include "stm32f10x_gpio.h"
 #include "gpio.h"
 
-void SysTick_Handler(void) // runs every 25ms
+void SysTick_Handler(void) // runs every 1ms
 {
-  static unsigned int counter = 0;
+  static unsigned int counter = 1;
   static unsigned int led_state_flag = 0;
 
   //commutate ();
 
-
-
   counter++;
-  if (counter > 100) // 1 second
+  if (counter > 1000) // 1 second
   {
     if (led_state_flag == 0)
     {
       // Enable the LEDs
-      GPIO_ResetBits(GPIOB, GPIO_Pin_4 | GPIO_Pin_5 | GPIO_Pin_8 | GPIO_Pin_9);
-      GPIO_ResetBits(GPIOA, GPIO_Pin_15);
-
-
-      phase_c_l_on ();
-
-
+      GPIO_ResetBits(GPIOA, LED_1_BATTERY_INDICATOR);
       led_state_flag = 1;
     }
     else
     {
       // Disable the LEDs
-      GPIO_SetBits(GPIOB, GPIO_Pin_4 | GPIO_Pin_5 | GPIO_Pin_8 | GPIO_Pin_9);
-      GPIO_SetBits(GPIOA, GPIO_Pin_15);
-
-
-      phase_c_l_off ();
-
-
+      GPIO_SetBits(GPIOA, LED_1_BATTERY_INDICATOR);
       led_state_flag = 0;
     }
 
-    counter = 0;
+    counter = 1;
   }
 }
 

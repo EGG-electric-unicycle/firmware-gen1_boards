@@ -16,7 +16,7 @@ extern GPIO_InitTypeDef GPIO_InitStructure;
 
 void phase_a_h_on (void)
 {
-  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8;
+  GPIO_InitStructure.GPIO_Pin = BRIDGE_A_HIGH;
   GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
   GPIO_Init(GPIOA, &GPIO_InitStructure);
@@ -24,7 +24,7 @@ void phase_a_h_on (void)
 
 void phase_a_h_off (void)
 {
-  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8;
+  GPIO_InitStructure.GPIO_Pin = BRIDGE_A_HIGH;
   GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
   GPIO_Init(GPIOA, &GPIO_InitStructure);
@@ -32,18 +32,18 @@ void phase_a_h_off (void)
 
 void phase_a_l_on (void)
 {
-  GPIO_SetBits(GPIOB, GPIO_Pin_13);
+  GPIO_SetBits(GPIOB, BRIDGE_A_LOW);
 }
 
 void phase_a_l_off (void)
 {
-  GPIO_ResetBits(GPIOB, GPIO_Pin_13);
+  GPIO_ResetBits(GPIOB, BRIDGE_A_LOW);
 }
 
 
 void phase_b_h_on (void)
 {
-  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9;
+  GPIO_InitStructure.GPIO_Pin = BRIDGE_B_HIGH;
   GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
   GPIO_Init(GPIOA, &GPIO_InitStructure);
@@ -51,7 +51,7 @@ void phase_b_h_on (void)
 
 void phase_b_h_off (void)
 {
-  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9;
+  GPIO_InitStructure.GPIO_Pin = BRIDGE_B_HIGH;
   GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
   GPIO_Init(GPIOA, &GPIO_InitStructure);
@@ -59,18 +59,18 @@ void phase_b_h_off (void)
 
 void phase_b_l_on (void)
 {
-  GPIO_SetBits(GPIOB, GPIO_Pin_14);
+  GPIO_SetBits(GPIOB, BRIDGE_B_LOW);
 }
 
 void phase_b_l_off (void)
 {
-  GPIO_ResetBits(GPIOB, GPIO_Pin_14);
+  GPIO_ResetBits(GPIOB, BRIDGE_B_LOW);
 }
 
 
 void phase_c_h_on (void)
 {
-  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_10;
+  GPIO_InitStructure.GPIO_Pin = BRIDGE_C_HIGH;
   GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
   GPIO_Init(GPIOA, &GPIO_InitStructure);
@@ -78,7 +78,7 @@ void phase_c_h_on (void)
 
 void phase_c_h_off (void)
 {
-  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_10;
+  GPIO_InitStructure.GPIO_Pin = BRIDGE_C_HIGH;
   GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
   GPIO_Init(GPIOA, &GPIO_InitStructure);
@@ -86,12 +86,12 @@ void phase_c_h_off (void)
 
 void phase_c_l_on (void)
 {
-  GPIO_SetBits(GPIOB, GPIO_Pin_15);
+  GPIO_SetBits(GPIOB, BRIDGE_C_LOW);
 }
 
 void phase_c_l_off (void)
 {
-  GPIO_ResetBits(GPIOB, GPIO_Pin_15);
+  GPIO_ResetBits(GPIOB, BRIDGE_C_LOW);
 }
 
 
@@ -279,32 +279,4 @@ void commutation_sector (unsigned int sector)
     commutation_disable ();
     break;
   }
-}
-
-unsigned int increment_sector (unsigned int sector)
-{
-  if (sector < 6)
-  {
-    sector++;
-  }
-  else // sector = 6
-  {
-    sector = 1;
-  }
-
-  return sector;
-}
-
-unsigned int decrement_sector (unsigned int sector)
-{
-  if (sector > 1)
-  {
-    sector--;
-  }
-  else // sector = 1
-  {
-    sector = 6;
-  }
-
-  return sector;
 }
