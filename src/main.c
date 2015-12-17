@@ -1,5 +1,6 @@
 /*
     Copyright (C) 2015 Joerg Hoener;
+    Copyright (C) 2015 Jorge Pinto;
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -18,6 +19,9 @@
 #include "stm32f10x.h"
 #include "stm32f10x_gpio.h"
 #include "gpio.h"
+#include "main.h"
+
+unsigned int state_machine = COAST;
 
 void SysTick_Handler(void) // runs every 1ms
 {
@@ -101,8 +105,9 @@ void initialize (void)
   SystemCoreClockUpdate();
 
   //commutation_disable ();
+  brake_init ();
   pwm_init ();
-  hall_sensor_init ();
+  //hall_sensor_init ();
 
   /* Setup SysTick Timer for xx millisecond interrupts, also enables Systick and Systick-Interrupt */
   if (SysTick_Config(SystemCoreClock / 1000))
@@ -114,6 +119,10 @@ void initialize (void)
 
 int main(void)
 {
+  /* TODO
+   *
+   *
+   */
 
   initialize();
 
@@ -122,5 +131,26 @@ int main(void)
   //motor_set_duty_cycle (100); // 100 --> 10%
   motor_start();
 
-  while (1) ;
+  while (1)
+  {
+    switch (state_machine)
+    {
+      case COAST:
+
+      break;
+
+      case RUNNING:
+
+      break;
+
+      case OVER_CURRENT:
+      buzzer_on();
+      __enable_irq;
+      while (1) ; //block!!
+      break;
+
+      default:
+      break;
+    }
+  }
 }

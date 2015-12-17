@@ -6,10 +6,10 @@
  * Released under the GPL License, Version 3
  */
 
-#ifndef _PWM_H_
-#define _PWM_H_
+#ifndef _ADC_H_
+#define _ADC_H_
 
-void pwm_init (void);
-void update_duty_cycle(unsigned int value);
+void adc_init (void);
+unsigned int adc_get_current_value (void);
 
 #endif

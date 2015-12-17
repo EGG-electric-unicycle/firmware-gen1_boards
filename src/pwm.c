@@ -46,8 +46,8 @@ void pwm_init (void)
   /* TIM1 counter enable */
   TIM_Cmd (TIM1, ENABLE);
 
-  /* TIM1 Main Output Enable */
-  TIM_CtrlPWMOutputs (TIM1, ENABLE);
+  /* TIM1 Main Output Disable */
+  TIM_CtrlPWMOutputs (TIM1, DISABLE);
 }
 
 void update_duty_cycle (unsigned int value)

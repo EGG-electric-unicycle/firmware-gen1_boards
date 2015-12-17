@@ -6,10 +6,11 @@
  * Released under the GPL License, Version 3
  */
 
-#ifndef _PWM_H_
-#define _PWM_H_
+#ifndef _BUZZER_H
+#define _BUZZER_H
 
-void pwm_init (void);
-void update_duty_cycle(unsigned int value);
+void buzzer_init (void);
+void buzzer_on (void);
+void buzzer_off (void);
 
-#endif
+#endif /* _BUZZER_H_ */

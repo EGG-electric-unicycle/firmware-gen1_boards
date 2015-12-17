@@ -73,4 +73,4 @@
 
 void gpio_init (void);
 
-#endif
+#endif /* GPIO_H_ */
