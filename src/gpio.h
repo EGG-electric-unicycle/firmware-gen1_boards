@@ -16,12 +16,12 @@
  * PIN				| IN/OUT| Works?|Function
  * ----------------------------------------------------------
  *
- * PA8  (TIM1_CH1)  		| out	| ??	| Bridge_A-High
- * PA9  (TIM1_CH2)  		| out	| ??	| Bridge_B-High
- * PA10 (TIM1_CH3)  		| out	| ??	| Bridge_C-High
- * PB13 (TIM1_CH1N) 		| out	| yes	| Bridge_A-Low
- * PB14 (TIM1_CH2N) 		| out	| yes	| Bridge_B-Low
- * PB15 (TIM1_CH3N) 		| out	| yes	| Bridge_C-Low
+ * PA8  (TIM1_CH1)  		| out	| yes	| Bridge_C-High
+ * PA9  (TIM1_CH2)  		| out	| yes	| Bridge_B-High
+ * PA10 (TIM1_CH3)  		| out	| yes	| Bridge_A-High
+ * PB13 (TIM1_CH1N) 		| out	| yes	| Bridge_C-Low (active low)
+ * PB14 (TIM1_CH2N) 		| out	| yes	| Bridge_B-Low (active low)
+ * PB15 (TIM1_CH3N) 		| out	| yes	| Bridge_A-Low (active low)
  *
  * PA2  (TIM2_CH3) 		| in	| yes	| Hall_sensor_A
  * PA1  (TIM2_CH2) 		| in	| yes	| Hall_sensor_B
@@ -60,12 +60,12 @@
 #define HALL_SENSOR_B			GPIO_Pin_1
 #define HALL_SENSOR_C			GPIO_Pin_0
 
-#define BRIDGE_A_HIGH			GPIO_Pin_8
+#define BRIDGE_A_HIGH			GPIO_Pin_10
 #define BRIDGE_B_HIGH			GPIO_Pin_9
-#define BRIDGE_C_HIGH			GPIO_Pin_10
-#define BRIDGE_A_LOW			GPIO_Pin_13
+#define BRIDGE_C_HIGH			GPIO_Pin_8
+#define BRIDGE_A_LOW			GPIO_Pin_15
 #define BRIDGE_B_LOW			GPIO_Pin_14
-#define BRIDGE_C_LOW			GPIO_Pin_15
+#define BRIDGE_C_LOW			GPIO_Pin_13
 
 #define BUZZER				GPIO_Pin_3
 #define PS_SIGNAL 			GPIO_Pin_4

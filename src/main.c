@@ -21,32 +21,77 @@
 #include "gpio.h"
 #include "main.h"
 
-unsigned int state_machine = COAST;
+unsigned int machine_state = COAST;
+
+void SetSysClockTo64(void);
+void initialize (void);
 
 void SysTick_Handler(void) // runs every 1ms
 {
   static unsigned int counter = 1;
   static unsigned int led_state_flag = 0;
 
-  //commutate ();
-
   counter++;
-  if (counter > 1000) // 1 second
+  if (counter == 1) // ??
   {
-    if (led_state_flag == 0)
-    {
+    //if (led_state_flag == 0)
+    //{
       // Enable the LEDs
       GPIO_ResetBits(GPIOA, LED_1_BATTERY_INDICATOR);
       led_state_flag = 1;
-    }
-    else
-    {
+
+      phase_a_h_on ();
+
+    //}
+  }
+  else if (counter == 2)
+  {
+    //else
+    //{
       // Disable the LEDs
       GPIO_SetBits(GPIOA, LED_1_BATTERY_INDICATOR);
       led_state_flag = 0;
-    }
 
-    counter = 1;
+      phase_a_h_off ();
+
+    //}
+  }
+  else if (counter > 500)
+  {
+    counter = 0;
+  }
+}
+
+int main(void)
+{
+  initialize();
+
+  update_duty_cycle (60); // 6%
+
+  //motor_set_duty_cycle (100); // 100 --> 10%
+  motor_start();
+
+  while (1)
+  {
+    switch (machine_state)
+    {
+      case COAST:
+
+      break;
+
+      case RUNNING:
+
+      break;
+
+      case OVER_CURRENT:
+      buzzer_on();
+      __enable_irq;
+      while (1) ; //block!!
+      break;
+
+      default:
+      break;
+    }
   }
 }
 
@@ -105,7 +150,7 @@ void initialize (void)
   SystemCoreClockUpdate();
 
   //commutation_disable ();
-  brake_init ();
+  //brake_init ();
   pwm_init ();
   //hall_sensor_init ();
 
@@ -114,43 +159,5 @@ void initialize (void)
   {
     /* Capture error */
     while (1);
-  }
-}
-
-int main(void)
-{
-  /* TODO
-   *
-   *
-   */
-
-  initialize();
-
-  update_duty_cycle (60); // 6%
-
-  //motor_set_duty_cycle (100); // 100 --> 10%
-  motor_start();
-
-  while (1)
-  {
-    switch (state_machine)
-    {
-      case COAST:
-
-      break;
-
-      case RUNNING:
-
-      break;
-
-      case OVER_CURRENT:
-      buzzer_on();
-      __enable_irq;
-      while (1) ; //block!!
-      break;
-
-      default:
-      break;
-    }
   }
 }

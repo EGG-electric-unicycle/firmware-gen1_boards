@@ -29,14 +29,14 @@ void motor_start (void)
   commutate (); // starts the commutation
   start_adc_max_current_management ();
   TIM_CtrlPWMOutputs (TIM1, ENABLE); // PWM Output Enable
-  state_machine = RUNNING;
+  machine_state = RUNNING;
 }
 
 void motor_coast (void)
 {
   stop_adc_max_current_management ();
   TIM_CtrlPWMOutputs (TIM1, DISABLE); // PWM Output Disable
-  state_machine = COAST;
+  machine_state = COAST;
 }
 
 void motor_set_duty_cycle (unsigned int value)
@@ -70,7 +70,7 @@ void TIM1_BRK_IRQHandler (void)
 {
   TIM_CtrlPWMOutputs (TIM1, DISABLE); //disable PWM signals
   TIM_ITConfig (TIM1, TIM_IT_Break, ENABLE); //disable this interrupt
-  state_machine = OVER_CURRENT;
+  machine_state = OVER_CURRENT;
 
   // clear interrupt flag
   TIM_ClearITPendingBit (TIM1, TIM_IT_Break);

@@ -13,7 +13,7 @@
 #define RUNNING 	1
 #define OVER_CURRENT 	2
 
-extern unsigned int state_machine;
+extern unsigned int machine_state;
 
 
 #endif /* _MAIN_H_ */

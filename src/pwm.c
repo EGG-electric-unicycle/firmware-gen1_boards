@@ -18,7 +18,7 @@ void pwm_init (void)
   TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
   TIM_TimeBaseStructure.TIM_Prescaler = 0;
   TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
-  TIM_TimeBaseStructure.TIM_Period = 1599; // 32MHz clock (PCLK1), 32MHz/1600 = 20KHz
+  TIM_TimeBaseStructure.TIM_Period = 3199; // 64MHz clock (PCLK1), 64MHz/3200 = 20KHz
   TIM_TimeBaseStructure.TIM_ClockDivision = 0;
   TIM_TimeBaseStructure.TIM_RepetitionCounter = 0;
   TIM_TimeBaseInit(TIM1, &TIM_TimeBaseStructure);
@@ -60,7 +60,8 @@ void update_duty_cycle (unsigned int value)
    */
   //value = (value * 1.2f);
   //HACK because seems that code is not doing math - seen on debug mode!!
-  value = 120; // 10%
+  //TODO correct this code!!
+  value = 200; // 6%
   if (value <= 0)
   {
     value = 0;
@@ -70,7 +71,7 @@ void update_duty_cycle (unsigned int value)
     value = 1200;
   }
 
-  TIM_SetCompare1(TIM1, value);
-  TIM_SetCompare2(TIM1, value);
-  TIM_SetCompare3(TIM1, value);
+  TIM_SetCompare1(TIM1, 1600);
+  TIM_SetCompare2(TIM1, 1600);
+  TIM_SetCompare3(TIM1, 1600);
 }

@@ -9,6 +9,7 @@
 #include "stm32f10x_gpio.h"
 #include "stm32f10x_tim.h"
 #include "gpio.h"
+#include "bldc.h"
 
 extern GPIO_InitTypeDef GPIO_InitStructure;
 
@@ -28,16 +29,17 @@ void phase_a_h_off (void)
   GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
   GPIO_Init(GPIOA, &GPIO_InitStructure);
+  GPIO_ResetBits(GPIOA, BRIDGE_A_HIGH);
 }
 
 void phase_a_l_on (void)
 {
-  GPIO_SetBits(GPIOB, BRIDGE_A_LOW);
+  GPIO_ResetBits(GPIOB, BRIDGE_A_LOW);
 }
 
 void phase_a_l_off (void)
 {
-  GPIO_ResetBits(GPIOB, BRIDGE_A_LOW);
+  GPIO_SetBits(GPIOB, BRIDGE_A_LOW);
 }
 
 
@@ -55,16 +57,17 @@ void phase_b_h_off (void)
   GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
   GPIO_Init(GPIOA, &GPIO_InitStructure);
+  GPIO_ResetBits(GPIOA, BRIDGE_B_HIGH);
 }
 
 void phase_b_l_on (void)
 {
-  GPIO_SetBits(GPIOB, BRIDGE_B_LOW);
+  GPIO_ResetBits(GPIOB, BRIDGE_B_LOW);
 }
 
 void phase_b_l_off (void)
 {
-  GPIO_ResetBits(GPIOB, BRIDGE_B_LOW);
+  GPIO_SetBits(GPIOB, BRIDGE_B_LOW);
 }
 
 
@@ -82,16 +85,17 @@ void phase_c_h_off (void)
   GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
   GPIO_Init(GPIOA, &GPIO_InitStructure);
+  GPIO_ResetBits(GPIOA, BRIDGE_C_HIGH);
 }
 
 void phase_c_l_on (void)
 {
-  GPIO_SetBits(GPIOB, BRIDGE_C_LOW);
+  GPIO_ResetBits(GPIOB, BRIDGE_C_LOW);
 }
 
 void phase_c_l_off (void)
 {
-  GPIO_ResetBits(GPIOB, BRIDGE_C_LOW);
+  GPIO_SetBits(GPIOB, BRIDGE_C_LOW);
 }
 
 
@@ -279,4 +283,70 @@ void commutation_sector (unsigned int sector)
     commutation_disable ();
     break;
   }
+}
+
+void force_commutate (void)
+{
+  static unsigned int sector = 0;
+
+  sector = increment_sector (sector);
+
+  switch (sector)
+  {
+    case 1:
+    commutation_sector_1 ();
+    break;
+
+    case 2:
+    commutation_sector_2 ();
+    break;
+
+    case 3:
+    commutation_sector_3 ();
+    break;
+
+    case 4:
+    commutation_sector_4 ();
+    break;
+
+    case 5:
+    commutation_sector_5 ();
+    break;
+
+    case 6:
+    commutation_sector_6 ();
+    break;
+
+    default:
+    commutation_disable ();
+    break;
+  }
+}
+
+unsigned int increment_sector (unsigned int sector)
+{
+  if (sector < 6)
+  {
+    sector++;
+  }
+  else // sector = 6
+  {
+    sector = 1;
+  }
+
+  return sector;
+}
+
+unsigned int decrement_sector (unsigned int sector)
+{
+  if (sector > 1)
+  {
+    sector--;
+  }
+  else // sector = 1
+  {
+    sector = 6;
+  }
+
+  return sector;
 }
