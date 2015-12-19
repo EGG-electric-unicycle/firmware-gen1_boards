@@ -71,7 +71,7 @@ void update_duty_cycle (unsigned int value)
     value = 1200;
   }
 
-  TIM_SetCompare1(TIM1, 1600);
-  TIM_SetCompare2(TIM1, 1600);
-  TIM_SetCompare3(TIM1, 1600);
+  TIM_SetCompare1(TIM1, 160);
+  TIM_SetCompare2(TIM1, 160);
+  TIM_SetCompare3(TIM1, 160);
 }

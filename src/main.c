@@ -32,33 +32,30 @@ void SysTick_Handler(void) // runs every 1ms
   static unsigned int led_state_flag = 0;
 
   counter++;
-  if (counter == 1) // ??
+  if (counter > 25) // ??
   {
-    //if (led_state_flag == 0)
-    //{
+    if (led_state_flag == 0)
+    {
       // Enable the LEDs
       GPIO_ResetBits(GPIOA, LED_1_BATTERY_INDICATOR);
       led_state_flag = 1;
 
-      phase_a_h_on ();
+      //phase_c_h_on ();
 
-    //}
-  }
-  else if (counter == 2)
-  {
-    //else
-    //{
+    }
+    else
+    {
       // Disable the LEDs
       GPIO_SetBits(GPIOA, LED_1_BATTERY_INDICATOR);
       led_state_flag = 0;
 
-      phase_a_h_off ();
+      //phase_c_h_on ();
 
-    //}
-  }
-  else if (counter > 500)
-  {
-    counter = 0;
+    }
+
+    force_commutate ();
+
+    counter = 1;
   }
 }
 
