@@ -32,30 +32,20 @@ void SysTick_Handler(void) // runs every 1ms
   static unsigned int led_state_flag = 0;
 
   counter++;
-  if (counter > 25) // ??
+  if (counter > 999) // ??
   {
     if (led_state_flag == 0)
     {
       // Enable the LEDs
       GPIO_ResetBits(GPIOA, LED_1_BATTERY_INDICATOR);
       led_state_flag = 1;
-
-      //phase_c_h_on ();
-
     }
     else
     {
       // Disable the LEDs
       GPIO_SetBits(GPIOA, LED_1_BATTERY_INDICATOR);
       led_state_flag = 0;
-
-      //phase_c_h_on ();
-
     }
-
-    force_commutate ();
-
-    counter = 1;
   }
 }
 
@@ -63,9 +53,7 @@ int main(void)
 {
   initialize();
 
-  update_duty_cycle (60); // 6%
-
-  //motor_set_duty_cycle (100); // 100 --> 10%
+  motor_set_duty_cycle (50); // 50 --> 5%
   motor_start();
 
   while (1)
@@ -82,7 +70,7 @@ int main(void)
 
       case OVER_CURRENT:
       buzzer_on();
-      __enable_irq;
+      __disable_irq;
       while (1) ; //block!!
       break;
 
@@ -146,10 +134,10 @@ void initialize (void)
   SetSysClockTo64(); //configure clock to 64 MHz (max possible speed)
   SystemCoreClockUpdate();
 
-  //commutation_disable ();
-  //brake_init ();
+  commutation_disable ();
+  brake_init ();
   pwm_init ();
-  //hall_sensor_init ();
+  hall_sensor_init ();
 
   /* Setup SysTick Timer for xx millisecond interrupts, also enables Systick and Systick-Interrupt */
   if (SysTick_Config(SystemCoreClock / 1000))

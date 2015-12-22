@@ -13,17 +13,19 @@
 #include "adc.h"
 
 /*
- * Target: 1A
- * 1.2A --> 0.0462V --> 58 ADC value
- * 0.8A --> 0.0308V --> 39 ADC value
- *
- * 1A = 0.0385V
+ * 0 Amps = 1.54V
+ * each 1A = +0.0385V
  * 12 bits ADC; 4096 steps
  * 3.3V / 4096 = 0.0008
  *
+ * Target: 4A
+ * 2.5 Amp  = 1.64V --> 2050
+ * 3.5 Amp  = 1.67V --> 2088
+ * 4.5 Amp  = 1.71V --> 2138
+ *
  */
-#define ADC_WATCHDOG_HIGHTHRESHOLD 58
-#define ADC_WATCHDOG_LOWTHRESHOLD 39
+#define ADC_WATCHDOG_HIGHTHRESHOLD 2088
+#define ADC_WATCHDOG_LOWTHRESHOLD  2050
 
 unsigned int adc_watchdog_highthreshold = ADC_WATCHDOG_HIGHTHRESHOLD;
 unsigned int adc_watchdog_lowthreshold = ADC_WATCHDOG_LOWTHRESHOLD;

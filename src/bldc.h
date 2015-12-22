@@ -10,11 +10,7 @@
 #define _BLDC_H
 
 void commutation_disable (void);
-void commutation_sector (unsigned int sector);
 void commutate (void);
 unsigned int get_current_sector (void);
-unsigned int increment_sector (unsigned int sector);
-unsigned int decrement_sector (unsigned int sector);
-void force_commutate (void);
 
 #endif

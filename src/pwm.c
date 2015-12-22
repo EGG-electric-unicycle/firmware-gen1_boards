@@ -37,12 +37,6 @@ void pwm_init (void)
   TIM_OC2Init(TIM1, &TIM_OCInitStructure);
   TIM_OC3Init(TIM1, &TIM_OCInitStructure);
 
-  /* configure ETR for current control */
-  //TIM_ETRConfig (TIM1, TIM_ExtTRGPSC_OFF, TIM_ExtTRGPolarity_NonInverted, 0);
-  //TIM_ClearOC1Ref (TIM1, TIM_OCClear_Enable);
-  //TIM_ClearOC2Ref (TIM1, TIM_OCClear_Enable);
-  //TIM_ClearOC3Ref (TIM1, TIM_OCClear_Enable);
-
   /* TIM1 counter enable */
   TIM_Cmd (TIM1, ENABLE);
 
@@ -54,24 +48,23 @@ void update_duty_cycle (unsigned int value)
 {
   /* value: 0 -> 1000; 0 == 0% and 1000 == 100% duty cycle
    *
-   * 100% --> 1200
-   * 0.1% --> 1.2
+   * 100% --> 3200
+   * 0.1% --> 3.2
    *
    */
-  //value = (value * 1.2f);
+  //value = (value * 3.2f);
   //HACK because seems that code is not doing math - seen on debug mode!!
   //TODO correct this code!!
-  value = 200; // 6%
-  if (value <= 0)
-  {
-    value = 0;
-  }
-  else if (value >= 1200)
-  {
-    value = 1200;
-  }
+//  if (value <= 0)
+//  {
+//    value = 0;
+//  }
+//  else if (value >= 1200)
+//  {
+//    value = 1200;
+//  }
 
-  TIM_SetCompare1(TIM1, 160);
-  TIM_SetCompare2(TIM1, 160);
-  TIM_SetCompare3(TIM1, 160);
+  TIM_SetCompare1(TIM1, 160); // 5% duty cycle
+  TIM_SetCompare2(TIM1, 160); // 5% duty cycle
+  TIM_SetCompare3(TIM1, 160); // 5% duty cycle
 }
