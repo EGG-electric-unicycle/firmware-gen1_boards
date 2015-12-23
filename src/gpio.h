@@ -60,13 +60,6 @@
 #define HALL_SENSOR_B			GPIO_Pin_1
 #define HALL_SENSOR_C			GPIO_Pin_0
 
-//#define BRIDGE_A_HIGH			GPIO_Pin_10
-//#define BRIDGE_B_HIGH			GPIO_Pin_9
-//#define BRIDGE_C_HIGH			GPIO_Pin_8
-//#define BRIDGE_A_LOW			GPIO_Pin_15
-//#define BRIDGE_B_LOW			GPIO_Pin_14
-//#define BRIDGE_C_LOW			GPIO_Pin_13
-
 #define BRIDGE_A_HIGH			GPIO_Pin_10
 #define BRIDGE_B_HIGH			GPIO_Pin_8
 #define BRIDGE_C_HIGH			GPIO_Pin_9

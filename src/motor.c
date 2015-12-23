@@ -11,6 +11,7 @@
 #include "bldc.h"
 #include "pwm.h"
 #include "main.h"
+#include "bldc.h"
 
 unsigned int motor_get_speed (void)
 {
@@ -97,5 +98,15 @@ void brake_init (void)
 
   /* Enable Break interrupt */
   TIM_ITConfig (TIM1, TIM_IT_Break, ENABLE);
+}
+
+void motor_set_direction (unsigned int direction)
+{
+  set_direction (direction);
+}
+
+unsigned int motor_get_direction (void)
+{
+  return get_direction ();
 }
 

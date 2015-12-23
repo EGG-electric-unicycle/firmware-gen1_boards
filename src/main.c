@@ -20,6 +20,7 @@
 #include "stm32f10x_gpio.h"
 #include "gpio.h"
 #include "main.h"
+#include "bldc.h"
 
 unsigned int machine_state = COAST;
 
@@ -54,7 +55,8 @@ int main(void)
   initialize();
 
   motor_set_duty_cycle (50); // 50 --> 5%
-  motor_start();
+  motor_set_direction (RIGHT);
+  motor_start ();
 
   while (1)
   {
