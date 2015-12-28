@@ -17,7 +17,7 @@ extern GPIO_InitTypeDef GPIO_InitStructure;
 
 static unsigned int _direction = RIGHT;
 
-void phase_a_h_on (void)
+void phase_a_h_pwm_on (void)
 {
   GPIO_InitStructure.GPIO_Pin = BRIDGE_A_HIGH;
   GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
@@ -34,18 +34,34 @@ void phase_a_h_off (void)
   GPIO_ResetBits(GPIOA, BRIDGE_A_HIGH);
 }
 
+void phase_a_l_pwm_on (void)
+{
+  GPIO_InitStructure.GPIO_Pin = BRIDGE_A_LOW;
+  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
+  GPIO_Init(GPIOB, &GPIO_InitStructure);
+}
+
 void phase_a_l_on (void)
 {
+  GPIO_InitStructure.GPIO_Pin = BRIDGE_A_LOW;
+  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+  GPIO_Init(GPIOB, &GPIO_InitStructure);
   GPIO_ResetBits(GPIOB, BRIDGE_A_LOW);
 }
 
 void phase_a_l_off (void)
 {
+  GPIO_InitStructure.GPIO_Pin = BRIDGE_A_LOW;
+  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+  GPIO_Init(GPIOB, &GPIO_InitStructure);
   GPIO_SetBits(GPIOB, BRIDGE_A_LOW);
 }
 
 
-void phase_b_h_on (void)
+void phase_b_h_pwm_on (void)
 {
   GPIO_InitStructure.GPIO_Pin = BRIDGE_B_HIGH;
   GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
@@ -62,18 +78,34 @@ void phase_b_h_off (void)
   GPIO_ResetBits(GPIOA, BRIDGE_B_HIGH);
 }
 
+void phase_b_l_pwm_on (void)
+{
+  GPIO_InitStructure.GPIO_Pin = BRIDGE_B_LOW;
+  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
+  GPIO_Init(GPIOB, &GPIO_InitStructure);
+}
+
 void phase_b_l_on (void)
 {
+  GPIO_InitStructure.GPIO_Pin = BRIDGE_B_LOW;
+  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+  GPIO_Init(GPIOB, &GPIO_InitStructure);
   GPIO_ResetBits(GPIOB, BRIDGE_B_LOW);
 }
 
 void phase_b_l_off (void)
 {
+  GPIO_InitStructure.GPIO_Pin = BRIDGE_B_LOW;
+  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+  GPIO_Init(GPIOB, &GPIO_InitStructure);
   GPIO_SetBits(GPIOB, BRIDGE_B_LOW);
 }
 
 
-void phase_c_h_on (void)
+void phase_c_h_pwm_on (void)
 {
   GPIO_InitStructure.GPIO_Pin = BRIDGE_C_HIGH;
   GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
@@ -90,21 +122,37 @@ void phase_c_h_off (void)
   GPIO_ResetBits(GPIOA, BRIDGE_C_HIGH);
 }
 
+void phase_c_l_pwm_on (void)
+{
+  GPIO_InitStructure.GPIO_Pin = BRIDGE_C_LOW;
+  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
+  GPIO_Init(GPIOB, &GPIO_InitStructure);
+}
+
 void phase_c_l_on (void)
 {
+  GPIO_InitStructure.GPIO_Pin = BRIDGE_C_LOW;
+  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+  GPIO_Init(GPIOB, &GPIO_InitStructure);
   GPIO_ResetBits(GPIOB, BRIDGE_C_LOW);
 }
 
 void phase_c_l_off (void)
 {
+  GPIO_InitStructure.GPIO_Pin = BRIDGE_C_LOW;
+  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+  GPIO_Init(GPIOB, &GPIO_InitStructure);
   GPIO_SetBits(GPIOB, BRIDGE_C_LOW);
 }
 
 
 void commutation_AB (void)
 {
-  phase_a_h_on ();
-  phase_a_l_off ();
+  phase_a_h_pwm_on ();
+  phase_a_l_pwm_on ();
 
   phase_b_h_off ();
   phase_b_l_on ();
@@ -115,8 +163,8 @@ void commutation_AB (void)
 
 void commutation_AC (void)
 {
-  phase_a_h_on ();
-  phase_a_l_off ();
+  phase_a_h_pwm_on ();
+  phase_a_l_pwm_on ();
 
   phase_b_h_off ();
   phase_b_l_off ();
@@ -130,8 +178,8 @@ void commutation_BC (void)
   phase_a_h_off ();
   phase_a_l_off ();
 
-  phase_b_h_on ();
-  phase_b_l_off ();
+  phase_b_h_pwm_on ();
+  phase_b_l_pwm_on ();
 
   phase_c_h_off ();
   phase_c_l_on ();
@@ -142,8 +190,8 @@ void commutation_BA (void)
   phase_a_h_off ();
   phase_a_l_on ();
 
-  phase_b_h_on ();
-  phase_b_l_off ();
+  phase_b_h_pwm_on ();
+  phase_b_l_pwm_on ();
 
   phase_c_h_off ();
   phase_c_l_off ();
@@ -157,8 +205,8 @@ void commutation_CA (void)
   phase_b_h_off ();
   phase_b_l_off ();
 
-  phase_c_h_on ();
-  phase_c_l_off ();
+  phase_c_h_pwm_on ();
+  phase_c_l_pwm_on ();
 }
 
 void commutation_CB (void)
@@ -169,8 +217,8 @@ void commutation_CB (void)
   phase_b_h_off ();
   phase_b_l_on ();
 
-  phase_c_h_on ();
-  phase_c_l_off ();
+  phase_c_h_pwm_on ();
+  phase_c_l_pwm_on ();
 }
 
 void commutation_disable (void)
@@ -251,6 +299,45 @@ void commutate (void)
   volatile unsigned int sector;
 
   sector = get_current_sector ();
+
+  //Coils: AB, AC, BC, BA, CA, CB
+  switch (sector)
+  {
+    case 1:
+    commutation_AB ();
+    break;
+
+    case 2:
+    commutation_AC ();
+    break;
+
+    case 3:
+    commutation_BC ();
+    break;
+
+    case 4:
+    commutation_BA ();
+    break;
+
+    case 5:
+    commutation_CA ();
+    break;
+
+    case 6:
+    commutation_CB ();
+    break;
+
+    default:
+    commutation_disable ();
+    break;
+  }
+}
+
+void commutate_sector (void)
+{
+  static unsigned int sector = 1;
+
+  sector = increment_sector (sector);
 
   //Coils: AB, AC, BC, BA, CA, CB
   switch (sector)

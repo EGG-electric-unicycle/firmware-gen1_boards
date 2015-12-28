@@ -33,7 +33,7 @@ void SysTick_Handler(void) // runs every 1ms
   static unsigned int led_state_flag = 0;
 
   counter++;
-  if (counter > 999) // ??
+  if (counter > 100) // ??
   {
     if (led_state_flag == 0)
     {
@@ -47,6 +47,10 @@ void SysTick_Handler(void) // runs every 1ms
       GPIO_SetBits(GPIOA, LED_1_BATTERY_INDICATOR);
       led_state_flag = 0;
     }
+
+    counter = 0;
+
+    //commutate_sector (); // starts the commutation
   }
 }
 
@@ -57,6 +61,7 @@ int main(void)
   motor_set_duty_cycle (50); // 50 --> 5%
   motor_set_direction (RIGHT);
   motor_start ();
+//TIM_CtrlPWMOutputs (TIM1, ENABLE); // PWM Output Enable
 
   while (1)
   {
@@ -137,7 +142,7 @@ void initialize (void)
   SystemCoreClockUpdate();
 
   commutation_disable ();
-  brake_init ();
+  //brake_init ();
   pwm_init ();
   hall_sensor_init ();
 
