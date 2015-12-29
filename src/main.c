@@ -21,6 +21,7 @@
 #include "gpio.h"
 #include "main.h"
 #include "bldc.h"
+#include "adc.h"
 
 unsigned int machine_state = COAST;
 
@@ -38,13 +39,13 @@ void SysTick_Handler(void) // runs every 1ms
     if (led_state_flag == 0)
     {
       // Enable the LEDs
-      GPIO_ResetBits(GPIOA, LED_1_BATTERY_INDICATOR);
+      //GPIO_ResetBits(GPIOA, LED_1_BATTERY_INDICATOR);
       led_state_flag = 1;
     }
     else
     {
       // Disable the LEDs
-      GPIO_SetBits(GPIOA, LED_1_BATTERY_INDICATOR);
+      //GPIO_SetBits(GPIOA, LED_1_BATTERY_INDICATOR);
       led_state_flag = 0;
     }
 
@@ -56,15 +57,25 @@ void SysTick_Handler(void) // runs every 1ms
 
 int main(void)
 {
+  static unsigned int pot;
+
   initialize();
 
-  motor_set_duty_cycle (50); // 50 --> 5%
+  //motor_set_duty_cycle (50); // 50 --> 5%
   motor_set_direction (RIGHT);
   motor_start ();
-//TIM_CtrlPWMOutputs (TIM1, ENABLE); // PWM Output Enable
+  TIM_CtrlPWMOutputs (TIM1, ENABLE); // PWM Output Enable
 
   while (1)
   {
+   pot = (adc_get_PS_signal_value () >> 2); // filter and the value is now 10 bits --> max 1023.
+
+
+// MAX 3200
+   TIM_SetCompare1(TIM1, pot); // 5% duty cycle
+   TIM_SetCompare2(TIM1, pot); // 5% duty cycle
+   TIM_SetCompare3(TIM1, pot); // 5% duty cycle
+
     switch (machine_state)
     {
       case COAST:
@@ -138,11 +149,13 @@ void initialize (void)
   //this is used to block firmware from running if for example it do a short circuit on the H bridges.
   while (!GPIO_ReadInputDataBit(GPIOA, PS_SIGNAL)) ;
 
+  adc_init ();
+
   SetSysClockTo64(); //configure clock to 64 MHz (max possible speed)
   SystemCoreClockUpdate();
 
   commutation_disable ();
-  //brake_init ();
+  brake_init ();
   pwm_init ();
   hall_sensor_init ();
 

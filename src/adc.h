@@ -11,5 +11,6 @@
 
 void adc_init (void);
 unsigned int adc_get_current_value (void);
+unsigned int adc_get_PS_signal_value (void);
 
 #endif

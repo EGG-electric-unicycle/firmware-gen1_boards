@@ -35,7 +35,7 @@ void motor_start (void)
 
 void motor_coast (void)
 {
-  stop_adc_max_current_management ();
+  // TODO stop_adc_max_current_management ();
   TIM_CtrlPWMOutputs (TIM1, DISABLE); // PWM Output Disable
   machine_state = COAST;
 }
