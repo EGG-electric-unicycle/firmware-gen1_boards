@@ -9,6 +9,9 @@
 #include "stm32f10x.h"
 #include "stm32f10x_tim.h"
 #include "stm32f10x_rcc.h"
+#include "pwm.h"
+
+struct BLDC_pwm bldc_pwm;
 
 void pwm_init (void)
 {
@@ -17,8 +20,8 @@ void pwm_init (void)
   /* Time Base configuration */
   TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
   TIM_TimeBaseStructure.TIM_Prescaler = 0;
-  TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
-  TIM_TimeBaseStructure.TIM_Period = 3199; // 64MHz clock (PCLK1), 64MHz/3200 = 20KHz
+  TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_CenterAligned1;
+  TIM_TimeBaseStructure.TIM_Period = (2048 - 1); // 64MHz clock (PCLK1), 64MHz/4096 = 15.625KHz (BUT PWM center alined mode needs twice the frequency)
   TIM_TimeBaseStructure.TIM_ClockDivision = 0;
   TIM_TimeBaseStructure.TIM_RepetitionCounter = 0;
   TIM_TimeBaseInit(TIM1, &TIM_TimeBaseStructure);
@@ -54,27 +57,83 @@ void pwm_init (void)
   TIM_CtrlPWMOutputs (TIM1, DISABLE);
 }
 
-void update_duty_cycle (unsigned int value)
+void pwm_set_duty_cycle (unsigned int value)
 {
-  /* value: 0 -> 1000; 0 == 0% and 1000 == 100% duty cycle
-   *
-   * 100% --> 3200
-   * 0.1% --> 3.2
-   *
-   */
-  //value = (value * 3.2f);
-  //HACK because seems that code is not doing math - seen on debug mode!!
-  //TODO correct this code!!
-//  if (value <= 0)
-//  {
-//    value = 0;
-//  }
-//  else if (value >= 1200)
-//  {
-//    value = 1200;
-//  }
+  // "value" = 1000 ---> 100% duty cycle
+  // "value" = 425 ---> % 42.5% duty cycle
 
-  TIM_SetCompare1(TIM1, 1600); // 5% duty cycle
-  TIM_SetCompare2(TIM1, 1600); // 5% duty cycle
-  TIM_SetCompare3(TIM1, 1600); // 5% duty cycle
+  // limit the input max value
+  if (value >= DUTY_CYCLE_MAX)
+  {
+    value = DUTY_CYCLE_MAX;
+  }
+
+  // 1000 ---> 100%;
+  // 0.625 * value = duty cycle (1000 accounts for max of 50%)
+  //bldc_pwm.duty_cycle_normal = DUTY_CYCLE_MEDIUM + (value * 0.625); // this goes from 50% up to max
+  //bldc_pwm.duty_cycle_inverted = DUTY_CYCLE_MEDIUM - (value * 0.625); // this goes from 50% down to max
+
+  //bldc_pwm.duty_cycle_normal = DUTY_CYCLE_MEDIUM + (DUTY_CYCLE_MEDIUM / 10) + 55; // this goes from 50% up to max
+  //bldc_pwm.duty_cycle_inverted = DUTY_CYCLE_MEDIUM - (DUTY_CYCLE_MEDIUM / 10) + 55; // this goes from 50% down to max
+
+  bldc_pwm.duty_cycle_normal = 1023 + 302 + 110; //1023 + 55; // this goes from 50% up to max
+  bldc_pwm.duty_cycle_inverted = 1023 - 302 + 110; // this goes from 50% down to max
+
+  // check for invalid values
+  //if (bldc_pwm.duty_cycle_normal > DUTY_CYCLE_MAX_SAFE)
+  //{
+    //bldc_pwm.duty_cycle_normal = DUTY_CYCLE_MAX_SAFE;
+  //}
+
+  //if (bldc_pwm.duty_cycle_inverted < DUTY_CYCLE_MIN_SAFE)
+  //{
+    //bldc_pwm.duty_cycle_inverted = DUTY_CYCLE_MIN_SAFE;
+  //}
+
+  pwm_update_duty_cycle ();
+}
+
+
+void pwm_update_duty_cycle (void)
+{
+  if (bldc_pwm.phase_a == NORMAL)
+  {
+    TIM_SetCompare3(TIM1, bldc_pwm.duty_cycle_normal); // phase A
+  }
+  else if (bldc_pwm.phase_a == INVERTED)
+  {
+    TIM_SetCompare3(TIM1, bldc_pwm.duty_cycle_inverted);
+  }
+  else if (bldc_pwm.phase_a == OFF)
+  {
+    TIM_SetCompare3(TIM1, DUTY_CYCLE_MEDIUM);
+  }
+
+
+  if (bldc_pwm.phase_b == NORMAL)
+  {
+    TIM_SetCompare1(TIM1, bldc_pwm.duty_cycle_normal); // phase B
+  }
+  else if (bldc_pwm.phase_b == INVERTED)
+  {
+    TIM_SetCompare1(TIM1, bldc_pwm.duty_cycle_inverted);
+  }
+  else if (bldc_pwm.phase_b == OFF)
+  {
+    TIM_SetCompare1(TIM1, DUTY_CYCLE_MEDIUM);
+  }
+
+
+  if (bldc_pwm.phase_c == NORMAL)
+  {
+    TIM_SetCompare2(TIM1, bldc_pwm.duty_cycle_normal); // phase C
+  }
+  else if (bldc_pwm.phase_c == INVERTED)
+  {
+    TIM_SetCompare2(TIM1, bldc_pwm.duty_cycle_inverted);
+  }
+  else if (bldc_pwm.phase_c == OFF)
+  {
+    TIM_SetCompare2(TIM1, DUTY_CYCLE_MEDIUM);
+  }
 }

@@ -10,20 +10,13 @@
 #include "stm32f10x_tim.h"
 #include "gpio.h"
 #include "bldc.h"
+#include "pwm.h"
 
 extern GPIO_InitTypeDef GPIO_InitStructure;
 
 #define HALL_SENSORS_MASK ((1 << 0) | (1 << 1) | (1 << 2))
 
 static unsigned int _direction = RIGHT;
-
-void phase_a_h_pwm_on (void)
-{
-  GPIO_InitStructure.GPIO_Pin = BRIDGE_A_HIGH;
-  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
-  GPIO_Init(GPIOA, &GPIO_InitStructure);
-}
 
 void phase_a_h_off (void)
 {
@@ -32,23 +25,6 @@ void phase_a_h_off (void)
   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
   GPIO_Init(GPIOA, &GPIO_InitStructure);
   GPIO_ResetBits(GPIOA, BRIDGE_A_HIGH);
-}
-
-void phase_a_l_pwm_on (void)
-{
-  GPIO_InitStructure.GPIO_Pin = BRIDGE_A_LOW;
-  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
-  GPIO_Init(GPIOB, &GPIO_InitStructure);
-}
-
-void phase_a_l_on (void)
-{
-  GPIO_InitStructure.GPIO_Pin = BRIDGE_A_LOW;
-  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
-  GPIO_Init(GPIOB, &GPIO_InitStructure);
-  GPIO_ResetBits(GPIOB, BRIDGE_A_LOW);
 }
 
 void phase_a_l_off (void)
@@ -60,15 +36,6 @@ void phase_a_l_off (void)
   GPIO_SetBits(GPIOB, BRIDGE_A_LOW);
 }
 
-
-void phase_b_h_pwm_on (void)
-{
-  GPIO_InitStructure.GPIO_Pin = BRIDGE_B_HIGH;
-  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
-  GPIO_Init(GPIOA, &GPIO_InitStructure);
-}
-
 void phase_b_h_off (void)
 {
   GPIO_InitStructure.GPIO_Pin = BRIDGE_B_HIGH;
@@ -76,23 +43,6 @@ void phase_b_h_off (void)
   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
   GPIO_Init(GPIOA, &GPIO_InitStructure);
   GPIO_ResetBits(GPIOA, BRIDGE_B_HIGH);
-}
-
-void phase_b_l_pwm_on (void)
-{
-  GPIO_InitStructure.GPIO_Pin = BRIDGE_B_LOW;
-  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
-  GPIO_Init(GPIOB, &GPIO_InitStructure);
-}
-
-void phase_b_l_on (void)
-{
-  GPIO_InitStructure.GPIO_Pin = BRIDGE_B_LOW;
-  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
-  GPIO_Init(GPIOB, &GPIO_InitStructure);
-  GPIO_ResetBits(GPIOB, BRIDGE_B_LOW);
 }
 
 void phase_b_l_off (void)
@@ -104,15 +54,6 @@ void phase_b_l_off (void)
   GPIO_SetBits(GPIOB, BRIDGE_B_LOW);
 }
 
-
-void phase_c_h_pwm_on (void)
-{
-  GPIO_InitStructure.GPIO_Pin = BRIDGE_C_HIGH;
-  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
-  GPIO_Init(GPIOA, &GPIO_InitStructure);
-}
-
 void phase_c_h_off (void)
 {
   GPIO_InitStructure.GPIO_Pin = BRIDGE_C_HIGH;
@@ -120,23 +61,6 @@ void phase_c_h_off (void)
   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
   GPIO_Init(GPIOA, &GPIO_InitStructure);
   GPIO_ResetBits(GPIOA, BRIDGE_C_HIGH);
-}
-
-void phase_c_l_pwm_on (void)
-{
-  GPIO_InitStructure.GPIO_Pin = BRIDGE_C_LOW;
-  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
-  GPIO_Init(GPIOB, &GPIO_InitStructure);
-}
-
-void phase_c_l_on (void)
-{
-  GPIO_InitStructure.GPIO_Pin = BRIDGE_C_LOW;
-  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
-  GPIO_Init(GPIOB, &GPIO_InitStructure);
-  GPIO_ResetBits(GPIOB, BRIDGE_C_LOW);
 }
 
 void phase_c_l_off (void)
@@ -151,86 +75,55 @@ void phase_c_l_off (void)
 
 void commutation_AB (void)
 {
-  phase_a_h_pwm_on ();
-  phase_a_l_pwm_on ();
-
-  phase_b_h_off ();
-  phase_b_l_on ();
-
-  phase_c_h_off ();
-  phase_c_l_off ();
+  bldc_pwm.phase_a = NORMAL;
+  bldc_pwm.phase_b = INVERTED;
+  bldc_pwm.phase_c = OFF;
+  pwm_update_duty_cycle ();
 }
 
 void commutation_AC (void)
 {
-  phase_a_h_pwm_on ();
-  phase_a_l_pwm_on ();
-
-  phase_b_h_off ();
-  phase_b_l_off ();
-
-  phase_c_h_off ();
-  phase_c_l_on ();
+  bldc_pwm.phase_a = NORMAL;
+  bldc_pwm.phase_b = OFF;
+  bldc_pwm.phase_c = INVERTED;
+  pwm_update_duty_cycle ();
 }
 
 void commutation_BC (void)
 {
-  phase_a_h_off ();
-  phase_a_l_off ();
-
-  phase_b_h_pwm_on ();
-  phase_b_l_pwm_on ();
-
-  phase_c_h_off ();
-  phase_c_l_on ();
+  bldc_pwm.phase_a = OFF;
+  bldc_pwm.phase_b = NORMAL;
+  bldc_pwm.phase_c = INVERTED;
+  pwm_update_duty_cycle ();
 }
 
 void commutation_BA (void)
 {
-  phase_a_h_off ();
-  phase_a_l_on ();
-
-  phase_b_h_pwm_on ();
-  phase_b_l_pwm_on ();
-
-  phase_c_h_off ();
-  phase_c_l_off ();
+  bldc_pwm.phase_a = INVERTED;
+  bldc_pwm.phase_b = NORMAL;
+  bldc_pwm.phase_c = OFF;
+  pwm_update_duty_cycle ();
 }
 
 void commutation_CA (void)
 {
-  phase_a_h_off ();
-  phase_a_l_on ();
-
-  phase_b_h_off ();
-  phase_b_l_off ();
-
-  phase_c_h_pwm_on ();
-  phase_c_l_pwm_on ();
+  bldc_pwm.phase_a = INVERTED;
+  bldc_pwm.phase_b = OFF;
+  bldc_pwm.phase_c = NORMAL;
+  pwm_update_duty_cycle ();
 }
 
 void commutation_CB (void)
 {
-  phase_a_h_off ();
-  phase_a_l_off ();
-
-  phase_b_h_off ();
-  phase_b_l_on ();
-
-  phase_c_h_pwm_on ();
-  phase_c_l_pwm_on ();
+  bldc_pwm.phase_a = OFF;
+  bldc_pwm.phase_b = INVERTED;
+  bldc_pwm.phase_c = NORMAL;
+  pwm_update_duty_cycle ();
 }
 
 void commutation_disable (void)
 {
-  phase_a_h_off ();
-  phase_a_l_off ();
-
-  phase_b_h_off ();
-  phase_b_l_off ();
-
-  phase_c_h_off ();
-  phase_c_l_off ();
+  TIM_CtrlPWMOutputs (TIM1, DISABLE); // PWM Output Disable
 }
 
 unsigned int get_current_sector (void)
@@ -255,27 +148,27 @@ unsigned int get_current_sector (void)
   switch (hall_sensors)
   {
     case 4:
-    sector = 1;
-    break;
-
-    case 5:
     sector = 2;
     break;
 
-    case 1:
+    case 5:
     sector = 3;
     break;
 
-    case 3:
+    case 1:
     sector = 4;
     break;
 
-    case 2:
+    case 3:
     sector = 5;
     break;
 
-    case 6:
+    case 2:
     sector = 6;
+    break;
+
+    case 6:
+    sector = 1;
     break;
 
     default:

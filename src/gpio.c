@@ -53,9 +53,10 @@ void gpio_init (void)
   GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
   GPIO_Init(GPIOA, &GPIO_InitStructure);
 
-  GPIO_SetBits(GPIOB, BRIDGE_A_LOW | BRIDGE_B_LOW | BRIDGE_C_LOW); // this pins have active low logic so we need to turn them on at start
+  //GPIO Configuration: Channel 1, 2 and 3 as alternate function push-pull -- PWM
+  GPIO_SetBits(GPIOB, BRIDGE_A_LOW | BRIDGE_B_LOW | BRIDGE_C_LOW);
   GPIO_InitStructure.GPIO_Pin = BRIDGE_A_LOW | BRIDGE_B_LOW | BRIDGE_C_LOW;
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
   GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
   GPIO_Init(GPIOB, &GPIO_InitStructure);
 }

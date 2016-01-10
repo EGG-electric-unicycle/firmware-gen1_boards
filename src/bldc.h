@@ -5,13 +5,14 @@
  *
  * Released under the GPL License, Version 3
  */
+#include "pwm.h"
 
-#ifndef _BLDC_H
-#define _BLDC_H
+#ifndef _BLDC_H_
+#define _BLDC_H_
 
 // direction of motor movement
-#define RIGHT 1
-#define LEFT 0
+#define RIGHT 		1
+#define LEFT 		0
 
 void commutation_disable (void);
 void commutate (void);

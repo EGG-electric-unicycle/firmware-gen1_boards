@@ -22,37 +22,17 @@
 #include "main.h"
 #include "bldc.h"
 #include "adc.h"
+#include "pwm.h"
 
 unsigned int machine_state = COAST;
 
 void SetSysClockTo64(void);
 void initialize (void);
 
-void SysTick_Handler(void) // runs every 1ms
+void SysTick_Handler(void) // runs every 8ms
 {
-  static unsigned int counter = 1;
-  static unsigned int led_state_flag = 0;
 
-  counter++;
-  if (counter > 100) // ??
-  {
-    if (led_state_flag == 0)
-    {
-      // Enable the LEDs
-      //GPIO_ResetBits(GPIOA, LED_1_BATTERY_INDICATOR);
-      led_state_flag = 1;
-    }
-    else
-    {
-      // Disable the LEDs
-      //GPIO_SetBits(GPIOA, LED_1_BATTERY_INDICATOR);
-      led_state_flag = 0;
-    }
-
-    counter = 0;
-
-    //commutate_sector (); // starts the commutation
-  }
+  //commutate_sector ();
 }
 
 int main(void)
@@ -61,20 +41,32 @@ int main(void)
 
   initialize();
 
-  //motor_set_duty_cycle (50); // 50 --> 5%
-  motor_set_direction (RIGHT);
+  motor_set_duty_cycle (100); // 100 --> 10%
+  //motor_set_direction (RIGHT);
   motor_start ();
-  TIM_CtrlPWMOutputs (TIM1, ENABLE); // PWM Output Enable
+
+//  bldc_pwm.duty_cycle_normal = 1023; //2047 120: 0.6us; 180: 2.48us; 360: 8us; 720: 19.4us
+//  bldc_pwm.duty_cycle_inverted = 2044;
+//  bldc_pwm.phase_a = NORMAL;
+//  bldc_pwm.phase_b = INVERTED;
+//  bldc_pwm.phase_c = OFF;
+  //TIM_SetCompare3(TIM1, 2047 + 110); // phase A
+  //TIM_SetCompare1(TIM1, 1023 + 110); // phase B
+
+  motor_set_duty_cycle (100); // 100 --> 10%
 
   while (1)
   {
-   pot = (adc_get_PS_signal_value () >> 2); // filter and the value is now 10 bits --> max 1023.
+//   pot = (adc_get_PS_signal_value () >> 2); // filter and the value is now 10 bits --> max 1023.
 
 
-// MAX 3200
-   TIM_SetCompare1(TIM1, pot); // 5% duty cycle
-   TIM_SetCompare2(TIM1, pot); // 5% duty cycle
-   TIM_SetCompare3(TIM1, pot); // 5% duty cycle
+//// MAX 3200
+//   TIM_SetCompare1(TIM1, pot); // 5% duty cycle
+//   TIM_SetCompare2(TIM1, pot); // 5% duty cycle
+//   TIM_SetCompare3(TIM1, pot); // 5% duty cycle
+
+      //TIM_SetCompare3(TIM1, 511 + 110); // phase A
+      //TIM_SetCompare1(TIM1, 1535 + 110); // phase B
 
     switch (machine_state)
     {
@@ -143,24 +135,31 @@ void SetSysClockTo64(void)
 
 void initialize (void)
 {
-  gpio_init ();
+  GPIO_InitTypeDef GPIO_InitStructure;
+  /* Config PS_signal pin */
+  RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
+  GPIO_InitStructure.GPIO_Pin = PS_SIGNAL;
+  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
+  GPIO_Init(GPIOA, &GPIO_InitStructure);
 
   //blocks while the PS_SIGNAL is low (there is a switch to control this signal
   //this is used to block firmware from running if for example it do a short circuit on the H bridges.
   while (!GPIO_ReadInputDataBit(GPIOA, PS_SIGNAL)) ;
 
-  adc_init ();
+
+  //adc_init ();
 
   SetSysClockTo64(); //configure clock to 64 MHz (max possible speed)
   SystemCoreClockUpdate();
 
   commutation_disable ();
-  brake_init ();
   pwm_init ();
+  gpio_init (); // configure pins just after PWM init
   hall_sensor_init ();
 
   /* Setup SysTick Timer for xx millisecond interrupts, also enables Systick and Systick-Interrupt */
-  if (SysTick_Config(SystemCoreClock / 1000))
+  if (SysTick_Config(SystemCoreClock / 125))
   {
     /* Capture error */
     while (1);

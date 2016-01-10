@@ -28,7 +28,7 @@ void motor_set_speed (unsigned int speed)
 void motor_start (void)
 {
   commutate (); // starts the commutation
-//  start_adc_max_current_management ();
+  //start_adc_max_current_management ();
   TIM_CtrlPWMOutputs (TIM1, ENABLE); // PWM Output Enable
   machine_state = RUNNING;
 }
@@ -42,7 +42,7 @@ void motor_coast (void)
 
 void motor_set_duty_cycle (unsigned int value)
 {
-  update_duty_cycle (value);
+  pwm_set_duty_cycle (value);
 }
 
 unsigned int motor_get_current (void)
