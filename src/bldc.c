@@ -18,6 +18,8 @@ extern GPIO_InitTypeDef GPIO_InitStructure;
 
 static unsigned int _direction = RIGHT;
 
+struct Bldc_phase_state bldc_phase_state;
+
 void phase_a_h_off (void)
 {
   GPIO_InitStructure.GPIO_Pin = BRIDGE_A_HIGH;
@@ -75,49 +77,49 @@ void phase_c_l_off (void)
 
 void commutation_AB (void)
 {
-  bldc_pwm.phase_a = NORMAL;
-  bldc_pwm.phase_b = INVERTED;
-  bldc_pwm.phase_c = OFF;
+  bldc_phase_state.a = NORMAL;
+  bldc_phase_state.b = INVERTED;
+  bldc_phase_state.c = OFF;
   pwm_update_duty_cycle ();
 }
 
 void commutation_AC (void)
 {
-  bldc_pwm.phase_a = NORMAL;
-  bldc_pwm.phase_b = OFF;
-  bldc_pwm.phase_c = INVERTED;
+  bldc_phase_state.a = NORMAL;
+  bldc_phase_state.b = OFF;
+  bldc_phase_state.c = INVERTED;
   pwm_update_duty_cycle ();
 }
 
 void commutation_BC (void)
 {
-  bldc_pwm.phase_a = OFF;
-  bldc_pwm.phase_b = NORMAL;
-  bldc_pwm.phase_c = INVERTED;
+  bldc_phase_state.a = OFF;
+  bldc_phase_state.b = NORMAL;
+  bldc_phase_state.c = INVERTED;
   pwm_update_duty_cycle ();
 }
 
 void commutation_BA (void)
 {
-  bldc_pwm.phase_a = INVERTED;
-  bldc_pwm.phase_b = NORMAL;
-  bldc_pwm.phase_c = OFF;
+  bldc_phase_state.a = INVERTED;
+  bldc_phase_state.b = NORMAL;
+  bldc_phase_state.c = OFF;
   pwm_update_duty_cycle ();
 }
 
 void commutation_CA (void)
 {
-  bldc_pwm.phase_a = INVERTED;
-  bldc_pwm.phase_b = OFF;
-  bldc_pwm.phase_c = NORMAL;
+  bldc_phase_state.a = INVERTED;
+  bldc_phase_state.b = OFF;
+  bldc_phase_state.c = NORMAL;
   pwm_update_duty_cycle ();
 }
 
 void commutation_CB (void)
 {
-  bldc_pwm.phase_a = OFF;
-  bldc_pwm.phase_b = INVERTED;
-  bldc_pwm.phase_c = NORMAL;
+  bldc_phase_state.a = OFF;
+  bldc_phase_state.b = INVERTED;
+  bldc_phase_state.c = NORMAL;
   pwm_update_duty_cycle ();
 }
 

@@ -29,44 +29,26 @@ unsigned int machine_state = COAST;
 void SetSysClockTo64(void);
 void initialize (void);
 
-void SysTick_Handler(void) // runs every 8ms
+void SysTick_Handler(void) // runs every 1ms
 {
-
-  //commutate_sector ();
+  pwm_manage (); // manage the pwm duty-cycle
 }
 
 int main(void)
 {
-  static unsigned int pot;
+  static int value;
 
   initialize();
 
-  motor_set_duty_cycle (100); // 100 --> 10%
-  //motor_set_direction (RIGHT);
   motor_start ();
-
-//  bldc_pwm.duty_cycle_normal = 1023; //2047 120: 0.6us; 180: 2.48us; 360: 8us; 720: 19.4us
-//  bldc_pwm.duty_cycle_inverted = 2044;
-//  bldc_pwm.phase_a = NORMAL;
-//  bldc_pwm.phase_b = INVERTED;
-//  bldc_pwm.phase_c = OFF;
-  //TIM_SetCompare3(TIM1, 2047 + 110); // phase A
-  //TIM_SetCompare1(TIM1, 1023 + 110); // phase B
-
-  motor_set_duty_cycle (100); // 100 --> 10%
 
   while (1)
   {
-//   pot = (adc_get_PS_signal_value () >> 2); // filter and the value is now 10 bits --> max 1023.
-
-
-//// MAX 3200
-//   TIM_SetCompare1(TIM1, pot); // 5% duty cycle
-//   TIM_SetCompare2(TIM1, pot); // 5% duty cycle
-//   TIM_SetCompare3(TIM1, pot); // 5% duty cycle
-
-      //TIM_SetCompare3(TIM1, 511 + 110); // phase A
-      //TIM_SetCompare1(TIM1, 1535 + 110); // phase B
+    // control the motor speed and rotation direction using a potentiometer on PS_SIGNAL pin
+    value = (adc_get_PS_signal_value () >> 2); // filter and the value is now 10 bits --> max 1023.
+    value = value - 511; // now middle value is 0. Left half of pot turns motor left and vice-versa
+    value = value * 1.953; // scale: 512 * 1.953 = 999.9
+    motor_set_duty_cycle (value);
 
     switch (machine_state)
     {
@@ -147,8 +129,7 @@ void initialize (void)
   //this is used to block firmware from running if for example it do a short circuit on the H bridges.
   while (!GPIO_ReadInputDataBit(GPIOA, PS_SIGNAL)) ;
 
-
-  //adc_init ();
+  adc_init ();
 
   SetSysClockTo64(); //configure clock to 64 MHz (max possible speed)
   SystemCoreClockUpdate();
@@ -158,8 +139,8 @@ void initialize (void)
   gpio_init (); // configure pins just after PWM init
   hall_sensor_init ();
 
-  /* Setup SysTick Timer for xx millisecond interrupts, also enables Systick and Systick-Interrupt */
-  if (SysTick_Config(SystemCoreClock / 125))
+  /* Setup SysTick Timer for 1 millisecond interrupts, also enables Systick and Systick-Interrupt */
+  if (SysTick_Config(SystemCoreClock / 1000))
   {
     /* Capture error */
     while (1);

@@ -14,6 +14,20 @@
 #define RIGHT 		1
 #define LEFT 		0
 
+// phase states
+#define OFF 		0
+#define NORMAL 		1
+#define INVERTED 	2
+
+struct Bldc_phase_state
+{
+  unsigned int a;
+  unsigned int b;
+  unsigned int c;
+};
+
+extern struct Bldc_phase_state bldc_phase_state;
+
 void commutation_disable (void);
 void commutate (void);
 unsigned int get_current_sector (void);

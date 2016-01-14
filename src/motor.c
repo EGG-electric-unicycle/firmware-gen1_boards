@@ -40,7 +40,7 @@ void motor_coast (void)
   machine_state = COAST;
 }
 
-void motor_set_duty_cycle (unsigned int value)
+void motor_set_duty_cycle (int value)
 {
   pwm_set_duty_cycle (value);
 }

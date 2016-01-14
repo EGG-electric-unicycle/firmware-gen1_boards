@@ -22,9 +22,9 @@ void gpio_init (void)
 
   GPIO_PinRemapConfig(GPIO_Remap_SWJ_JTAGDisable, ENABLE);
 
-  GPIO_InitStructure.GPIO_Pin = PS_SIGNAL;
+  GPIO_InitStructure.GPIO_Pin = PS_SIGNAL | CURRENT_SIGNAL;
   GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN;
   GPIO_Init(GPIOA, &GPIO_InitStructure);
 
   GPIO_InitStructure.GPIO_Pin = (LED_2_BATTERY_INDICATOR | LED_3_BATTERY_INDICATOR | LED_4_BATTERY_INDICATOR | LED_POWER_SWITCHER);

@@ -10,8 +10,10 @@
 #include "stm32f10x_tim.h"
 #include "stm32f10x_rcc.h"
 #include "pwm.h"
+#include "bldc.h"
 
-struct BLDC_pwm bldc_pwm;
+int pwm_duty_cycle;
+int pwm_duty_cycle_target;
 
 void pwm_init (void)
 {
@@ -57,83 +59,108 @@ void pwm_init (void)
   TIM_CtrlPWMOutputs (TIM1, DISABLE);
 }
 
-void pwm_set_duty_cycle (unsigned int value)
-{
-  // "value" = 1000 ---> 100% duty cycle
-  // "value" = 425 ---> % 42.5% duty cycle
-
-  // limit the input max value
-  if (value >= DUTY_CYCLE_MAX)
-  {
-    value = DUTY_CYCLE_MAX;
-  }
-
-  // 1000 ---> 100%;
-  // 0.625 * value = duty cycle (1000 accounts for max of 50%)
-  //bldc_pwm.duty_cycle_normal = DUTY_CYCLE_MEDIUM + (value * 0.625); // this goes from 50% up to max
-  //bldc_pwm.duty_cycle_inverted = DUTY_CYCLE_MEDIUM - (value * 0.625); // this goes from 50% down to max
-
-  //bldc_pwm.duty_cycle_normal = DUTY_CYCLE_MEDIUM + (DUTY_CYCLE_MEDIUM / 10) + 55; // this goes from 50% up to max
-  //bldc_pwm.duty_cycle_inverted = DUTY_CYCLE_MEDIUM - (DUTY_CYCLE_MEDIUM / 10) + 55; // this goes from 50% down to max
-
-  bldc_pwm.duty_cycle_normal = 1023 + 302 + 110; //1023 + 55; // this goes from 50% up to max
-  bldc_pwm.duty_cycle_inverted = 1023 - 302 + 110; // this goes from 50% down to max
-
-  // check for invalid values
-  //if (bldc_pwm.duty_cycle_normal > DUTY_CYCLE_MAX_SAFE)
-  //{
-    //bldc_pwm.duty_cycle_normal = DUTY_CYCLE_MAX_SAFE;
-  //}
-
-  //if (bldc_pwm.duty_cycle_inverted < DUTY_CYCLE_MIN_SAFE)
-  //{
-    //bldc_pwm.duty_cycle_inverted = DUTY_CYCLE_MIN_SAFE;
-  //}
-
-  pwm_update_duty_cycle ();
-}
-
-
+// Function to update the duty cycle PWM values on the PWM controller
 void pwm_update_duty_cycle (void)
 {
-  if (bldc_pwm.phase_a == NORMAL)
+  #define DUTY_CYCLE_MAGIC_NUMBER		100 // this value was found experimentally and need to be added to duty cyce value to have correct output value
+
+  // 2039 max duty cycle value
+  #define DUTY_CYCLE_NORMAL_MAX		2047
+  #define DUTY_CYCLE_NORMAL_MIN		(2047/2)
+  #define DUTY_CYCLE_OFF		(2047/2) + DUTY_CYCLE_MAGIC_NUMBER
+  #define DUTY_CYCLE_INVERTED_MAX	((2047/2) - 1)
+  #define DUTY_CYCLE_INVERTED_MIN 0
+
+//  #define DUTY_CYCLE_MAX_SAFE		(DUTY_CYCLE_MAX - (DUTY_CYCLE_MAX/20)) // 95% for safe margin
+//  #define DUTY_CYCLE_MIN_SAFE		(DUTY_CYCLE_MAX/20 + DUTY_CYCLE_MAGIC_NUMBER) // 5% for safe margin
+
+  unsigned int duty_cycle_normal;
+  unsigned int duty_cycle_inverted;
+  int temp;
+
+  // Calc the correct value of duty cycle and inverted duty cycle
+  temp = (pwm_duty_cycle + 999) * 1.024; // scale to correct value
+  duty_cycle_normal = (unsigned int) (temp + DUTY_CYCLE_MAGIC_NUMBER);
+  duty_cycle_inverted = 2047 - duty_cycle_normal;
+
+  // Apply the duty cycle values
+  if (bldc_phase_state.a == NORMAL)
   {
-    TIM_SetCompare3(TIM1, bldc_pwm.duty_cycle_normal); // phase A
+    TIM_SetCompare3(TIM1, duty_cycle_normal); // phase A
   }
-  else if (bldc_pwm.phase_a == INVERTED)
+  else if (bldc_phase_state.a == INVERTED)
   {
-    TIM_SetCompare3(TIM1, bldc_pwm.duty_cycle_inverted);
+    TIM_SetCompare3(TIM1, duty_cycle_inverted);
   }
-  else if (bldc_pwm.phase_a == OFF)
+  else if (bldc_phase_state.a == OFF)
   {
-    TIM_SetCompare3(TIM1, DUTY_CYCLE_MEDIUM);
+    TIM_SetCompare3(TIM1, DUTY_CYCLE_OFF);
   }
 
 
-  if (bldc_pwm.phase_b == NORMAL)
+  if (bldc_phase_state.b == NORMAL)
   {
-    TIM_SetCompare1(TIM1, bldc_pwm.duty_cycle_normal); // phase B
+    TIM_SetCompare1(TIM1, duty_cycle_normal); // phase B
   }
-  else if (bldc_pwm.phase_b == INVERTED)
+  else if (bldc_phase_state.b == INVERTED)
   {
-    TIM_SetCompare1(TIM1, bldc_pwm.duty_cycle_inverted);
+    TIM_SetCompare1(TIM1, duty_cycle_inverted);
   }
-  else if (bldc_pwm.phase_b == OFF)
+  else if (bldc_phase_state.b == OFF)
   {
-    TIM_SetCompare1(TIM1, DUTY_CYCLE_MEDIUM);
+    TIM_SetCompare1(TIM1, DUTY_CYCLE_OFF);
   }
 
 
-  if (bldc_pwm.phase_c == NORMAL)
+  if (bldc_phase_state.c == NORMAL)
   {
-    TIM_SetCompare2(TIM1, bldc_pwm.duty_cycle_normal); // phase C
+    TIM_SetCompare2(TIM1, duty_cycle_normal); // phase C
   }
-  else if (bldc_pwm.phase_c == INVERTED)
+  else if (bldc_phase_state.c == INVERTED)
   {
-    TIM_SetCompare2(TIM1, bldc_pwm.duty_cycle_inverted);
+    TIM_SetCompare2(TIM1, duty_cycle_inverted);
   }
-  else if (bldc_pwm.phase_c == OFF)
+  else if (bldc_phase_state.c == OFF)
   {
-    TIM_SetCompare2(TIM1, DUTY_CYCLE_MEDIUM);
+    TIM_SetCompare2(TIM1, DUTY_CYCLE_OFF);
   }
+}
+
+// Function to set duty cycle PWM value
+void pwm_set_duty_cycle (int value)
+{
+#define DUTY_CYCLE_MAX_VALUE	1000 //
+#define DUTY_CYCLE_MIN_VALUE	-999 //
+
+  // limit the input values
+  if (value >= DUTY_CYCLE_MAX_VALUE)
+  {
+    value = DUTY_CYCLE_MAX_VALUE;
+  }
+  else if (value <= DUTY_CYCLE_MIN_VALUE)
+  {
+    value = DUTY_CYCLE_MIN_VALUE;
+  }
+
+  pwm_duty_cycle_target = value;
+}
+
+// This function need to be called every 1ms
+// manages the increase/decrease of PWM value at rate
+void pwm_manage (void)
+{
+  if (pwm_duty_cycle == pwm_duty_cycle_target)
+  {
+    return; // nothing to do, return
+  }
+  else if (pwm_duty_cycle < pwm_duty_cycle_target)
+  {
+    pwm_duty_cycle += PWM_DUTY_CYCLE_STEP;
+  }
+  else if (pwm_duty_cycle > pwm_duty_cycle_target)
+  {
+    pwm_duty_cycle -= PWM_DUTY_CYCLE_STEP;
+  }
+
+  pwm_update_duty_cycle ();
 }

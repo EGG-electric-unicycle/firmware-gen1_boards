@@ -36,12 +36,6 @@ static unsigned int adc_values[2];
 // ADC_Channel_7 (PA7) to read over current signal
 void adc_init (void)
 {
-  // first set the IO pins as analog input
-  GPIO_InitTypeDef GPIO_InitStructure;
-  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_4 | GPIO_Pin_7;
-  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN;
-  GPIO_Init(GPIOA, &GPIO_InitStructure);
-
   /* ADCCLK = PCLK2/8 */
   RCC_ADCCLKConfig(RCC_PCLK2_Div8);
 
@@ -142,11 +136,13 @@ unsigned int middle_threshold;
   ADC_ClearITPendingBit(ADC1, ADC_IT_AWD);
 }
 
+// output a value 0 - 4095
 unsigned int adc_get_PS_signal_value (void)
 {
   return adc_values[0];
 }
 
+// output a value 0 - 4095
 unsigned int adc_get_current_value (void)
 {
   return adc_values[1];

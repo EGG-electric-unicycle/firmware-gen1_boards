@@ -69,6 +69,7 @@
 
 #define BUZZER				GPIO_Pin_3
 #define PS_SIGNAL 			GPIO_Pin_4
+#define CURRENT_SIGNAL 			GPIO_Pin_7
 
 
 void gpio_init (void);

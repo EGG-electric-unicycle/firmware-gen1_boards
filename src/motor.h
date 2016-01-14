@@ -10,6 +10,6 @@ unsigned int motor_get_speed (void);
 void motor_set_speed (unsigned int speed);
 void motor_start (void);
 void motor_coast (void);
-void motor_set_duty_cycle (unsigned int value);
+void motor_set_duty_cycle (int value);
 void motor_set_direction (unsigned int direction);
 unsigned int motor_get_direction (void);
