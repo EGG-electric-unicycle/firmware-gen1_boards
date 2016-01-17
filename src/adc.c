@@ -89,9 +89,17 @@ void adc_init (void)
   /* Enable analog watchdog on one regular channel */
   ADC_AnalogWatchdogCmd(ADC1, ADC_AnalogWatchdog_SingleRegEnable);
 
+// TODO enable NVIC for ADC
+//  NVIC_InitTypeDef NVIC_InitStructure;
+//  /* Configure and enable TIM2 interrupt */
+//  NVIC_InitStructure.NVIC_IRQChannel = TIM2_IRQn;
+//  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+//  NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+//  NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+//  NVIC_Init(&NVIC_InitStructure);
+
   /* Enable AWD interrupt */
   ADC_ITConfig(ADC1, ADC_IT_AWD, ENABLE);
-
 
   /* Enable ADC1 DMA */
   ADC_DMACmd(ADC1, ENABLE);

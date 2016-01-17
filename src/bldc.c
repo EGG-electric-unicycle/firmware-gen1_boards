@@ -74,13 +74,22 @@ void phase_c_l_off (void)
   GPIO_SetBits(GPIOB, BRIDGE_C_LOW);
 }
 
+// update duty-cycle controller with phase new states
+void apply_duty_cycle (void)
+{
+  TIM_UpdateDisableConfig (TIM1, ENABLE); // disable update event
+  pwm_update_duty_cycle ();
+  TIM_GenerateEvent(TIM1, TIM_EventSource_Update); // generate update event to update shadow registers / duty-cycle
+  TIM_UpdateDisableConfig (TIM1, DISABLE); // disable update event// disable update event
+}
 
 void commutation_AB (void)
 {
   bldc_phase_state.a = NORMAL;
   bldc_phase_state.b = INVERTED;
   bldc_phase_state.c = OFF;
-  pwm_update_duty_cycle ();
+
+  update_duty_cycle_shadow_registers (); // update duty-cycle controller with phase new states
 }
 
 void commutation_AC (void)
@@ -88,7 +97,8 @@ void commutation_AC (void)
   bldc_phase_state.a = NORMAL;
   bldc_phase_state.b = OFF;
   bldc_phase_state.c = INVERTED;
-  pwm_update_duty_cycle ();
+
+  update_duty_cycle_shadow_registers ();
 }
 
 void commutation_BC (void)
@@ -96,7 +106,8 @@ void commutation_BC (void)
   bldc_phase_state.a = OFF;
   bldc_phase_state.b = NORMAL;
   bldc_phase_state.c = INVERTED;
-  pwm_update_duty_cycle ();
+
+  update_duty_cycle_shadow_registers ();
 }
 
 void commutation_BA (void)
@@ -104,7 +115,8 @@ void commutation_BA (void)
   bldc_phase_state.a = INVERTED;
   bldc_phase_state.b = NORMAL;
   bldc_phase_state.c = OFF;
-  pwm_update_duty_cycle ();
+
+  update_duty_cycle_shadow_registers ();
 }
 
 void commutation_CA (void)
@@ -112,7 +124,8 @@ void commutation_CA (void)
   bldc_phase_state.a = INVERTED;
   bldc_phase_state.b = OFF;
   bldc_phase_state.c = NORMAL;
-  pwm_update_duty_cycle ();
+
+  update_duty_cycle_shadow_registers ();
 }
 
 void commutation_CB (void)
@@ -120,7 +133,8 @@ void commutation_CB (void)
   bldc_phase_state.a = OFF;
   bldc_phase_state.b = INVERTED;
   bldc_phase_state.c = NORMAL;
-  pwm_update_duty_cycle ();
+
+  update_duty_cycle_shadow_registers ();
 }
 
 void commutation_disable (void)

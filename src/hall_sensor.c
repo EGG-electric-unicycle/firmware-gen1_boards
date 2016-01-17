@@ -18,10 +18,12 @@ volatile unsigned int hall_sensors_time = 0;
 void TIM2_IRQHandler(void)
 {
   /* "Read" all sensors sequence and execute the BLDC coils commutation */
+  TIM_ITConfig (TIM1, TIM_IT_Update, DISABLE); // disable to avoid concurrency access to update of PWM controller duty-cycle values
   commutate ();
+  TIM_ITConfig (TIM1, TIM_IT_Update, ENABLE);
 
   /* Save current time between each hall sensor signal change */
-  hall_sensors_time = TIM_GetCapture1(TIM2);
+  hall_sensors_time = TIM_GetCapture1 (TIM2);
 
   // clear interrupt flag
   TIM_ClearITPendingBit (TIM2, TIM_IT_Trigger);

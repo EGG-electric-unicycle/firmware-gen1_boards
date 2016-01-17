@@ -12,8 +12,18 @@
 #include "pwm.h"
 #include "bldc.h"
 
-int pwm_duty_cycle;
-int pwm_duty_cycle_target;
+int pwm_duty_cycle = 0;
+int pwm_duty_cycle_target = 0;
+
+// This interrupt fires when there is an Update Event of PWM (downcounting and upcounting) - but there is a division of about 16 (see configuration of Repetion Counter)
+// This interrupt should happen at about each 1ms and is the right place to update the duty-cycle values for the PWM controller
+void TIM1_UP_IRQHandler(void)
+{
+  pwm_manage (); //manage the increase/decrease rate of PWM duty-cycle and setup new values on the PWM controller
+
+  /* Clear TIM1 TIM_IT_Update pending interrupt bit */
+  TIM_ClearITPendingBit(TIM1, TIM_IT_Update);
+}
 
 void pwm_init (void)
 {
@@ -25,10 +35,29 @@ void pwm_init (void)
   TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_CenterAligned1;
   TIM_TimeBaseStructure.TIM_Period = (2048 - 1); // 64MHz clock (PCLK1), 64MHz/4096 = 15.625KHz (BUT PWM center alined mode needs twice the frequency)
   TIM_TimeBaseStructure.TIM_ClockDivision = 0;
-  TIM_TimeBaseStructure.TIM_RepetitionCounter = 0;
+  /* Each time the RCR downcounter reaches zero, an update event is generated and counting restarts from the RCR value (N).
+   This means in PWM mode that (N+1) corresponds to: the number of half PWM period in center-aligned mode */
+  TIM_TimeBaseStructure.TIM_RepetitionCounter = (31 - 1); // PWM period = 64us. 1ms / (0.032) = 31.25 --> have an event at every ~1ms
   TIM_TimeBaseInit(TIM1, &TIM_TimeBaseStructure);
 
-  /* Channel 1, 2,3 Configuration in PWM mode */
+  /* Configures the TIM1 Update Request Interrupt source (SETS the CR1->URS bit)*/
+  TIM_UpdateRequestConfig(TIM1,TIM_UpdateSource_Regular);
+
+  /* TIMx_ARR register is buffered and so the duty-cycle value is just updated (shadow registers) at Update Event */
+  TIM_ARRPreloadConfig(TIM1, ENABLE);
+
+  NVIC_InitTypeDef NVIC_InitStructure;
+  /* Configure and enable TIM1 interrupt */
+  NVIC_InitStructure.NVIC_IRQChannel = TIM1_UP_IRQn;
+  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+  NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+  NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+  NVIC_Init(&NVIC_InitStructure);
+
+  /* Enable Update Event interrupt */
+  TIM_ITConfig(TIM1, TIM_IT_Update, ENABLE);
+
+  /* Channel 1, 2, 3 Configuration in PWM mode */
   TIM_OCInitTypeDef TIM_OCInitStructure;
   TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM1;
   TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;
@@ -53,34 +82,21 @@ void pwm_init (void)
   TIM_BDTRConfig(TIM1, &TIM_BDTRInitStructure);
 
   /* TIM1 counter enable */
-  TIM_Cmd (TIM1, ENABLE);
+  TIM_Cmd (TIM1, DISABLE);
 
   /* TIM1 Main Output Disable */
   TIM_CtrlPWMOutputs (TIM1, DISABLE);
 }
 
 // Function to update the duty cycle PWM values on the PWM controller
+// also setup the correct values of PWM duty-cycle for each BLDC phase
 void pwm_update_duty_cycle (void)
 {
-  #define DUTY_CYCLE_MAGIC_NUMBER		100 // this value was found experimentally and need to be added to duty cyce value to have correct output value
-
-  // 2039 max duty cycle value
-  #define DUTY_CYCLE_NORMAL_MAX		2047
-  #define DUTY_CYCLE_NORMAL_MIN		(2047/2)
-  #define DUTY_CYCLE_OFF		(2047/2) + DUTY_CYCLE_MAGIC_NUMBER
-  #define DUTY_CYCLE_INVERTED_MAX	((2047/2) - 1)
-  #define DUTY_CYCLE_INVERTED_MIN 0
-
-//  #define DUTY_CYCLE_MAX_SAFE		(DUTY_CYCLE_MAX - (DUTY_CYCLE_MAX/20)) // 95% for safe margin
-//  #define DUTY_CYCLE_MIN_SAFE		(DUTY_CYCLE_MAX/20 + DUTY_CYCLE_MAGIC_NUMBER) // 5% for safe margin
-
   unsigned int duty_cycle_normal;
   unsigned int duty_cycle_inverted;
-  int temp;
 
   // Calc the correct value of duty cycle and inverted duty cycle
-  temp = (pwm_duty_cycle + 999) * 1.024; // scale to correct value
-  duty_cycle_normal = (unsigned int) (temp + DUTY_CYCLE_MAGIC_NUMBER);
+  duty_cycle_normal = (unsigned int) ((pwm_duty_cycle + 999) * 1.024); // scale to correct value
   duty_cycle_inverted = 2047 - duty_cycle_normal;
 
   // Apply the duty cycle values
@@ -146,7 +162,7 @@ void pwm_set_duty_cycle (int value)
 }
 
 // This function need to be called every 1ms
-// manages the increase/decrease of PWM value at rate
+// manages the increase/decrease of PWM duty-cycle value at a specific rate
 void pwm_manage (void)
 {
   if (pwm_duty_cycle == pwm_duty_cycle_target)

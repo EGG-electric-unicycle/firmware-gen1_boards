@@ -31,7 +31,15 @@ void initialize (void);
 
 void SysTick_Handler(void) // runs every 1ms
 {
-  pwm_manage (); // manage the pwm duty-cycle
+  static unsigned int c = 0;
+
+  //pwm_manage (); // manage the pwm duty-cycle
+
+//  if (c++ > 999)
+//  {
+//    commutate_sector ();
+//    c = 0;
+//  }
 }
 
 int main(void)
