@@ -31,7 +31,8 @@
  * PB0  (ADC12_IN8) 		| in	| ??	| BMF_signal-Green_B
  * PB1  (ADC12_IN9) 		| in	| ??	| BMF_signal-Blue_C
  *
- * PA7  (ADC12_IN7)		| in	| ??	| Current_signal
+ * PA5  (ADC12_IN5)		| in	| ??	| Battery_voltage_signal
+ * PA7  (ADC12_IN7)		| in	| ??	| Motor_current_signal
  *
  * PB6  (I2C1_SCL)		| in/out| ??	| IMU_MPU6050-SCL
  * PB7  (I2C1_SDA)		| in/out| ??	| IMU_MPU6050-SDA
@@ -69,7 +70,8 @@
 
 #define BUZZER				GPIO_Pin_3
 #define PS_SIGNAL 			GPIO_Pin_4
-#define CURRENT_SIGNAL 			GPIO_Pin_7
+#define BATTERY_VOLTAGE_SIGNAL 		GPIO_Pin_5
+#define MOTOR_CURRENT_SIGNAL 		GPIO_Pin_7
 
 
 void gpio_init (void);

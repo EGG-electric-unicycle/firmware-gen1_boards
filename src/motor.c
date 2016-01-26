@@ -54,7 +54,7 @@ unsigned int motor_get_current (void)
   unsigned int current;
 
 
-  adc_current = adc_get_current_value ();
+  adc_current = adc_get_motor_current_value (); // TODO needs work for correct value
 
   /*
    * 1A = 0.0385V

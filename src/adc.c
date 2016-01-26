@@ -15,6 +15,14 @@
 #include "main.h"
 
 /*
+ * BATTERY VOLTAGE SIGNAL
+ * 30V -> 1180
+ * 40V -> 1558
+ * 50V -> 1940
+ * 60V -> 2320 | each 1V -> 0.0255 * ADC value
+ *
+ *
+ * MOTOR CURRENT SIGNAL:
  * 0 Amps = 1.54V
  * each 1A = +0.0385V
  * 12 bits ADC; 4096 steps
@@ -22,15 +30,19 @@
  *
  */
 
+#define ADC_BATTERY_VOLTAGE_CONSTANT 0.0255 // fine tunned by hand
+#define ADC_BATTERY_VOLTAGE_CONSTANT_X2 (ADC_BATTERY_VOLTAGE_CONSTANT * 2)
+
 #define ADC_WATCHDOG_HIGHTHRESHOLD ((1.54 + (0.0385 * 1/*amps*/)) / 0.0008)
 #define ADC_WATCHDOG_LOWTHRESHOLD  0
 
 unsigned int adc_watchdog_highthreshold = ADC_WATCHDOG_HIGHTHRESHOLD;
 
-static unsigned int adc_values[2];
+static unsigned int adc_values[3];
 
 // ADC_Channel_4 (PA4) to read PS_signal -- used on debug connected to a potentiometer
-// ADC_Channel_7 (PA7) to read over current signal
+// ADC_Channel_5 (PA5) to read over battery voltage signal
+// ADC_Channel_7 (PA7) to read over motor current signal
 void adc_init (void)
 {
   /* ADCCLK = PCLK2/8 */
@@ -48,7 +60,7 @@ void adc_init (void)
   DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t) &(ADC1->DR);
   DMA_InitStructure.DMA_MemoryBaseAddr = (uint32_t) &adc_values;
   DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralSRC;
-  DMA_InitStructure.DMA_BufferSize = 2;
+  DMA_InitStructure.DMA_BufferSize = 3;
   DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
   DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
   DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_HalfWord;
@@ -68,13 +80,19 @@ void adc_init (void)
   ADC_InitStructure.ADC_ContinuousConvMode = ENABLE;
   ADC_InitStructure.ADC_ExternalTrigConv = ADC_ExternalTrigConv_None;
   ADC_InitStructure.ADC_DataAlign = ADC_DataAlign_Right;
-  ADC_InitStructure.ADC_NbrOfChannel = 2;
+  ADC_InitStructure.ADC_NbrOfChannel = 3;// output a value 0 - 4095
+  unsigned int adc_get_battery_voltage_value (void)
+  {
+    return adc_values[1];
+  }
   ADC_Init(ADC1, &ADC_InitStructure);
 
   /* ADC1 regular channel4 configuration */
   ADC_RegularChannelConfig(ADC1, ADC_Channel_4, 1, ADC_SampleTime_55Cycles5);
+  /* ADC1 regular channel5 configuration */
+  ADC_RegularChannelConfig(ADC1, ADC_Channel_5, 2, ADC_SampleTime_55Cycles5);
   /* ADC1 regular channel7 configuration */
-  ADC_RegularChannelConfig(ADC1, ADC_Channel_7, 2, ADC_SampleTime_55Cycles5);
+  ADC_RegularChannelConfig(ADC1, ADC_Channel_7, 3, ADC_SampleTime_55Cycles5);
 
   /*
    * ADC analog watchdog used for over current measurement
@@ -137,14 +155,25 @@ unsigned int adc_get_PS_signal_value (void)
 }
 
 // output a value 0 - 4095
-unsigned int adc_get_current_value (void)
+unsigned int adc_get_battery_voltage_value (void)
 {
   return adc_values[1];
 }
 
+float get_battery_voltage (void)
+{
+  return ((adc_values[1] >> 1) * ADC_BATTERY_VOLTAGE_CONSTANT_X2);
+}
+
+// output a value 0 - 4095
+unsigned int adc_get_motor_current_value (void)
+{
+  return adc_values[2];
+}
+
 unsigned int is_current_under_max (void)
 {
-  if (adc_get_current_value() < adc_watchdog_highthreshold)
+  if (adc_get_motor_current_value() < adc_watchdog_highthreshold)
   {
     return 1;
   }
