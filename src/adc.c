@@ -11,6 +11,8 @@
 #include "stm32f10x_adc.h"
 #include "stm32f10x_dma.h"
 #include "adc.h"
+#include "bldc.h"
+#include "main.h"
 
 /*
  * 0 Amps = 1.54V
@@ -18,17 +20,12 @@
  * 12 bits ADC; 4096 steps
  * 3.3V / 4096 = 0.0008
  *
- * Target: 4A
- * 2.5 Amp  = 1.64V --> 2050
- * 3.5 Amp  = 1.67V --> 2088
- * 4.5 Amp  = 1.71V --> 2138
- *
  */
-#define ADC_WATCHDOG_HIGHTHRESHOLD 2088
-#define ADC_WATCHDOG_LOWTHRESHOLD  2050
+
+#define ADC_WATCHDOG_HIGHTHRESHOLD ((1.54 + (0.0385 * 1/*amps*/)) / 0.0008)
+#define ADC_WATCHDOG_LOWTHRESHOLD  0
 
 unsigned int adc_watchdog_highthreshold = ADC_WATCHDOG_HIGHTHRESHOLD;
-unsigned int adc_watchdog_lowthreshold = ADC_WATCHDOG_LOWTHRESHOLD;
 
 static unsigned int adc_values[2];
 
@@ -83,20 +80,19 @@ void adc_init (void)
    * ADC analog watchdog used for over current measurement
    */
   /* Configure high and low analog watchdog thresholds */
-  ADC_AnalogWatchdogThresholdsConfig(ADC1, adc_watchdog_highthreshold, adc_watchdog_lowthreshold);
+  ADC_AnalogWatchdogThresholdsConfig(ADC1, adc_watchdog_highthreshold, ADC_WATCHDOG_LOWTHRESHOLD);
   /* Configure channel14 as the single analog watchdog guarded channel */
   ADC_AnalogWatchdogSingleChannelConfig(ADC1, ADC_Channel_7);
   /* Enable analog watchdog on one regular channel */
   ADC_AnalogWatchdogCmd(ADC1, ADC_AnalogWatchdog_SingleRegEnable);
 
-// TODO enable NVIC for ADC
-//  NVIC_InitTypeDef NVIC_InitStructure;
-//  /* Configure and enable TIM2 interrupt */
-//  NVIC_InitStructure.NVIC_IRQChannel = TIM2_IRQn;
-//  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
-//  NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
-//  NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-//  NVIC_Init(&NVIC_InitStructure);
+  NVIC_InitTypeDef NVIC_InitStructure;
+  /* Configure and enable TIM2 interrupt */
+  NVIC_InitStructure.NVIC_IRQChannel = ADC1_2_IRQn;
+  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = ADC_ANALOG_WATCHDOG_PRIORITY;
+  NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+  NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+  NVIC_Init(&NVIC_InitStructure);
 
   /* Enable AWD interrupt */
   ADC_ITConfig(ADC1, ADC_IT_AWD, ENABLE);
@@ -121,27 +117,17 @@ void adc_init (void)
   ADC_SoftwareStartConvCmd(ADC1, ENABLE);
 }
 
-void ADC1_IRQHandler(void)
+// This interrupt happens when current is over the defined threshold and will disable the duty-cycle
+void MAX_CURRENT_INTERRUPT(void)
 {
-unsigned int adc_current_value;
-unsigned int middle_threshold;
-
-  adc_current_value = adc_get_current_value ();
-
-  // calc the window middle value
-  middle_threshold = adc_watchdog_lowthreshold + ((adc_watchdog_highthreshold - adc_watchdog_lowthreshold) / 2);
-
-  if (adc_get_current_value () > middle_threshold)
+  if (ADC_GetFlagStatus (ADC1, ADC_FLAG_AWD) == SET)
   {
     TIM_CtrlPWMOutputs (TIM1, DISABLE); //disable PWM signals
-  }
-  else
-  {
-    TIM_CtrlPWMOutputs (TIM1, ENABLE); //enable PWM signals
-  }
+    bldc_set_state (BLDC_OVER_MAX_CURRENT);
 
-  /* Clear ADC1 AWD pending interrupt bit */
-  ADC_ClearITPendingBit(ADC1, ADC_IT_AWD);
+    /* Clear ADC1 AWD pending interrupt bit */
+    ADC_ClearITPendingBit(ADC1, ADC_IT_AWD); // it's the same as ADC_ClearFlagStatus (ADC1, ADC_FLAG_AWD);
+  }
 }
 
 // output a value 0 - 4095
@@ -154,4 +140,16 @@ unsigned int adc_get_PS_signal_value (void)
 unsigned int adc_get_current_value (void)
 {
   return adc_values[1];
+}
+
+unsigned int is_current_under_max (void)
+{
+  if (adc_get_current_value() < adc_watchdog_highthreshold)
+  {
+    return 1;
+  }
+  else
+  {
+    return 0;
+  }
 }

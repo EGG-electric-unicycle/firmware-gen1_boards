@@ -137,11 +137,13 @@ void initialize (void)
   //this is used to block firmware from running if for example it do a short circuit on the H bridges.
   while (!GPIO_ReadInputDataBit(GPIOA, PS_SIGNAL)) ;
 
-  adc_init ();
-
   SetSysClockTo64(); //configure clock to 64 MHz (max possible speed)
   SystemCoreClockUpdate();
 
+  // This will affect the configuration for all interrupts
+  //NVIC_PriorityGroupConfig(NVIC_PriorityGroup_4); //4 bits for preemp priority 0 bit for sub priority
+
+  adc_init ();
   commutation_disable ();
   pwm_init ();
   gpio_init (); // configure pins just after PWM init

@@ -9,17 +9,37 @@
 #include "stm32f10x.h"
 #include "stm32f10x_tim.h"
 #include "stm32f10x_rcc.h"
+#include "main.h"
 #include "pwm.h"
 #include "bldc.h"
 
 int pwm_duty_cycle = 0;
 int pwm_duty_cycle_target = 0;
 
-// This interrupt fires when there is an Update Event of PWM (downcounting and upcounting) - but there is a division of about 16 (see configuration of Repetion Counter)
-// This interrupt should happen at about each 1ms and is the right place to update the duty-cycle values for the PWM controller
-void TIM1_UP_IRQHandler(void)
+// This interrupt fire after the end on the PWM period (64us) - TIM1 UPdate event
+void PWM_PERIOD_INTERRUPT (void)
 {
-  pwm_manage (); //manage the increase/decrease rate of PWM duty-cycle and setup new values on the PWM controller
+  static unsigned int counter = 1;
+
+  // at each 1.024ms (64us * 16)
+  counter++;
+  if (counter >= 16)
+  {
+    // manage PWM only if BLDC is in normal state
+    if (bldc_get_state () == BLDC_NORMAL)
+    {
+      pwm_manage (); //manage the increase/decrease rate of PWM duty-cycle and setup new values on the PWM controller
+    }
+
+    counter = 1;
+  }
+
+  // if current is now under the max value, enable PWM signal again
+  if ((bldc_get_state () == BLDC_OVER_MAX_CURRENT) && is_current_under_max ())
+  {
+    TIM_CtrlPWMOutputs (TIM1, ENABLE); // enable PWM signals
+    bldc_set_state (BLDC_NORMAL);
+  }
 
   /* Clear TIM1 TIM_IT_Update pending interrupt bit */
   TIM_ClearITPendingBit(TIM1, TIM_IT_Update);
@@ -35,9 +55,7 @@ void pwm_init (void)
   TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_CenterAligned1;
   TIM_TimeBaseStructure.TIM_Period = (2048 - 1); // 64MHz clock (PCLK1), 64MHz/4096 = 15.625KHz (BUT PWM center alined mode needs twice the frequency)
   TIM_TimeBaseStructure.TIM_ClockDivision = 0;
-  /* Each time the RCR downcounter reaches zero, an update event is generated and counting restarts from the RCR value (N).
-   This means in PWM mode that (N+1) corresponds to: the number of half PWM period in center-aligned mode */
-  TIM_TimeBaseStructure.TIM_RepetitionCounter = (31 - 1); // PWM period = 64us. 1ms / (0.032) = 31.25 --> have an event at every ~1ms
+  TIM_TimeBaseStructure.TIM_RepetitionCounter = 1; // will fire the TIM1_UP_IRQHandler at every PWM period (64us)
   TIM_TimeBaseInit(TIM1, &TIM_TimeBaseStructure);
 
   /* Configures the TIM1 Update Request Interrupt source (SETS the CR1->URS bit)*/
@@ -49,7 +67,7 @@ void pwm_init (void)
   NVIC_InitTypeDef NVIC_InitStructure;
   /* Configure and enable TIM1 interrupt */
   NVIC_InitStructure.NVIC_IRQChannel = TIM1_UP_IRQn;
-  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = TIM1_UP_PWM_PRIORITY;
   NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
   NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
   NVIC_Init(&NVIC_InitStructure);
@@ -98,6 +116,16 @@ void pwm_update_duty_cycle (void)
   // Calc the correct value of duty cycle and inverted duty cycle
   duty_cycle_normal = (unsigned int) ((pwm_duty_cycle + 999) * 1.024); // scale to correct value
   duty_cycle_inverted = 2047 - duty_cycle_normal;
+
+
+  if (duty_cycle_normal > 0)
+  {
+    set_direction (RIGHT);
+  }
+  else
+  {
+    set_direction (LEFT);
+  }
 
   // Apply the duty cycle values
   if (bldc_phase_state.a == NORMAL)

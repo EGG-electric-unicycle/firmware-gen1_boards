@@ -16,6 +16,8 @@ extern GPIO_InitTypeDef GPIO_InitStructure;
 
 #define HALL_SENSORS_MASK ((1 << 0) | (1 << 1) | (1 << 2))
 
+unsigned int bldc_machine_state = BLDC_NORMAL;
+
 static unsigned int _direction = RIGHT;
 
 struct Bldc_phase_state bldc_phase_state;
@@ -80,7 +82,7 @@ void apply_duty_cycle (void)
   TIM_UpdateDisableConfig (TIM1, ENABLE); // disable update event
   pwm_update_duty_cycle ();
   TIM_GenerateEvent(TIM1, TIM_EventSource_Update); // generate update event to update shadow registers / duty-cycle
-  TIM_UpdateDisableConfig (TIM1, DISABLE); // disable update event// disable update event
+  TIM_UpdateDisableConfig (TIM1, DISABLE); // enable update event
 }
 
 void commutation_AB (void)
@@ -89,7 +91,7 @@ void commutation_AB (void)
   bldc_phase_state.b = INVERTED;
   bldc_phase_state.c = OFF;
 
-  update_duty_cycle_shadow_registers (); // update duty-cycle controller with phase new states
+  apply_duty_cycle (); // update duty-cycle controller with phase new states
 }
 
 void commutation_AC (void)
@@ -98,7 +100,7 @@ void commutation_AC (void)
   bldc_phase_state.b = OFF;
   bldc_phase_state.c = INVERTED;
 
-  update_duty_cycle_shadow_registers ();
+  apply_duty_cycle ();
 }
 
 void commutation_BC (void)
@@ -107,7 +109,7 @@ void commutation_BC (void)
   bldc_phase_state.b = NORMAL;
   bldc_phase_state.c = INVERTED;
 
-  update_duty_cycle_shadow_registers ();
+  apply_duty_cycle ();
 }
 
 void commutation_BA (void)
@@ -116,7 +118,7 @@ void commutation_BA (void)
   bldc_phase_state.b = NORMAL;
   bldc_phase_state.c = OFF;
 
-  update_duty_cycle_shadow_registers ();
+  apply_duty_cycle ();
 }
 
 void commutation_CA (void)
@@ -125,7 +127,7 @@ void commutation_CA (void)
   bldc_phase_state.b = OFF;
   bldc_phase_state.c = NORMAL;
 
-  update_duty_cycle_shadow_registers ();
+  apply_duty_cycle ();
 }
 
 void commutation_CB (void)
@@ -134,7 +136,7 @@ void commutation_CB (void)
   bldc_phase_state.b = INVERTED;
   bldc_phase_state.c = NORMAL;
 
-  update_duty_cycle_shadow_registers ();
+  apply_duty_cycle ();
 }
 
 void commutation_disable (void)
@@ -317,4 +319,14 @@ void set_direction (unsigned int direction)
 unsigned int get_direction (void)
 {
   return _direction;
+}
+
+void bldc_set_state (unsigned int state)
+{
+  bldc_machine_state = state;
+}
+
+unsigned int bldc_get_state (void)
+{
+  return bldc_machine_state;
 }

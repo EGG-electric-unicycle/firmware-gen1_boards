@@ -9,11 +9,18 @@
 #ifndef _MAIN_H_
 #define _MAIN_H_
 
-#define COAST		0
-#define RUNNING 	1
-#define OVER_CURRENT 	2
+// Define for the NVIC IRQChannel Preemption Priority
+// lower number has higher priority
+#define ADC_ANALOG_WATCHDOG_PRIORITY		0
+#define TIM2_HALL_SENSORS_PRIORITY		1
+#define	TIM1_UP_PWM_PRIORITY			2
+
+// State machine
+#define COAST			0
+#define RUNNING 		1
+#define OVER_MAX_CURRENT 	2
+#define OVER_CURRENT 		3
 
 extern unsigned int machine_state;
-
 
 #endif /* _MAIN_H_ */

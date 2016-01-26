@@ -21,6 +21,8 @@
 
 #define PWM_DUTY_CYCLE_STEP		1 // step value to increment/decrement duty cycle value
 
+#define PWM_PERIOD_INTERRUPT		TIM1_UP_IRQHandler
+
 void pwm_init (void);
 void pwm_set_duty_cycle (int value);
 void pwm_update_duty_cycle (void);
