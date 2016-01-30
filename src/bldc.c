@@ -248,7 +248,7 @@ void commutate_sector (void)
 {
   static unsigned int sector = 1;
 
-  sector = increment_sector (sector);
+  sector = decrement_sector (sector);
 
   //Coils: AB, AC, BC, BA, CA, CB
   switch (sector)

@@ -80,11 +80,7 @@ void adc_init (void)
   ADC_InitStructure.ADC_ContinuousConvMode = ENABLE;
   ADC_InitStructure.ADC_ExternalTrigConv = ADC_ExternalTrigConv_None;
   ADC_InitStructure.ADC_DataAlign = ADC_DataAlign_Right;
-  ADC_InitStructure.ADC_NbrOfChannel = 3;// output a value 0 - 4095
-  unsigned int adc_get_battery_voltage_value (void)
-  {
-    return adc_values[1];
-  }
+  ADC_InitStructure.ADC_NbrOfChannel = 3;
   ADC_Init(ADC1, &ADC_InitStructure);
 
   /* ADC1 regular channel4 configuration */

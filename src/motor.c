@@ -27,7 +27,7 @@ void motor_set_speed (unsigned int speed)
 
 void motor_start (void)
 {
-  commutate (); // do the first commutation -- will update the PWM driver with correct start values
+  //commutate (); // do the first commutation -- will update the PWM driver with correct start values
 
   TIM_CtrlPWMOutputs (TIM1, ENABLE); // enable now the signals to motor
 

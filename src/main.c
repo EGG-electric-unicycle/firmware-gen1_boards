@@ -26,6 +26,8 @@
 
 unsigned int machine_state = COAST;
 
+static unsigned int time = 0;
+
 void SetSysClockTo64(void);
 void initialize (void);
 
@@ -33,7 +35,28 @@ void SysTick_Handler(void) // runs every 1ms
 {
   static unsigned int c = 0;
 
-  //pwm_manage (); // manage the pwm duty-cycle
+  static unsigned int led_state = 0;
+  if (led_state == 0)
+  {
+    c++;
+    if (c > time)
+    {
+      led_state = 1;
+      c = 0;
+      GPIO_SetBits (GPIOB, LED_2_BATTERY_INDICATOR);
+    }
+  }
+
+  if (led_state == 1)
+  {
+    c++;
+    if (c > time)
+    {
+      led_state = 0;
+      c = 0;
+      GPIO_ResetBits (GPIOB, LED_2_BATTERY_INDICATOR);
+    }
+  }
 
 //  if (c++ > 999)
 //  {
@@ -53,10 +76,12 @@ int main(void)
   while (1)
   {
     // control the motor speed and rotation direction using a potentiometer on PS_SIGNAL pin
-    value = (adc_get_PS_signal_value () >> 2); // filter and the value is now 10 bits --> max 1023.
-    value = value - 511; // now middle value is 0. Left half of pot turns motor left and vice-versa
-    value = value * 1.953; // scale: 512 * 1.953 = 999.9
-    motor_set_duty_cycle (value);
+//    value = (adc_get_PS_signal_value () >> 2); // filter and the value is now 10 bits --> max 1023.
+//    value = value - 511; // now middle value is 0. Left half of pot turns motor left and vice-versa
+//    value = value * 1.953; // scale: 512 * 1.953 = 999.9
+//    motor_set_duty_cycle (value);
+
+    time = (adc_get_PS_signal_value () >> 2); // filter and the value is now 10 bits --> max 1023.
 
     switch (machine_state)
     {
@@ -140,14 +165,13 @@ void initialize (void)
   SetSysClockTo64(); //configure clock to 64 MHz (max possible speed)
   SystemCoreClockUpdate();
 
-  // This will affect the configuration for all interrupts
-  //NVIC_PriorityGroupConfig(NVIC_PriorityGroup_4); //4 bits for preemp priority 0 bit for sub priority
-
-  adc_init ();
+  //adc_init ();
   commutation_disable ();
-  pwm_init ();
+  //pwm_init ();
   gpio_init (); // configure pins just after PWM init
-  hall_sensor_init ();
+  //hall_sensor_init ();
+
+  //IMU_init ();
 
   /* Setup SysTick Timer for 1 millisecond interrupts, also enables Systick and Systick-Interrupt */
   if (SysTick_Config(SystemCoreClock / 1000))

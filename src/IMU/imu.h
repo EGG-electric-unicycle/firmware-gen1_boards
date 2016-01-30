@@ -52,7 +52,7 @@ BOOL IMU_init();
 void IMU_getData(float* fwBkAngle, uint8_t* sideLean);
 
 #elif IMU_MODE_DMA
-BOOL IMU_init(void (*dataAvailable)(float*, uint8_t*));
+BOOL IMU_init(void);
 
 void IMU_startDMAtransfer();
 
