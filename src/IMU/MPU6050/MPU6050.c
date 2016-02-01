@@ -31,6 +31,7 @@
 /* Includes */
 #include "MPU6050.h"
 #include "stm32f10x_i2c.h"
+#include "main.h"
 
 /** @defgroup MPU6050_Library
  * @{
@@ -41,7 +42,7 @@ void MPU6050_Initialize(void)
    //reset the whole module first
    MPU6050_Write(MPU6050_DEFAULT_ADDRESS, MPU6050_RA_PWR_MGMT_1, 1<<7);
 
-   //delay(50);	//wait for 50ms for the gyro to stable
+   delay_ms(50); //wait for 50ms for the gyro to stable
 
    //PLL with Z axis gyroscope reference
    MPU6050_Write(MPU6050_DEFAULT_ADDRESS, MPU6050_RA_PWR_MGMT_1, MPU6050_CLOCK_PLL_ZGYRO);
@@ -57,12 +58,6 @@ void MPU6050_Initialize(void)
    
    //Accel full scale setting
    MPU6050_Write(MPU6050_DEFAULT_ADDRESS, MPU6050_RA_ACCEL_CONFIG, MPU6050_ACCEL_FS_16);	
-
-   //interrupt status bits are cleared on any read operation
-   //MPU6050_Write(MPU6050_DEFAULT_ADDRESS, MPU6050_RA_INT_PIN_CFG, 1<<4);		
-
-   //interupt occurs when data is ready. The interupt routine is in the receiver.c file.
-   //MPU6050_Write(MPU6050_DEFAULT_ADDRESS, MPU6050_RA_INT_ENABLE, 1<<0);
 
    MPU6050_Write(MPU6050_DEFAULT_ADDRESS, MPU6050_RA_SIGNAL_PATH_RESET, 0x07);//reset gyro and accel sensor
 }
@@ -205,7 +200,6 @@ void MPU6050_GetRawAccelGyro(s16* AccelGyro)
     /* Get Angular rate */
     for (i = 4; i < 7; i++)
         AccelGyro[i - 1] = ((s16) ((u16) tmpBuffer[2 * i] << 8) + tmpBuffer[2 * i + 1]);
-
 }
 
 void MPU6050_Write(uint8_t slaveAddr, uint8_t regAddr, uint8_t data) 

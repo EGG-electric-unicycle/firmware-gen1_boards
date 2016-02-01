@@ -22,5 +22,6 @@
 #define OVER_CURRENT 		3
 
 extern unsigned int machine_state;
+void delay_ms (unsigned int ms);
 
 #endif /* _MAIN_H_ */

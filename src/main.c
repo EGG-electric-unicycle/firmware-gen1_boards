@@ -27,19 +27,29 @@
 unsigned int machine_state = COAST;
 
 static unsigned int time = 0;
+static unsigned int _ms;
 
 void SetSysClockTo64(void);
 void initialize (void);
+
+void delay_ms (unsigned int ms)
+{
+  _ms = 1;
+  while (ms >= _ms) ;
+}
 
 void SysTick_Handler(void) // runs every 1ms
 {
   static unsigned int c = 0;
 
+  // for delay_ms ()
+  _ms++;
+
   static unsigned int led_state = 0;
   if (led_state == 0)
   {
     c++;
-    if (c > time)
+    if (c > (time + 50))
     {
       led_state = 1;
       c = 0;
@@ -50,7 +60,7 @@ void SysTick_Handler(void) // runs every 1ms
   if (led_state == 1)
   {
     c++;
-    if (c > time)
+    if (c > (time + 50))
     {
       led_state = 0;
       c = 0;
@@ -68,6 +78,7 @@ void SysTick_Handler(void) // runs every 1ms
 int main(void)
 {
   static int value;
+  static s16 AccelGyro[6];
 
   initialize();
 
@@ -81,7 +92,13 @@ int main(void)
 //    value = value * 1.953; // scale: 512 * 1.953 = 999.9
 //    motor_set_duty_cycle (value);
 
-    time = (adc_get_PS_signal_value () >> 2); // filter and the value is now 10 bits --> max 1023.
+    //time = (adc_get_PS_signal_value () >> 2); // filter and the value is now 10 bits --> max 1023.
+    //time /= 3;
+
+
+    MPU6050_GetRawAccelGyro (&AccelGyro);
+    time = AccelGyro[4];
+
 
     switch (machine_state)
     {
@@ -165,18 +182,18 @@ void initialize (void)
   SetSysClockTo64(); //configure clock to 64 MHz (max possible speed)
   SystemCoreClockUpdate();
 
-  //adc_init ();
-  commutation_disable ();
-  //pwm_init ();
-  gpio_init (); // configure pins just after PWM init
-  //hall_sensor_init ();
-
-  //IMU_init ();
-
   /* Setup SysTick Timer for 1 millisecond interrupts, also enables Systick and Systick-Interrupt */
   if (SysTick_Config(SystemCoreClock / 1000))
   {
     /* Capture error */
     while (1);
   }
+
+  adc_init ();
+  commutation_disable ();
+  //pwm_init ();
+  gpio_init (); // configure pins just after PWM init
+  //hall_sensor_init ();
+
+  IMU_init ();
 }
