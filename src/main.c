@@ -51,9 +51,6 @@ void SysTick_Handler(void) // runs every 1ms
   // for delay_ms ()
   _ms++;
 
-  // for
-  read_imu_flag = 1;
-
   static unsigned int led_state = 0;
   if (led_state == 0)
   {
@@ -85,17 +82,27 @@ void SysTick_Handler(void) // runs every 1ms
 
   // For IMU reading task
   timer_imu++;
-  if (timer_imu > 4000)
+  if (timer_imu > 500)
   {
     timer_imu = 0;
     read_imu_flag = 1;
   }
 }
 
+void printDouble(double v, int decimalDigits)
+{
+  int i = 1;
+  int intPart, fractPart;
+  for (;decimalDigits!=0; i*=10, decimalDigits--);
+  intPart = (int)v;
+  fractPart = (int)((v-(double)(int)v)*i);
+  printf("%d.%d", intPart, fractPart);
+}
+
 int main(void)
 {
   static int value;
-  static float fv;
+  static double fv;
   static int iv;
 
 
@@ -116,18 +123,9 @@ int main(void)
 
     if (read_imu_flag == 1)
     {
-      //IMU_read ();
+      IMU_read ();
       read_imu_flag = 0;
     }
-
-    iv = 1122334455;
-    printf ("iv: %d *** ", iv);
-
-    fv = 123.456;
-    printf ("fv: %f\n", fv);
-
-
-
 
     switch (machine_state)
     {
@@ -224,6 +222,6 @@ void initialize (void)
   gpio_init (); // configure pins just after PWM init
   //hall_sensor_init ();
 
-  //IMU_init ();
+  IMU_init ();
   usart1_init ();
 }

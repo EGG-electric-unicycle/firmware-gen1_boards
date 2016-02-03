@@ -23,5 +23,6 @@
 
 extern unsigned int machine_state;
 void delay_ms (unsigned int ms);
+void printDouble(double v, int decimalDigits);
 
 #endif /* _MAIN_H_ */

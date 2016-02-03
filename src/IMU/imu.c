@@ -19,7 +19,11 @@
 #include "math.h"
 #include "MPU6050/MPU6050.h"
 
+// Y axis gives the front/rear inclination of the wheel
+// Z axis gives the lateral inclination of the wheel
+
 static s16 accel_gyro[6];
+static s16 accel_gyro_average[6];
 static float accel_x = 0;
 static float accel_y = 0;
 static float accel_z = 0;
@@ -43,29 +47,38 @@ BOOL IMU_init(void)
 
 BOOL IMU_read(void)
 {
-  MPU6050_GetRawAccelGyro (accel_gyro);
+  unsigned int x = 0;
 
-  accel_x = accel_gyro[0] / ACCEL_SENSITIVITY;
-  accel_y = accel_gyro[1] / ACCEL_SENSITIVITY;
-  accel_z = accel_gyro[2] / ACCEL_SENSITIVITY;
-//  pitch = atan2(accel_y, accel_z) + PI;
-//  roll = atan2(accel_x, accel_z) + PI;
+  for (x = 0; x < 25; x++)
+  {
+    MPU6050_GetRawAccelGyro (accel_gyro);
 
-  gyro_x = accel_gyro[3] / GYRO_SENSITIVITY;
-  gyro_y = accel_gyro[4] / GYRO_SENSITIVITY;
-  gyro_z = accel_gyro[5] / GYRO_SENSITIVITY;
-  gyro_angle_x += gyro_x * (1/1000); //dt = 1ms
-  gyro_angle_y += gyro_y * (1/1000);
-  gyro_angle_z += gyro_z * (1/1000);
+    accel_x = accel_gyro[0] / ACCEL_SENSITIVITY;
+    accel_y = accel_gyro[1] / ACCEL_SENSITIVITY;
+    accel_z = accel_gyro[2] / ACCEL_SENSITIVITY;
+    //  pitch = atan2(accel_y, accel_z) + PI;
+    //  roll = atan2(accel_x, accel_z) + PI;
 
-  //kalmanCalculate (angle_x, gyro_angle_x, )
+    gyro_x = accel_gyro[3] / GYRO_SENSITIVITY;
+    gyro_y = accel_gyro[4] / GYRO_SENSITIVITY;
+    gyro_z = accel_gyro[5] / GYRO_SENSITIVITY;
+    gyro_angle_x += gyro_x * (1/1000); //dt = 1ms
+    gyro_angle_y += gyro_y * (1/1000);
+    gyro_angle_z += gyro_z * (1/1000);
 
-//  printf ("ax: %f --- ", accel_x);
-//  printf ("gx: %f\n", gyro_x);
+    //kalmanCalculate (angle_x, gyro_angle_x, )
 
-  accel_x = 12.345;
-  printf ("ax: %f\n", accel_x);
+    accel_gyro_average[0] -= (accel_gyro_average[0] / 25);
+    accel_gyro_average[0] += (accel_gyro[0] / 25);
 
+    accel_gyro_average[1] -= (accel_gyro_average[1] / 25);
+    accel_gyro_average[1] += (accel_gyro[1] / 25);
+
+    accel_gyro_average[2] -= (accel_gyro_average[2] / 25);
+    accel_gyro_average[2] += (accel_gyro[2] / 25);
+  }
+
+  printf ("Ax: %d ** Ay: %d ** Az: %d\n", (accel_gyro_average[0]), (accel_gyro_average[1]), (accel_gyro_average[2]));
 }
 
 // KasBot V1  -  Kalman filter module
