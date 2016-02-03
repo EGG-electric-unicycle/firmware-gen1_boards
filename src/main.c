@@ -37,23 +37,6 @@ static unsigned int read_imu_flag = 0;
 void SetSysClockTo64(void);
 void initialize (void);
 
-void dbg_write_str(const char *msg)
-{
-  // Manual semi-hosting, because the GCC ARM Embedded's semihosting wasn't working.
-  for (; *msg; ++msg)
-  {
-    // Moves a pointer to msg into r1, sets r0 to 0x03,
-    // and then performs a special breakpoint that OpenOCD sees as
-    // the semihosting call. r0 tells OpenOCD which semihosting
-    // function we're calling. In this case WRITEC, which writes
-    // a single char pointed to by r1 to the console.
-    __asm__ ("mov r1,%0; mov r0,$3; BKPT 0xAB" :
-					       : "r" (msg)
-					       : "r0", "r1"
-    );
-  }
-}
-
 void delay_ms (unsigned int ms)
 {
   _ms = 1;
@@ -63,6 +46,7 @@ void delay_ms (unsigned int ms)
 void SysTick_Handler(void) // runs every 1ms
 {
   static unsigned int c = 0;
+  static unsigned int timer_imu = 0;
 
   // for delay_ms ()
   _ms++;
@@ -98,11 +82,21 @@ void SysTick_Handler(void) // runs every 1ms
 //    commutate_sector ();
 //    c = 0;
 //  }
+
+  // For IMU reading task
+  timer_imu++;
+  if (timer_imu > 4000)
+  {
+    timer_imu = 0;
+    read_imu_flag = 1;
+  }
 }
 
 int main(void)
 {
   static int value;
+  static float fv;
+  static int iv;
 
 
   initialize();
@@ -122,15 +116,15 @@ int main(void)
 
     if (read_imu_flag == 1)
     {
-
-
+      //IMU_read ();
       read_imu_flag = 0;
     }
 
+    iv = 1122334455;
+    printf ("iv: %d *** ", iv);
 
-    dbg_write_str("test semihost\n");
-
-    //printf("Magic semihosting\n");
+    fv = 123.456;
+    printf ("fv: %f\n", fv);
 
 
 
@@ -202,8 +196,6 @@ void SetSysClockTo64(void)
 
 void initialize (void)
 {
-  initialise_monitor_handles ();
-
   GPIO_InitTypeDef GPIO_InitStructure;
   /* Config PS_signal pin */
   RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
@@ -232,5 +224,6 @@ void initialize (void)
   gpio_init (); // configure pins just after PWM init
   //hall_sensor_init ();
 
-  IMU_init ();
+  //IMU_init ();
+  usart1_init ();
 }

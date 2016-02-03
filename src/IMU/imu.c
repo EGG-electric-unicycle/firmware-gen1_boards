@@ -60,6 +60,12 @@ BOOL IMU_read(void)
 
   //kalmanCalculate (angle_x, gyro_angle_x, )
 
+//  printf ("ax: %f --- ", accel_x);
+//  printf ("gx: %f\n", gyro_x);
+
+  accel_x = 12.345;
+  printf ("ax: %f\n", accel_x);
+
 }
 
 // KasBot V1  -  Kalman filter module
