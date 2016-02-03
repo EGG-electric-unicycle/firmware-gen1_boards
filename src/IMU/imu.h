@@ -1,4 +1,5 @@
-/*  Copyright (C) 2015 Joerg Hoener
+/*  Copyright (C) 2016 Jorge Pinto
+    Copyright (C) 2015 Joerg Hoener
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -14,6 +15,12 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#define PI 3.1415926535897932384626433832795
+
+// 16 bits +-16g: -32768 [-16g] <---> 32768 [+16g]
+#define ACCEL_SENSITIVITY (16.0 / 32768.0)
+// 16 bits +-2000º/sec: -32768 [-16g] <---> 32768 [+16g]
+#define GYRO_SENSITIVITY (2000.0 / 32768.0)
 
 /**
  * Select one define for data transfer mode

@@ -59,7 +59,8 @@ void MPU6050_Initialize(void)
    //Accel full scale setting
    MPU6050_Write(MPU6050_DEFAULT_ADDRESS, MPU6050_RA_ACCEL_CONFIG, MPU6050_ACCEL_FS_16);	
 
-   MPU6050_Write(MPU6050_DEFAULT_ADDRESS, MPU6050_RA_SIGNAL_PATH_RESET, 0x07);//reset gyro and accel sensor
+   //reset gyro and accel sensor
+   MPU6050_Write(MPU6050_DEFAULT_ADDRESS, MPU6050_RA_SIGNAL_PATH_RESET, 0x07);
 }
 
 uint8_t I2C_Rx_Buffer[14];
