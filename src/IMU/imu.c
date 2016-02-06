@@ -23,7 +23,7 @@
 // Z axis gives the lateral inclination of the wheel
 
 static s16 accel_gyro[6];
-static s16 accel_gyro_average[6];
+static float accel_gyro_average[6];
 static float accel_x = 0;
 static float accel_y = 0;
 static float accel_z = 0;
@@ -45,41 +45,100 @@ BOOL IMU_init(void)
   return MPU6050_TestConnection();
 }
 
+// a=tau / (tau + loop time)
+// newAngle = angle measured with atan2 using the accelerometer
+// newRate = angle measured using the gyro
+// looptime = loop time in millis()
+
+float tau = 0.075;
+float a = 0.0;
+
+float Complementary (float newAngle, float newRate, int accel_x)
+{
+  float angle;
+//  float dtC;
+//  float x_angleC;
+//
+//  dtC = (float) (looptime / 1000.0);
+//  a = tau / (tau + dtC);
+//  x_angleC = a * (x_angleC + newRate * dtC) + (1 - a) * (newAngle);
+//  return x_angleC;
+
+  angle = (0.98) * (newAngle + (newRate * 0.01)) + (0.02) * (accel_x);
+  return angle;
+}
+
 BOOL IMU_read(void)
 {
-  unsigned int x = 0;
+  static unsigned int timer_1s = 0;
+  static float newAngle = 0;
+  static float temp = 0;
+  static float accAngle = 0;
+  static float gyroRate = 0;
 
-  for (x = 0; x < 25; x++)
+  MPU6050_GetRawAccelGyro (accel_gyro);
+
+  accel_x = ((float) accel_gyro[0]) / ACCEL_SENSITIVITY;
+  accel_y = ((float) accel_gyro[1]) / ACCEL_SENSITIVITY;
+//  accAngle = atan2(accel_x, accel_y); // calc angle between X and Y axis, in rads
+//  printf ("atan2: ");
+//  printDouble (accAngle, 2);
+//
+//  accAngle = accAngle + PI;
+//  printf ("** +PI: ");
+//  printDouble (accAngle, 2);
+//
+//  accAngle = accAngle * RAD_TO_DEG;
+//  printf ("** +RAD_TO_DEG: ");
+//  printDouble (accAngle, 2);
+
+
+
+  //gyro_y = accel_gyro[4] / GYRO_SENSITIVITY;
+  //gyroRate += gyro_y * 0.01;
+
+  //newAngle = Complementary (accAngle, gyro_y, accel_x);
+
+
+  accel_gyro_average[0] -= (accel_gyro_average[0] / 25);
+  accel_gyro_average[0] += (accel_x / 25);
+
+  accel_gyro_average[1] -= (accel_gyro_average[1] / 25);
+  accel_gyro_average[1] += (accel_y / 25);
+
+//  accel_gyro_average[2] -= (accel_gyro_average[2] / 25);
+//  accel_gyro_average[2] += (accel_gyro[2] / 25);
+
+  // For IMU reading task
+  timer_1s++;
+  if (timer_1s > 99)
   {
-    MPU6050_GetRawAccelGyro (accel_gyro);
+    timer_1s = 0;
 
-    accel_x = accel_gyro[0] / ACCEL_SENSITIVITY;
-    accel_y = accel_gyro[1] / ACCEL_SENSITIVITY;
-    accel_z = accel_gyro[2] / ACCEL_SENSITIVITY;
-    //  pitch = atan2(accel_y, accel_z) + PI;
-    //  roll = atan2(accel_x, accel_z) + PI;
+//    printf ("accel_gyro_average[0]: %d", ((int) (accel_gyro_average[0] * 10)));
+//    printf ("** accel_gyro_average[1]: %d", ((int) (accel_gyro_average[1] * 10)));
 
-    gyro_x = accel_gyro[3] / GYRO_SENSITIVITY;
-    gyro_y = accel_gyro[4] / GYRO_SENSITIVITY;
-    gyro_z = accel_gyro[5] / GYRO_SENSITIVITY;
-    gyro_angle_x += gyro_x * (1/1000); //dt = 1ms
-    gyro_angle_y += gyro_y * (1/1000);
-    gyro_angle_z += gyro_z * (1/1000);
+    accAngle = atan2(accel_gyro_average[0], accel_gyro_average[1]); // calc angle between X and Y axis, in rads
+//    printf ("atan2: ");
+//    printDouble (accAngle, 2);
+//    printf ("** atan2:  %d", ((int) (accAngle * 10)));
 
-    //kalmanCalculate (angle_x, gyro_angle_x, )
+    accAngle = accAngle + PI;
+//    printf ("** +PI: ");
+//    printDouble (accAngle, 2);
 
-    accel_gyro_average[0] -= (accel_gyro_average[0] / 25);
-    accel_gyro_average[0] += (accel_gyro[0] / 25);
+    accAngle = accAngle * RAD_TO_DEG;
+    printf ("Angle: ");
+    printDouble (accAngle, 2);
 
-    accel_gyro_average[1] -= (accel_gyro_average[1] / 25);
-    accel_gyro_average[1] += (accel_gyro[1] / 25);
-
-    accel_gyro_average[2] -= (accel_gyro_average[2] / 25);
-    accel_gyro_average[2] += (accel_gyro[2] / 25);
+    printf ("\n");
+//    newAngle *= 10;
+//    printf ("Ay: %d :: Angle: %d\n", accel_gyro_average[1], (int) newAngle);
   }
-
-  printf ("Ax: %d ** Ay: %d ** Az: %d\n", (accel_gyro_average[0]), (accel_gyro_average[1]), (accel_gyro_average[2]));
 }
+
+
+
 
 // KasBot V1  -  Kalman filter module
 float Q_angle  =  0.0005; //0.001

@@ -82,7 +82,7 @@ void SysTick_Handler(void) // runs every 1ms
 
   // For IMU reading task
   timer_imu++;
-  if (timer_imu > 500)
+  if (timer_imu > 9)
   {
     timer_imu = 0;
     read_imu_flag = 1;
