@@ -14,6 +14,7 @@
 #define ADC_ANALOG_WATCHDOG_PRIORITY		0
 #define TIM2_HALL_SENSORS_PRIORITY		1
 #define	TIM1_UP_PWM_PRIORITY			2
+#define	TIM3_PRIORITY				3
 
 // State machine
 #define COAST			0

@@ -187,10 +187,10 @@ extern "C" {
 #define MPU6050_GCONFIG_FS_SEL_BIT      4
 #define MPU6050_GCONFIG_FS_SEL_LENGTH   2
 
-#define MPU6050_GYRO_FS_250         0x00
-#define MPU6050_GYRO_FS_500         0x01
-#define MPU6050_GYRO_FS_1000        0x02
-#define MPU6050_GYRO_FS_2000        0x03
+#define MPU6050_GYRO_FS_250         (0x00 << 3)
+#define MPU6050_GYRO_FS_500         (0x01 << 3)
+#define MPU6050_GYRO_FS_1000        (0x02 << 3)
+#define MPU6050_GYRO_FS_2000        (0x03 << 3)
 
 #define MPU6050_ACONFIG_XA_ST_BIT           7
 #define MPU6050_ACONFIG_YA_ST_BIT           6
@@ -200,10 +200,10 @@ extern "C" {
 #define MPU6050_ACONFIG_ACCEL_HPF_BIT       2
 #define MPU6050_ACONFIG_ACCEL_HPF_LENGTH    3
 
-#define MPU6050_ACCEL_FS_2          0x00
-#define MPU6050_ACCEL_FS_4          0x01
-#define MPU6050_ACCEL_FS_8          0x02
-#define MPU6050_ACCEL_FS_16         0x03
+#define MPU6050_ACCEL_FS_2          (0x00 << 3)
+#define MPU6050_ACCEL_FS_4          (0x01 << 3)
+#define MPU6050_ACCEL_FS_8          (0x02 << 3)
+#define MPU6050_ACCEL_FS_16         (0x03 << 3)
 
 #define MPU6050_DHPF_RESET          0x00
 #define MPU6050_DHPF_5              0x01
@@ -420,15 +420,9 @@ void MPU6050_WriteBit(uint8_t slaveAddr, uint8_t regAddr, uint8_t bitNum, uint8_
 void MPU6050_ReadBits(uint8_t slaveAddr, uint8_t regAddr, uint8_t bitStart, uint8_t length, uint8_t *data);
 void MPU6050_ReadBit(uint8_t slaveAddr, uint8_t regAddr, uint8_t bitNum, uint8_t *data);
 
-void DMA1_Channel7_IRQHandler(void);
-
-
-//void MPU6050_DMA_Read(u8 slaveAddr, u8 readAddr, u16 NumByteToRead);
-void I2C_DMA_Read(u8 slaveAddr, u8 readAddr);
-
 void MPU6050_I2C_Init();
 void MPU6050_I2C_ByteWrite(u8 slaveAddr, u8* pBuffer, u8 writeAddr);
-void MPU6050_I2C_BufferRead(u8 slaveAddr,u8* pBuffer, u8 readAddr, u16 NumByteToRead);
+void MPU6050_I2C_BufferRead(u8 slaveAddr, u8* pBuffer, u8 readAddr, u16 NumByteToRead);
 
 #ifdef __cplusplus
 }

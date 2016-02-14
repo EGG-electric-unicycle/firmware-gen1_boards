@@ -19,9 +19,10 @@
 #define RAD_TO_DEG 57.2957786
 
 // 16 bits +-16g: -32768 [-16g] <---> 32768 [+16g]
+// 1g --> 2048
 #define ACCEL_SENSITIVITY (16.0 / 32768.0)
-// 16 bits +-2000º/sec: -32768 [-16g] <---> 32768 [+16g]
-#define GYRO_SENSITIVITY (2000.0 / 32768.0)
+// 16 bits +-2000º/sec: -32768 [-2000] <---> 32768 [+2000]
+#define GYRO_SENSITIVITY (2000.0 / 32768.0) // 0.061035156
 
 /**
  * Select one define for data transfer mode

@@ -23,10 +23,7 @@
 #include "bldc.h"
 #include "adc.h"
 #include "pwm.h"
-#include <stdio.h>
-
-/* For semihosting on newlib */
-extern void  initialise_monitor_handles(void);
+#include "tinystdio/tinystdio.h"
 
 unsigned int machine_state = COAST;
 
@@ -89,14 +86,9 @@ void SysTick_Handler(void) // runs every 1ms
   }
 }
 
-void printDouble(double v, int decimalDigits)
+void putc ( void* p, char c)
 {
-  int i = 1;
-  int intPart, fractPart;
-  for (;decimalDigits!=0; i*=10, decimalDigits--);
-  intPart = (int)v;
-  fractPart = (int)((v-(double)(int)v)*i);
-  printf("%d.%d", intPart, fractPart);
+  usart1_send_char (c);
 }
 
 int main(void)
@@ -108,7 +100,18 @@ int main(void)
 
   initialize();
 
+  init_printf(NULL,putc);
+
   motor_start ();
+
+  // 30123
+  static uint8_t a = 0b01110101;
+  static uint8_t b = 0b10101011;
+
+
+  static uint16_t x = 0;
+  static int16_t y = 0;
+  static int32_t z = 0;
 
   while (1)
   {
@@ -126,6 +129,20 @@ int main(void)
       IMU_read ();
       read_imu_flag = 0;
     }
+
+
+
+//      // 30123
+//      a = 0b11110101;
+//      b = 0b10101011;
+//      x = (a << 8) + b;
+//
+//      y = (a << 8) + b;
+//
+//      z = (a << 8) + b;
+//      z = (~z) + 1;
+
+
 
     switch (machine_state)
     {
@@ -224,4 +241,5 @@ void initialize (void)
 
   IMU_init ();
   usart1_init ();
+  TIM3_init ();
 }
