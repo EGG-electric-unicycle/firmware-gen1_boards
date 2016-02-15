@@ -48,35 +48,6 @@ void SysTick_Handler(void) // runs every 1ms
   // for delay_ms ()
   _ms++;
 
-  static unsigned int led_state = 0;
-  if (led_state == 0)
-  {
-    c++;
-    if (c > (time + 50))
-    {
-      led_state = 1;
-      c = 0;
-      GPIO_SetBits (GPIOB, LED_2_BATTERY_INDICATOR);
-    }
-  }
-
-  if (led_state == 1)
-  {
-    c++;
-    if (c > (time + 50))
-    {
-      led_state = 0;
-      c = 0;
-      GPIO_ResetBits (GPIOB, LED_2_BATTERY_INDICATOR);
-    }
-  }
-
-//  if (c++ > 999)
-//  {
-//    commutate_sector ();
-//    c = 0;
-//  }
-
   // For IMU reading task
   timer_imu++;
   if (timer_imu > 9)
@@ -94,24 +65,12 @@ void putc ( void* p, char c)
 int main(void)
 {
   static int value;
-  static double fv;
-  static int iv;
-
 
   initialize();
 
   init_printf(NULL,putc);
 
   motor_start ();
-
-  // 30123
-  static uint8_t a = 0b01110101;
-  static uint8_t b = 0b10101011;
-
-
-  static uint16_t x = 0;
-  static int16_t y = 0;
-  static int32_t z = 0;
 
   while (1)
   {
@@ -121,28 +80,12 @@ int main(void)
 //    value = value * 1.953; // scale: 512 * 1.953 = 999.9
 //    motor_set_duty_cycle (value);
 
-    //time = (adc_get_PS_signal_value () >> 2); // filter and the value is now 10 bits --> max 1023.
-    //time /= 3;
-
+    //read the IMU signal at every 10ms e apply the angle signal for motor control
     if (read_imu_flag == 1)
     {
       IMU_read ();
       read_imu_flag = 0;
     }
-
-
-
-//      // 30123
-//      a = 0b11110101;
-//      b = 0b10101011;
-//      x = (a << 8) + b;
-//
-//      y = (a << 8) + b;
-//
-//      z = (a << 8) + b;
-//      z = (~z) + 1;
-
-
 
     switch (machine_state)
     {
@@ -235,11 +178,11 @@ void initialize (void)
 
   adc_init ();
   commutation_disable ();
-  //pwm_init ();
+  pwm_init ();
   gpio_init (); // configure pins just after PWM init
-  //hall_sensor_init ();
+  hall_sensor_init ();
 
   IMU_init ();
-  usart1_init ();
+  //usart1_init ();
   TIM3_init ();
 }

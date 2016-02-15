@@ -304,8 +304,7 @@ void MPU6050_I2C_Init()
   I2C_InitTypeDef I2C_InitStructure;
   GPIO_InitTypeDef GPIO_InitStructure;
 
-  /* Enable I2C and GPIO clocks */
-  RCC_APB1PeriphClockCmd(MPU6050_I2C_RCC_Periph, ENABLE);
+  /* Enable GPIO clocks */
   RCC_APB2PeriphClockCmd(MPU6050_I2C_RCC_Port, ENABLE);
 
   /* Configure I2C pins: SCL and SDA */
@@ -313,6 +312,17 @@ void MPU6050_I2C_Init()
   GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_OD;
   GPIO_Init(MPU6050_I2C_Port, &GPIO_InitStructure);
+
+  /* Enable I2C clocks */
+  RCC_APB1PeriphClockCmd(MPU6050_I2C_RCC_Periph, ENABLE);
+
+  I2C_DeInit(MPU6050_I2C);
+
+  /* Reset I2C1 IP */
+  RCC_APB1PeriphResetCmd(MPU6050_I2C_RCC_Periph, ENABLE);
+  delay_ms (100);
+  /* Release reset signal of I2C1 IP */
+  RCC_APB1PeriphResetCmd(MPU6050_I2C_RCC_Periph, DISABLE);
 
   /* I2C configuration */
   I2C_InitStructure.I2C_Mode = I2C_Mode_I2C;
@@ -326,8 +336,9 @@ void MPU6050_I2C_Init()
   I2C_Init(MPU6050_I2C, &I2C_InitStructure);
   /* I2C Peripheral Enable */
   I2C_Cmd(MPU6050_I2C, ENABLE);
-}
 
+  I2C_StretchClockCmd(MPU6050_I2C, ENABLE);
+}
 
 /**
  * @brief  Reads a block of data from the MPU6050.

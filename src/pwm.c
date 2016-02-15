@@ -96,7 +96,7 @@ void pwm_init (void)
   TIM_BDTRInitStructure.TIM_DeadTime = 165; // 3us dead time
   TIM_BDTRInitStructure.TIM_Break = TIM_Break_Disable;
   TIM_BDTRInitStructure.TIM_BreakPolarity = TIM_BreakPolarity_Low;
-  TIM_BDTRInitStructure.TIM_AutomaticOutput = TIM_AutomaticOutput_Enable;
+  TIM_BDTRInitStructure.TIM_AutomaticOutput = TIM_AutomaticOutput_Disable;
   TIM_BDTRConfig(TIM1, &TIM_BDTRInitStructure);
 
   /* TIM1 counter enable */
@@ -173,8 +173,10 @@ void pwm_update_duty_cycle (void)
 // Function to set duty cycle PWM value
 void pwm_set_duty_cycle (int value)
 {
-#define DUTY_CYCLE_MAX_VALUE	1000 //
-#define DUTY_CYCLE_MIN_VALUE	-999 //
+//#define DUTY_CYCLE_MAX_VALUE	1000 //
+//#define DUTY_CYCLE_MIN_VALUE	-999 //
+#define DUTY_CYCLE_MAX_VALUE	300 //
+#define DUTY_CYCLE_MIN_VALUE	-300 //
 
   // limit the input values
   if (value >= DUTY_CYCLE_MAX_VALUE)

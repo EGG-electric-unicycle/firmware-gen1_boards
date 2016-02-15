@@ -19,6 +19,7 @@
 #include "math.h"
 #include "MPU6050/MPU6050.h"
 #include "tinystdio/tinystdio.h"
+#include "motor.h"
 
 // X axis gives the front/rear inclination of the wheel
 // Z axis gives the lateral inclination of the wheel
@@ -77,6 +78,7 @@ BOOL IMU_read(void)
 {
   float acc_x;
   float acc_y;
+  float acc_z;
   float angle;
   static float gyro_rate;
   float dt;
@@ -89,22 +91,40 @@ BOOL IMU_read(void)
 
   acc_x = accel_gyro[0];
   acc_y = accel_gyro[1];
-  gyro_rate = accel_gyro[4] * GYRO_SENSITIVITY;
+  acc_z = accel_gyro[2];
+  gyro_rate = accel_gyro[5] * GYRO_SENSITIVITY;
 
   // calc dt, using micro seconds value
   micros_new = micros ();
   dt = (micros_new - micros_old) / 1000000.0;
   micros_old = micros_new;
 
-  angle = atan2(acc_x, acc_y); //calc angle between X and Y axis, in rads
+  angle = atan2(acc_x, acc_z); //calc angle between X and Y axis, in rads
   angle = (angle + PI) * RAD_TO_DEG; //convert from rads to degres
   angle = 0.98 * (angle + (gyro_rate * dt)) + 0.02 * (acc_y); //use the complementary filter.
+
+  //control the motor now using the angle value
+  // for testing the board in horizontal
+  // z = 2047 when the board is parallel to ground
+  // angle measure between x and z axis
+  // angle after Complementary filter: 180 degres with board on horizontal
+  //
+  // Make the system work with max inclination of +- 10 degres --> 170 up to 190
+  angle -= 180;
+  if (angle > 9) angle = 10;
+  if (angle < -9) angle = -10;
+  angle *= 50;
+  motor_set_duty_cycle (angle); // duty-cycle between -300 and 300 only! on this test
+
 
   timer_1s++;
   if (timer_1s > 99)
   {
     timer_1s = 0;
 
-    printf ("new_angle: %6.6f : \n", angle);
+    //printf ("x: %3.3f :", acc_x);
+    //printf ("y: %3.3f :", acc_y);
+    //printf ("z: %3.3f :", acc_z);
+    //printf ("angle: %3.3f : \n", angle);
   }
 }
