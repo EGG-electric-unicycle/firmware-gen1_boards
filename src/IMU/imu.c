@@ -79,12 +79,23 @@ BOOL IMU_read(void)
   float acc_x;
   float acc_y;
   float acc_z;
-  float angle;
+  static float angle;
+  static float old_angle1;
+  static float old_angle2;
+  static float old_angle3;
   static float gyro_rate;
   float dt;
   unsigned int micros_new;
   static unsigned int micros_old = 0;
   static unsigned int timer_1s = 0;
+
+  float current_error = 0;
+  static float sum_error = 0;
+  float integral_term = 0;
+  float derivative_term = 0;
+  static float previous_error = 0;
+  float duty_cycle = 0;
+
 
   // read the accel and gyro sensor values
   MPU6050_GetRawAccelGyro (accel_gyro);
@@ -101,7 +112,12 @@ BOOL IMU_read(void)
 
   angle = atan2(acc_x, acc_z); //calc angle between X and Y axis, in rads
   angle = (angle + PI) * RAD_TO_DEG; //convert from rads to degres
-  angle = 0.98 * (angle + (gyro_rate * dt)) + 0.02 * (acc_y); //use the complementary filter.
+//  angle = 0.98 * (angle + (gyro_rate * dt)) + 0.02 * (acc_y); //use the complementary filter.
+
+  angle = (0.25 * angle) + (0.25 * old_angle1) + (0.25 * old_angle2) + (0.25 * old_angle3);
+  old_angle1 = angle;
+  old_angle2 = old_angle1;
+  old_angle3 = old_angle2;
 
   //control the motor now using the angle value
   // for testing the board in horizontal
@@ -109,22 +125,51 @@ BOOL IMU_read(void)
   // angle measure between x and z axis
   // angle after Complementary filter: 180 degres with board on horizontal
   //
-  // Make the system work with max inclination of +- 10 degres --> 170 up to 190
-  angle -= 180;
-  if (angle > 9) angle = 10;
-  if (angle < -9) angle = -10;
-  angle *= 50;
-  motor_set_duty_cycle (angle); // duty-cycle between -300 and 300 only! on this test
+  // Make the system work with max inclination of +- 5 degres --> 175 up to 185
+//  angle -= 180;
+//  if (angle > 4) angle = 5;
+//  if (angle < -4) angle = -5;
+//  angle *= 60;
+//  motor_set_duty_cycle ((int) angle); // duty-cycle between -300 and 300 only! on this test
 
+  //printf ("a %3.2f", angle);
 
-  timer_1s++;
-  if (timer_1s > 99)
-  {
-    timer_1s = 0;
+  current_error = angle - INITIAL_ANGLE; //error
+  sum_error += current_error;
 
-    //printf ("x: %3.3f :", acc_x);
-    //printf ("y: %3.3f :", acc_y);
-    //printf ("z: %3.3f :", acc_z);
-    //printf ("angle: %3.3f : \n", angle);
-  }
+  if (sum_error > SUM_ERROR_MAX) sum_error = SUM_ERROR_MAX;
+  else if (sum_error < SUM_ERROR_MIN) sum_error = SUM_ERROR_MIN;
+
+  //Ki*SumE/(Kp*Fs*X)
+  integral_term = sum_error * dt * KI / KP * 10.0; // 0.0005
+  derivative_term = current_error - previous_error;
+
+  if(derivative_term > 0.1) derivative_term = 0.1;
+  else if (derivative_term < -0.1) derivative_term = -0.1;
+
+  // Kd(curErr-prevErr)*Ts/(Kp*X)
+  derivative_term = derivative_term * KD * dt / KP;
+
+  if(derivative_term > 120) derivative_term = 120;
+  else if (derivative_term < -120) derivative_term = -120;
+
+  duty_cycle = (current_error + integral_term + derivative_term);
+  duty_cycle *= KP;
+
+  motor_set_duty_cycle ((int) duty_cycle);
+
+  //printf ("d %3.2f\n", duty_cycle);
+
+  previous_error = current_error;
+
+//  timer_1s++;
+//  if (timer_1s > 99)
+//  {
+//    timer_1s = 0;
+//
+//    //printf ("x: %3.3f :", acc_x);
+//    //printf ("y: %3.3f :", acc_y);
+//    //printf ("z: %3.3f :", acc_z);
+//    //printf ("angle: %3.3f : \n", angle);
+//  }
 }

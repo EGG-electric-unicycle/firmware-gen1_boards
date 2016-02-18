@@ -24,6 +24,16 @@
 // 16 bits +-2000º/sec: -32768 [-2000] <---> 32768 [+2000]
 #define GYRO_SENSITIVITY (2000.0 / 32768.0) // 0.061035156
 
+#define INITIAL_ANGLE 180.0
+#define SUM_ERROR_MAX 3.0
+#define SUM_ERROR_MIN -3.0
+#define KP 200 //30000.0
+//#define KI 50000.0
+//#define KD 500.0
+#define KI 500.0
+#define KD 100.0
+
+
 /**
  * Select one define for data transfer mode
  * and used filter

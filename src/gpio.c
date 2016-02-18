@@ -9,6 +9,7 @@
 #include "stm32f10x_rcc.h"
 #include "stm32f10x_gpio.h"
 #include "gpio.h"
+#include "main.h"
 
 GPIO_InitTypeDef GPIO_InitStructure;
 
@@ -47,6 +48,19 @@ void gpio_init (void)
   GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
   GPIO_Init(GPIOA, &GPIO_InitStructure);
 
+#ifdef USART1_DEBUG
+  /* Configure USARTy Rx as input floating */
+  GPIO_InitStructure.GPIO_Pin = BRIDGE_A_HIGH;
+  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
+  GPIO_Init(GPIOA, &GPIO_InitStructure);
+
+  /* Configure USARTy Tx as alternate function push-pull */
+  GPIO_InitStructure.GPIO_Pin = BRIDGE_C_HIGH;
+  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
+  GPIO_Init(GPIOA, &GPIO_InitStructure);
+#else
   //GPIO Configuration: Channel 1, 2 and 3 as alternate function push-pull -- PWM
   GPIO_InitStructure.GPIO_Pin = BRIDGE_A_HIGH | BRIDGE_B_HIGH | BRIDGE_C_HIGH;
   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
@@ -59,4 +73,5 @@ void gpio_init (void)
   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
   GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
   GPIO_Init(GPIOB, &GPIO_InitStructure);
+#endif
 }

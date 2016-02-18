@@ -78,6 +78,8 @@ void TIM1_BRK_IRQHandler (void)
 
   // clear interrupt flag
   TIM_ClearITPendingBit (TIM1, TIM_IT_Break);
+
+  while (1) ;
 }
 
 void brake_init (void)

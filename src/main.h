@@ -22,6 +22,8 @@
 #define OVER_MAX_CURRENT 	2
 #define OVER_CURRENT 		3
 
+//#define USART1_DEBUG
+
 extern unsigned int machine_state;
 void delay_ms (unsigned int ms);
 void printDouble(double v, int decimalDigits);
