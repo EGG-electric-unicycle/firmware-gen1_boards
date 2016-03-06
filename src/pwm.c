@@ -16,102 +16,48 @@
 int pwm_duty_cycle = 0;
 int pwm_duty_cycle_target = 0;
 
-//uint16_t sine_table [9] = {
-//
-//    1024,
-//    1681,
-//    2031,
-//    1910,
-//    1374,
-//    673,
-//    137,
-//    15,
-//    365
-//
-//};
-
-//uint16_t sine_table [9] = {
-//
-//    102,
-//    168,
-//    203,
-//    191,
-//    137,
-//    67,
-//    13,
-//    1,
-//    36
-//
-//};
-
-//uint16_t sine_table [9] = {
-//
-//    256,
-//    420,
-//    507,
-//    477,electric
-//    343,
-//    168,
-//    34,
-//    14,
-//    91
-//
-//};
-
-
-//uint16_t sine_table [9] = {
-//
-//    300,
-//    504,
-//    609,
-//    573,
-//    411,
-//    201,
-//    39,
-//    3,
-//    109
-//
-//};
-
-uint16_t sine_table [36] = {
-372,
-437,
-499,
-558,
-611,
-657,
-695,
-722,
-739,
-744,
-739,
-722,
-695,
-657,
-611,
-558,
-499,
-437,
-372,
-308,
-245,
-186,
-133,
-87,
-50,
-22,
-6,
-0,
-6,
-22,
-50,
-87,
-133,
-186,
-245,
-308,
+// Sine wave Space-Vector PWMs values, please read this blog message:
+// http://www.berryjam.eu/2015/04/driving-bldc-gimbals-at-super-slow-speeds-with-arduino/
+// Please see file: BLDC_SPWM_Lookup_tables.ods
+uint16_t sine_table [36] =
+{
+  299,
+  343,
+  386,
+  427,
+  437,
+  444,
+  446,
+  444,
+  437,
+  427,
+  437,
+  444,
+  446,
+  444,
+  437,
+  427,
+  386,
+  343,
+  299,
+  254,
+  211,
+  171,
+  160,
+  153,
+  151,
+  153,
+  160,
+  171,
+  160,
+  153,
+  151,
+  153,
+  160,
+  171,
+  211,
+  254
 };
-
 
 // This interrupt fire after the end on the PWM period (64us) - TIM1 UPdate event
 void PWM_PERIOD_INTERRUPT (void)
@@ -239,9 +185,9 @@ void pwm_update_duty_cycle (void)
   //pot_value = (adc_get_PS_signal_value () >> 2); // filter and the value is now 10 bits --> max 1023.
 
   // Apply the duty cycle values
-  TIM_SetCompare3(TIM1, (sine_table[index_a] >> 1));
-  TIM_SetCompare1(TIM1, (sine_table[index_b] >> 1));
-  TIM_SetCompare2(TIM1, (sine_table[index_c] >> 1));
+  TIM_SetCompare3(TIM1, (sine_table[index_a]));
+  TIM_SetCompare1(TIM1, (sine_table[index_b]));
+  TIM_SetCompare2(TIM1, (sine_table[index_c]));
 
 
 

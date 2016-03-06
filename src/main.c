@@ -48,7 +48,7 @@ void SysTick_Handler(void) // runs every 1ms
   // for delay_ms ()
   _ms++;
 
-  if (c++ > 28) //28
+  if (c++ > 2) //167
   {
       //commutate_sector ();
 
@@ -56,8 +56,6 @@ void SysTick_Handler(void) // runs every 1ms
 
     c = 0;
   }
-
-
 
 
 //  // For IMU reading task
@@ -90,13 +88,11 @@ int main(void)
   while (1)
   {
 
-
-
     // control the motor speed and rotation direction using a pc = 0;
       //  }otentiometer on PS_SIGNAL pin
 //    value = (adc_get_PS_signal_value () >> 2); // filter and the value is now 10 bits --> max 1023.
 //    value = value - 511; // now middle value is 0. Left half of pot turns motor left and vice-versa
-//    value = value * 1.953; // scale: 512 * 1.953 = 999.9
+//    value = value * 1.953; // scale: 5112 * 1.953 = 999.9
 //    motor_set_duty_cycle (value);
 //
 //    //read the IMU signal at every 10ms e apply the angle signal for motor control
@@ -116,7 +112,7 @@ int main(void)
 //	motor_set_duty_cycle (-115);
 //	duty = 1;
 //      }
-//    }5
+//    }
 
     switch (machine_state)
     {
