@@ -16,23 +16,120 @@
 int pwm_duty_cycle = 0;
 int pwm_duty_cycle_target = 0;
 
+//uint16_t sine_table [9] = {
+//
+//    1024,
+//    1681,
+//    2031,
+//    1910,
+//    1374,
+//    673,
+//    137,
+//    15,
+//    365
+//
+//};
+
+//uint16_t sine_table [9] = {
+//
+//    102,
+//    168,
+//    203,
+//    191,
+//    137,
+//    67,
+//    13,
+//    1,
+//    36
+//
+//};
+
+//uint16_t sine_table [9] = {
+//
+//    256,
+//    420,
+//    507,
+//    477,electric
+//    343,
+//    168,
+//    34,
+//    14,
+//    91
+//
+//};
+
+
+//uint16_t sine_table [9] = {
+//
+//    300,
+//    504,
+//    609,
+//    573,
+//    411,
+//    201,
+//    39,
+//    3,
+//    109
+//
+//};
+
+uint16_t sine_table [36] = {
+372,
+437,
+499,
+558,
+611,
+657,
+695,
+722,
+739,
+744,
+739,
+722,
+695,
+657,
+611,
+558,
+499,
+437,
+372,
+308,
+245,
+186,
+133,
+87,
+50,
+22,
+6,
+0,
+6,
+22,
+50,
+87,
+133,
+186,
+245,
+308,
+};
+
+
 // This interrupt fire after the end on the PWM period (64us) - TIM1 UPdate event
 void PWM_PERIOD_INTERRUPT (void)
 {
   static unsigned int counter = 1;
 
-  // at each 1.024ms (64us * 16)
-  counter++;
-  if (counter >= 16)
-  {
-    // manage PWM only if BLDC is in normal state
-    if (bldc_get_state () == BLDC_NORMAL)
-    {
-      pwm_manage (); //manage the increase/decrease rate of PWM duty-cycle and setup new values on the PWM controller
-    }
-
-    counter = 1;
-  }
+//  // at each 1.024ms (64us * 16)
+//  counter++;
+//  if (counter >= 16)2
+//  {
+//    // manage PWM only if BLDC is in normal state
+//    if (bldc_get_state () == BLDC_NORMAL)
+//    {
+//      pwm_manage (); //manage the increase/decrease rate of PWM duty-cycle and setup new values on the PWM controller
+//    }
+//
+//    counter = 1;
+//  }
 
   // if current is now under the max value, enable PWM signal again
   if ((bldc_get_state () == BLDC_OVER_MAX_CURRENT) && is_current_under_max ())
@@ -106,6 +203,21 @@ void pwm_init (void)
   TIM_CtrlPWMOutputs (TIM1, DISABLE);
 }
 
+
+unsigned int increment_index (unsigned int index)
+{
+  if (index < 35)
+  {
+    index++;
+  }
+  else
+  {
+    index = 0;
+  }
+
+  return index;
+}
+
 // Function to update the duty cycle PWM values on the PWM controller
 // also setup the correct values of PWM duty-cycle for each BLDC phase
 void pwm_update_duty_cycle (void)
@@ -113,61 +225,82 @@ void pwm_update_duty_cycle (void)
   unsigned int duty_cycle_normal;
   unsigned int duty_cycle_inverted;
 
-  // Calc the correct value of duty cycle and inverted duty cycle
-  duty_cycle_normal = (unsigned int) ((pwm_duty_cycle + 999) * 1.024); // scale to correct value
-  duty_cycle_inverted = 2047 - duty_cycle_normal;
+  static unsigned int index_a = 0;
+  static unsigned int index_b = 12;
+  static unsigned int index_c = 24;
+
+  static unsigned int pot_value = 0;
 
 
-  if (duty_cycle_normal > 0)
-  {
-    set_direction (RIGHT);
-  }
-  else
-  {
-    set_direction (LEFT);
-  }
+  index_a = increment_index (index_a);
+  index_b = increment_index (index_b);
+  index_c = increment_index (index_c);
+
+  //pot_value = (adc_get_PS_signal_value () >> 2); // filter and the value is now 10 bits --> max 1023.
 
   // Apply the duty cycle values
-  if (bldc_phase_state.a == NORMAL)
-  {
-    TIM_SetCompare3(TIM1, duty_cycle_normal); // phase A
-  }
-  else if (bldc_phase_state.a == INVERTED)
-  {
-    TIM_SetCompare3(TIM1, duty_cycle_inverted);
-  }
-  else if (bldc_phase_state.a == OFF)
-  {
-    TIM_SetCompare3(TIM1, DUTY_CYCLE_OFF);
-  }
+  TIM_SetCompare3(TIM1, (sine_table[index_a] >> 1));
+  TIM_SetCompare1(TIM1, (sine_table[index_b] >> 1));
+  TIM_SetCompare2(TIM1, (sine_table[index_c] >> 1));
 
 
-  if (bldc_phase_state.b == NORMAL)
-  {
-    TIM_SetCompare1(TIM1, duty_cycle_normal); // phase B
-  }
-  else if (bldc_phase_state.b == INVERTED)
-  {
-    TIM_SetCompare1(TIM1, duty_cycle_inverted);
-  }
-  else if (bldc_phase_state.b == OFF)
-  {
-    TIM_SetCompare1(TIM1, DUTY_CYCLE_OFF);
-  }
 
 
-  if (bldc_phase_state.c == NORMAL)
-  {
-    TIM_SetCompare2(TIM1, duty_cycle_normal); // phase C
-  }
-  else if (bldc_phase_state.c == INVERTED)
-  {
-    TIM_SetCompare2(TIM1, duty_cycle_inverted);
-  }
-  else if (bldc_phase_state.c == OFF)
-  {
-    TIM_SetCompare2(TIM1, DUTY_CYCLE_OFF);
-  }
+//  // Calc the correct value of duty cycle and inverted duty cycle
+//  duty_cycle_normal = (unsigned int) ((pwm_duty_cycle + 999) * 1.024); // scale to correct value
+//  duty_cycle_inverted = 2047 - duty_cycle_normal;
+//
+//
+//  if (duty_cycle_normal > 0)
+//  {
+//    set_direction (RIGHT);
+//  }
+//  else
+//  {
+//    set_direction (LEFT);
+//  }
+
+//  // Apply the duty cycle values
+//  if (bldc_phase_state.a == NORMAL)
+//  {
+//    TIM_SetCompare3(TIM1, duty_cycle_normal); // phase A
+//  }
+//  else if (bldc_phase_state.a == INVERTED)
+//  {
+//    TIM_SetCompare3(TIM1, duty_cycle_inverted);
+//  }
+//  else if (bldc_phase_state.a == OFF)
+//  {
+//    TIM_SetCompare3(TIM1, DUTY_CYCLE_OFF);
+//  }
+//
+//
+//  if (bldc_phase_state.b == NORMAL)
+//  {
+//    TIM_SetCompare1(TIM1, duty_cycle_normal); // phase B
+//  }
+//  else if (bldc_phase_state.b == INVERTED)
+//  {
+//    TIM_SetCompare1(TIM1, duty_cycle_inverted);
+//  }
+//  else if (bldc_phase_state.b == OFF)
+//  {
+//    TIM_SetCompare1(TIM1, DUTY_CYCLE_OFF);
+//  }
+//
+//
+//  if (bldc_phase_state.c == NORMAL)
+//  {
+//    TIM_SetCompare2(TIM1, duty_cycle_normal); // phase C
+//  }
+//  else if (bldc_phase_state.c == INVERTED)
+//  {
+//    TIM_SetCompare2(TIM1, duty_cycle_inverted);
+//  }
+//  else if (bldc_phase_state.c == OFF)
+//  {
+//    TIM_SetCompare2(TIM1, DUTY_CYCLE_OFF);
+//  }
 }
 
 // Function to set duty cycle PWM value
@@ -175,8 +308,8 @@ void pwm_set_duty_cycle (int value)
 {
 //#define DUTY_CYCLE_MAX_VALUE	1000 //
 //#define DUTY_CYCLE_MIN_VALUE	-999 //
-#define DUTY_CYCLE_MAX_VALUE	200 //
-#define DUTY_CYCLE_MIN_VALUE	-200 //
+#define DUTY_CYCLE_MAX_VALUE	500 //
+#define DUTY_CYCLE_MIN_VALUE	-500 //
 
   // limit the input values
   if (value >= DUTY_CYCLE_MAX_VALUE)
@@ -191,11 +324,10 @@ void pwm_set_duty_cycle (int value)
   pwm_duty_cycle_target = value;
 
 
-//if (value > 0) value += 100;
-//if (value < 0) value -= 100;
-//
-//pwm_duty_cycle_target = 200;
-  pwm_duty_cycle = value;
+//if (value > 0) value += MIN_POSITIVE_DUTY_CYCLE;
+//if (value < 0) value -= MIN_NEGATIVE_DUTY_CYCLE;
+
+pwm_duty_cycle = value;
 pwm_update_duty_cycle ();
 }
 

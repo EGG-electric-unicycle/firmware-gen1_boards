@@ -48,13 +48,25 @@ void SysTick_Handler(void) // runs every 1ms
   // for delay_ms ()
   _ms++;
 
-  // For IMU reading task
-  timer_imu++;
-  if (timer_imu > 9)
+  if (c++ > 28) //28
   {
-    timer_imu = 0;
-    read_imu_flag = 1;
+      //commutate_sector ();
+
+    pwm_update_duty_cycle ();
+
+    c = 0;
   }
+
+
+
+
+//  // For IMU reading task
+//  timer_imu++;
+//  if (timer_imu > 14)
+//  {
+//    timer_imu = 0;
+//    read_imu_flag = 1;13
+//  }
 }
 
 void putc ( void* p, char c)
@@ -65,6 +77,7 @@ void putc ( void* p, char c)
 int main(void)
 {
   static int value;
+  static unsigned int duty = 0;
 
   initialize();
 
@@ -72,25 +85,42 @@ int main(void)
 
   motor_start ();
 
+  //motor_set_duty_cycle (160);
+
   while (1)
   {
-    // control the motor speed and rotation direction using a potentiometer on PS_SIGNAL pin
+
+
+
+    // control the motor speed and rotation direction using a pc = 0;
+      //  }otentiometer on PS_SIGNAL pin
 //    value = (adc_get_PS_signal_value () >> 2); // filter and the value is now 10 bits --> max 1023.
 //    value = value - 511; // now middle value is 0. Left half of pot turns motor left and vice-versa
 //    value = value * 1.953; // scale: 512 * 1.953 = 999.9
 //    motor_set_duty_cycle (value);
-
-    //read the IMU signal at every 10ms e apply the angle signal for motor control
-    if (read_imu_flag == 1)
-    {
-      IMU_read ();
-      read_imu_flag = 0;
-    }
+//
+//    //read the IMU signal at every 10ms e apply the angle signal for motor control
+//    if (read_imu_flag == 1)
+//    {
+//      //IMU_read ();
+//      read_imu_flag = 0;
+//
+//
+//      if (duty == 1)
+//      {
+//	motor_set_duty_cycle (115);
+//	duty = 0;
+//      }
+//      else if (duty == 0)
+//      {
+//	motor_set_duty_cycle (-115);
+//	duty = 1;
+//      }
+//    }5
 
     switch (machine_state)
     {
       case COAST:
-
       break;
 
       case RUNNING:
@@ -180,9 +210,9 @@ void initialize (void)
   commutation_disable ();
   pwm_init ();
   gpio_init (); // configure pins just after PWM init
-  hall_sensor_init ();
+  //hall_sensor_init ();
 
-  IMU_init ();
+  //IMU_init ();
   //usart1_init ();
   TIM3_init ();
 }
