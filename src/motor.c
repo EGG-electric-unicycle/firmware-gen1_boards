@@ -107,11 +107,11 @@ void brake_init (void)
 
 void motor_set_direction (unsigned int direction)
 {
-  set_direction (direction);
+  bldc_set_direction (direction);
 }
 
 unsigned int motor_get_direction (void)
 {
-  return get_direction ();
+  return bldc_get_direction ();
 }
 

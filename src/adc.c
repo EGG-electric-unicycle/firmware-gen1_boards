@@ -40,6 +40,24 @@ unsigned int adc_watchdog_highthreshold = ADC_WATCHDOG_HIGHTHRESHOLD;
 
 static unsigned int adc_values[3];
 
+
+/* INTERRUPT
+ *
+ * This interrupt happens when current is over the defined threshold and will disable the duty-cycle
+ *
+ */
+void MAX_CURRENT_INTERRUPT(void)
+{
+  if (ADC_GetFlagStatus (ADC1, ADC_FLAG_AWD) == SET)
+  {
+    TIM_CtrlPWMOutputs (TIM1, DISABLE); //disable PWM signals
+    bldc_set_state (BLDC_OVER_MAX_CURRENT);
+
+    /* Clear ADC1 AWD pending interrupt bit */
+    ADC_ClearITPendingBit(ADC1, ADC_IT_AWD); // it's the same as ADC_ClearFlagStatus (ADC1, ADC_FLAG_AWD);
+  }
+}
+
 // ADC_Channel_4 (PA4) to read PS_signal -- used on debug connected to a potentiometer
 // ADC_Channel_5 (PA5) to read over battery voltage signal
 // ADC_Channel_7 (PA7) to read over motor current signal
@@ -129,19 +147,6 @@ void adc_init (void)
 
   /* Start ADC1 Software Conversion */
   ADC_SoftwareStartConvCmd(ADC1, ENABLE);
-}
-
-// This interrupt happens when current is over the defined threshold and will disable the duty-cycle
-void MAX_CURRENT_INTERRUPT(void)
-{
-  if (ADC_GetFlagStatus (ADC1, ADC_FLAG_AWD) == SET)
-  {
-    TIM_CtrlPWMOutputs (TIM1, DISABLE); //disable PWM signals
-    bldc_set_state (BLDC_OVER_MAX_CURRENT);
-
-    /* Clear ADC1 AWD pending interrupt bit */
-    ADC_ClearITPendingBit(ADC1, ADC_IT_AWD); // it's the same as ADC_ClearFlagStatus (ADC1, ADC_FLAG_AWD);
-  }
 }
 
 // output a value 0 - 4095

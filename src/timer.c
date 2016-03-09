@@ -27,6 +27,7 @@ void TIM3_IRQHandler (void)
   TIM_ClearITPendingBit(TIM3, TIM_IT_Update);
 }
 
+// TIM3 is only used for implementation of micros()
 void TIM3_init(void)
 {
   // enable TIM3 clock

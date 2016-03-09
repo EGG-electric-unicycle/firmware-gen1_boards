@@ -37,8 +37,8 @@ void commutate (void);
 unsigned int get_current_sector (void);
 unsigned int increment_sector (unsigned int sector);
 unsigned int decrement_sector (unsigned int sector);
-void set_direction (unsigned int direction);
-unsigned int get_direction (void);
+void bldc_set_direction (unsigned int direction);
+unsigned int bldc_get_direction (void);
 void bldc_set_state (unsigned int state);
 unsigned int bldc_get_state (void);
 

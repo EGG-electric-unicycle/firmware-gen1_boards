@@ -48,23 +48,14 @@ void SysTick_Handler(void) // runs every 1ms
   // for delay_ms ()
   _ms++;
 
-  if (c++ > 2) //167
-  {
-      //commutate_sector ();
+  pwm_manage ();
 
+  if (c++ > 2)
+  {
     pwm_update_duty_cycle ();
 
     c = 0;
   }
-
-
-//  // For IMU reading task
-//  timer_imu++;
-//  if (timer_imu > 14)
-//  {
-//    timer_imu = 0;
-//    read_imu_flag = 1;13
-//  }
 }
 
 void putc ( void* p, char c)
@@ -83,36 +74,13 @@ int main(void)
 
   motor_start ();
 
-  //motor_set_duty_cycle (160);
-
   while (1)
   {
-
     // control the motor speed and rotation direction using a pc = 0;
-      //  }otentiometer on PS_SIGNAL pin
-//    value = (adc_get_PS_signal_value () >> 2); // filter and the value is now 10 bits --> max 1023.
-//    value = value - 511; // now middle value is 0. Left half of pot turns motor left and vice-versa
-//    value = value * 1.953; // scale: 5112 * 1.953 = 999.9
-//    motor_set_duty_cycle (value);
-//
-//    //read the IMU signal at every 10ms e apply the angle signal for motor control
-//    if (read_imu_flag == 1)
-//    {
-//      //IMU_read ();
-//      read_imu_flag = 0;
-//
-//
-//      if (duty == 1)
-//      {
-//	motor_set_duty_cycle (115);
-//	duty = 0;
-//      }
-//      else if (duty == 0)
-//      {
-//	motor_set_duty_cycle (-115);
-//	duty = 1;
-//      }
-//    }
+    value = (adc_get_PS_signal_value () >> 2); // filter and the value is now 10 bits --> max 1023.
+    value = value - 511; // now middle value is 0. Left half of pot turns motor left and vice-versa
+    value = value * 1.953; // scale: 5112 * 1.953 = 999.9
+    motor_set_duty_cycle (value);
 
     switch (machine_state)
     {

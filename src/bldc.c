@@ -311,12 +311,12 @@ unsigned int decrement_sector (unsigned int sector)
   return sector;
 }
 
-void set_direction (unsigned int direction)
+void bldc_set_direction (unsigned int direction)
 {
   _direction = direction;
 }
 
-unsigned int get_direction (void)
+unsigned int bldc_get_direction (void)
 {
   return _direction;
 }
