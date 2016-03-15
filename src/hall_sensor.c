@@ -30,9 +30,9 @@ void TIM2_IRQHandler(void)
   TIM_ClearITPendingBit (TIM2, TIM_IT_Trigger);
 }
 
-unsigned int get_hall_sensors_us (void)
+unsigned int get_hall_sensors_10us (void)
 {
-  return hall_sensors_time * 10; // multiply by 10 to get in us
+  return hall_sensors_time;
 }
 
 void hall_sensor_init (void)
@@ -40,31 +40,48 @@ void hall_sensor_init (void)
   // Enable clock for TIM2, used by hall sensors
   RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
   
+  /*
+   * Calc for the max possible time between each hall sensor signal
+   * Assuming max of 35 km/h speed of the wheel:
+   * 1 rotation / second --> 46 impulses
+   * 1 rotation / second --> 1 / 46 = 21.7ms each impulse
+   * 1 rotation / second --> 1.12 * 60 * 60 = 4.032 km/h. Note: (1.12m = 14" wheel perimeter)
+   * 35km/h --> 35 / 4.032 = 8.7
+   * each impulse for 35km/h --> 21.7 / 8.7 = 2.5ms
+   *
+   * Each impulse need to be divided by 6 because we are using a space_vector_table that have 6 steps for each impulse
+   * 2.5 / 6 = 417us
+   *
+   * Timer increment clock for capture signals can be 10us and so we will have a resolution of 400/10 = 40
+   * for the max speed of 35km/h which should be good
+   *
+   */
+
   TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
   // timer base configuration
-  // 84 => 655ms till overflow ; 100kHz (10us) TimerClock [24MHz/Prescaler]
-  TIM_TimeBaseStructure.TIM_Prescaler = 240;
+  // 64MHz clock (PCLK1), 64MHz/640 = 1MHz --> 10us each increment of the counter/timer
+  TIM_TimeBaseStructure.TIM_Prescaler = (640 -1);
+  TIM_TimeBaseStructure.TIM_Period = 65535; // max of 655.35ms or the Timer will overflow
   TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
-  TIM_TimeBaseStructure.TIM_Period = 65535;
   TIM_TimeBaseStructure.TIM_ClockDivision = 0;
   TIM_TimeBaseStructure.TIM_RepetitionCounter = 0;
   TIM_TimeBaseInit(TIM2, &TIM_TimeBaseStructure);
 
   // enable hall sensor
-  // T1F_ED will be connected to  HallSensors Inputs
+  // T1F_ED will be connected to  HallSensors InputTIM_ICPSC_DIV1s
   // TIM2_CH1, TIM2_CH2, TIM2_CH3
   TIM_SelectHallSensor(TIM2, ENABLE);
 
-  // HallSensor event is delivered with signal TI1F_ED
+  // HallSensor event is delivered with signal TI1FTIM_ICPSC_DIV1_ED
   // (this is XOR of the three hall sensor lines)
   // Signal TI1F_ED: falling and rising edge of the inputs is used
   TIM_SelectInputTrigger(TIM2, TIM_TS_TI1F_ED);
 
-  // On every TI1F_ED event the counter is resetted and update is tiggered
+  // On every TI1F_ED event the counter is resetted and update is triggered
   TIM_SelectSlaveMode(TIM2, TIM_SlaveMode_Reset);
 
   // Channel 1 in input capture mode
-  // on every TCR edge (build from TI1F_ED which is a HallSensor edge)
+  // on every TCR edge (build from TI1F_ED which isTIM_ICPSC_DIV1 a HallSensor edge)
   // the timervalue is copied into ccr register and a CCR1 Interrupt
   // TIM_IT_CC1 is fired
   TIM_ICInitTypeDef TIM_ICInitStructure;

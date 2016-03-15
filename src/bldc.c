@@ -12,15 +12,70 @@
 #include "bldc.h"
 #include "pwm.h"
 
-extern GPIO_InitTypeDef GPIO_InitStructure;
-
 #define HALL_SENSORS_MASK ((1 << 0) | (1 << 1) | (1 << 2))
 
+extern GPIO_InitTypeDef GPIO_InitStructure;
+
 unsigned int bldc_machine_state = BLDC_NORMAL;
-
 static unsigned int _direction = RIGHT;
-
 struct Bldc_phase_state bldc_phase_state;
+
+// Space Vector Modulation PWMs values, please read this blog message:
+// http://www.berryjam.eu/2015/04/driving-bldc-gimbals-at-super-slow-speeds-with-arduino/
+// Please see file: BLDC_SPWM_Lookup_tables.ods
+unsigned int svm_table [36] =
+{
+  1152,
+  1418,
+  1677,
+  1919,
+  1984,
+  2024,
+  2038,
+  2024,
+  1984,
+  1919,
+  1984,
+  2024,
+  2038,
+  2024,
+  1984,
+  1919,
+  1677,
+  1418,
+  1152,
+  885,
+  626,
+  384,
+  319,
+  279,
+  265,
+  279,
+  319,
+  384,
+  319,
+  279,
+  265,
+  279,
+  319,
+  384,
+  626,
+  885
+};
+
+unsigned int inc_svm_table_index (unsigned int index)
+{
+  if (index < 35)
+  {
+    index++;
+  }
+  else
+  {
+    index = 0;
+  }
+
+  return index;
+}
 
 void phase_a_h_off (void)
 {
@@ -162,44 +217,35 @@ unsigned int get_current_sector (void)
   //  00000100 == 4
   //  00000101 == 5
 
-  //Halls sequence: 1, 3, 2, 6, 4, 5
+  //Halls sequence: 6, 5, 2, 3, 1, 4 (includes the increment of the next step)
   switch (hall_sensors)
   {
-    case 4:
-    sector = 2;
-    break;
-
-    case 5:
-    sector = 3;
-    break;
-
     case 1:
-    sector = 4;
-    break;
-
-    case 3:
-    sector = 5;
-    break;
-
-    case 2:
     sector = 6;
     break;
 
-    case 6:
+    case 2:
+    sector = 5;
+    break;
+
+    case 3:
+    sector = 2;
+    break;
+
+    case 4:
+    sector = 3;
+    break;
+
+    case 5:
     sector = 1;
+    break;
+
+    case 6:
+    sector = 4;
     break;
 
     default:
     break;
-  }
-
-  if (_direction == RIGHT)
-  {
-    sector = increment_sector(sector);
-  }
-  else if (_direction == LEFT)
-  {
-    sector = decrement_sector(sector);
   }
 
   return sector;
@@ -242,73 +288,6 @@ void commutate (void)
     commutation_disable ();
     break;
   }
-}
-
-void commutate_sector (void)
-{
-  static unsigned int sector = 1;
-
-  sector = increment_sector (sector);
-
-  //Coils: AB, AC, BC, BA, CA, CB
-  switch (sector)
-  {
-    case 1:
-    commutation_AB ();
-    break;
-
-    case 2:
-    commutation_AC ();
-    break;
-
-    case 3:
-    commutation_BC ();
-    break;
-
-    case 4:
-    commutation_BA ();
-    break;
-
-    case 5:
-    commutation_CA ();
-    break;
-
-    case 6:
-    commutation_CB ();
-    break;
-
-    default:
-    commutation_disable ();
-    break;
-  }
-}
-
-unsigned int increment_sector (unsigned int sector)
-{
-  if (sector < 6)
-  {
-    sector++;
-  }
-  else // sector = 6
-  {
-    sector = 1;
-  }
-
-  return sector;
-}
-
-unsigned int decrement_sector (unsigned int sector)
-{
-  if (sector > 1)
-  {
-    sector--;
-  }
-  else // sector = 1
-  {
-    sector = 6;
-  }
-
-  return sector;
 }
 
 void bldc_set_direction (unsigned int direction)

@@ -16,7 +16,7 @@
 unsigned int motor_get_speed (void)
 {
   unsigned int motor_speed;
-  motor_speed = 1.0 / ((get_hall_sensors_us () * 6.0) / 1000000.0);
+//  motor_speed = 1.0 / ((get_hall_sensors_us () * 6.0) / 1000000.0);
   return motor_speed;
 }
 

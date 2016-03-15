@@ -13,49 +13,6 @@
 #include "pwm.h"
 #include "bldc.h"
 
-// Sine wave Space-Vector PWMs values, please read this blog message:
-// http://www.berryjam.eu/2015/04/driving-bldc-gimbals-at-super-slow-speeds-with-arduino/
-// Please see file: BLDC_SPWM_Lookup_tables.ods
-unsigned int space_vector_table [36] =
-{
-  1152,
-  1418,
-  1677,
-  1919,
-  1984,
-  2024,
-  2038,
-  2024,
-  1984,
-  1919,
-  1984,
-  2024,
-  2038,
-  2024,
-  1984,
-  1919,
-  1677,
-  1418,
-  1152,
-  885,
-  626,
-  384,
-  319,
-  279,
-  265,
-  279,
-  319,
-  384,
-  319,
-  279,
-  265,
-  279,
-  319,
-  384,
-  626,
-  885
-};
-
 unsigned int pwm_duty_cycle = 0;
 unsigned int pwm_duty_cycle_target = 0;
 float pwm_scale_factor = 0;
@@ -155,35 +112,6 @@ void pwm_init (void)
   TIM_CtrlPWMOutputs (TIM1, DISABLE);
 }
 
-
-unsigned int increment_space_vector_table_index (unsigned int index)
-{
-  if (index < 35)
-  {
-    index++;
-  }
-  else
-  {
-    index = 0;
-  }
-
-  return index;
-}
-
-unsigned int decrement_space_vector_table_index (unsigned int index)
-{
-  if (index > 1)
-  {
-    index--;
-  }
-  else
-  {
-    index = 35;
-  }
-
-  return index;
-}
-
 // Function to update the duty cycle PWM values
 void pwm_update_duty_cycle (void)
 {
@@ -196,9 +124,9 @@ void pwm_update_duty_cycle (void)
   if (pwm_duty_cycle >= 0)
   {
     // Go to next step of the sine table
-    index_a = increment_space_vector_table_index (index_a);
-    index_b = increment_space_vector_table_index (index_b);
-    index_c = increment_space_vector_table_index (index_c);
+//    index_a = increment_space_vector_table_index (index_a);
+//    index_b = increment_space_vector_table_index (index_b);
+//    index_c = increment_space_vector_table_index (index_c);
 
     bldc_set_direction (RIGHT);
   }
@@ -215,9 +143,9 @@ void pwm_update_duty_cycle (void)
   // Scale and apply the duty cycle values
   pwm_scale_factor = pwm_duty_cycle + 999;
   pwm_scale_factor = pwm_scale_factor / 1999.0 ;
-  TIM_SetCompare3(TIM1, (space_vector_table[index_a]) * pwm_scale_factor);
-  TIM_SetCompare1(TIM1, (space_vector_table[index_b]) * pwm_scale_factor);
-  TIM_SetCompare2(TIM1, (space_vector_table[index_c]) * pwm_scale_factor);
+//  TIM_SetCompare3(TIM1, (space_vector_table[index_a]) * pwm_scale_factor);
+//  TIM_SetCompare1(TIM1, (space_vector_table[index_b]) * pwm_scale_factor);
+//  TIM_SetCompare2(TIM1, (space_vector_table[index_c]) * pwm_scale_factor);
 }
 
 // Function to set duty cycle PWM value
@@ -237,6 +165,8 @@ void pwm_set_duty_cycle (int value)
   }
 
   pwm_duty_cycle_target = value;
+
+pwm_duty_cycle = value;
 }
 
 // This function need to be called every 1ms

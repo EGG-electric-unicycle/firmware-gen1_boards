@@ -23,7 +23,7 @@ void gpio_init (void)
 
   GPIO_PinRemapConfig(GPIO_Remap_SWJ_JTAGDisable, ENABLE);
 
-  GPIO_InitStructure.GPIO_Pin = PS_SIGNAL | MOTOR_CURRENT_SIGNAL | BATTERY_VOLTAGE_SIGNAL;
+  GPIO_InitStructure.GPIO_Pin = MOTOR_CURRENT_SIGNAL | BATTERY_VOLTAGE_SIGNAL;
   GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN;
   GPIO_Init(GPIOA, &GPIO_InitStructure);

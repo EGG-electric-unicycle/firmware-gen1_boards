@@ -14,7 +14,8 @@
 #define ADC_ANALOG_WATCHDOG_PRIORITY		0
 #define TIM2_HALL_SENSORS_PRIORITY		1
 #define	TIM1_UP_PWM_PRIORITY			2
-#define	TIM3_PRIORITY				3
+#define	TIM4_PRIORITY				3
+#define	TIM3_PRIORITY				4
 
 // State machine
 #define COAST			0
@@ -23,6 +24,7 @@
 #define OVER_CURRENT 		3
 
 //#define USART1_DEBUG
+#define DAC_DEBUG
 
 extern unsigned int machine_state;
 void delay_ms (unsigned int ms);

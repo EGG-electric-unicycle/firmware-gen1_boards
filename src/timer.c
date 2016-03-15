@@ -18,6 +18,7 @@ unsigned int micros (void)
   return (TIM_GetCounter (TIM3) + (overflow_counter * 65536));
 }
 
+// Used for implementation of micros()
 // This interrupt fire after each TIM3 overflow, 65536us
 void TIM3_IRQHandler (void)
 {
@@ -25,6 +26,18 @@ void TIM3_IRQHandler (void)
 
   /* Clear TIM3 TIM_IT_Update pending interrupt bit */
   TIM_ClearITPendingBit(TIM3, TIM_IT_Update);
+}
+
+// Used for Space Vactor Modulation BLDC control
+// This interrupt fire after each TIM4 overflow, 65536us
+void TIM4_IRQHandler (void)
+{
+
+
+
+
+  /* Clear TIM4 TIM_IT_Update pending interrupt bit */
+  TIM_ClearITPendingBit(TIM4, TIM_IT_Update);
 }
 
 // TIM3 is only used for implementation of micros()
@@ -57,4 +70,36 @@ void TIM3_init(void)
 
   /* TIM3 counter enable */
   TIM_Cmd (TIM3, ENABLE);
+}
+
+// TIM4 is only used for Space Vactor Modulation BLDC control
+void TIM4_init(void)
+{
+  // enable TIM4 clock
+  RCC_APB1PeriphClockCmd (RCC_APB1Periph_TIM4, ENABLE);
+
+  // reset TIM4
+  TIM_DeInit (TIM4);
+
+  /* Time base configuration */
+  TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
+  TIM_TimeBaseStructure.TIM_Period = 65535;
+  TIM_TimeBaseStructure.TIM_Prescaler = (640 - 1); // 64MHz clock (PCLK1), 64MHz/640 = 100kHz --> 10us each increment of the counter/timer
+  TIM_TimeBaseStructure.TIM_ClockDivision = 0;
+  TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
+  TIM_TimeBaseInit (TIM4, &TIM_TimeBaseStructure);
+
+  /* Enable the TIM4 gloabal Interrupt */
+  NVIC_InitTypeDef NVIC_InitStructure;
+  NVIC_InitStructure.NVIC_IRQChannel = TIM4_IRQn;
+  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = TIM4_PRIORITY;
+  NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+  NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+  NVIC_Init (&NVIC_InitStructure);
+
+  /* TIM4 TIM_IT_Update enable */
+  TIM_ITConfig (TIM4, TIM_IT_Update, ENABLE);
+
+  /* TIM4 counter enable */
+  TIM_Cmd (TIM4, ENABLE);
 }

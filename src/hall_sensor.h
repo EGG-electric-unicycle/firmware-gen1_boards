@@ -10,6 +10,6 @@
 #define _HALL_SENSOR_H_
 
 void hall_sensor_init (void);
-unsigned int get_hall_sensors_us (void);
+unsigned int get_hall_sensors_10us (void);
 
 #endif
