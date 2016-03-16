@@ -18,6 +18,12 @@ extern GPIO_InitTypeDef GPIO_InitStructure;
 
 unsigned int bldc_machine_state = BLDC_NORMAL;
 static unsigned int _direction = RIGHT;
+
+// We start with the sine waves with 120º of each other
+static unsigned int svm_table_index_a = 0;
+static unsigned int svm_table_index_b = 12;
+static unsigned int svm_table_index_c = 24;
+
 struct Bldc_phase_state bldc_phase_state;
 
 // Space Vector Modulation PWMs values, please read this blog message:
@@ -73,9 +79,27 @@ unsigned int inc_svm_table_index (unsigned int index)
   {
     index = 0;
   }
-
-  return index;
 }
+
+void bldc_svm_tick (void)
+{
+  float pwm_scale_factor;
+
+  // Update the index values
+  svm_table_index_a = inc_svm_table_index (svm_table_index_a);
+  svm_table_index_b = inc_svm_table_index (svm_table_index_b);
+  svm_table_index_c = inc_svm_table_index (svm_table_index_c);
+
+  // Scale and apply the duty cycle values
+  pwm_scale_factor = pwm_get_duty_cycle () + 999;
+  pwm_scale_factor = pwm_scale_factor / 1999.0 ;
+  TIM_SetCompare3(TIM1, (svm_table[svm_table_index_a]) * pwm_scale_factor);
+  TIM_SetCompare1(TIM1, (svm_table[svm_table_index_b]) * pwm_scale_factor);
+  TIM_SetCompare2(TIM1, (svm_table[svm_table_index_c]) * pwm_scale_factor);
+}
+
+
+
 
 void phase_a_h_off (void)
 {

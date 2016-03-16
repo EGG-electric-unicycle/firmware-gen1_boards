@@ -23,7 +23,6 @@
 #include "bldc.h"
 #include "adc.h"
 #include "pwm.h"
-#include "dac.h"
 #include "tinystdio/tinystdio.h"
 
 unsigned int machine_state = COAST;
@@ -48,10 +47,6 @@ void SysTick_Handler(void) // runs every 1ms
 
   // for delay_ms ()
   _ms++;
-
-//  c += 10;
-//  dac_set_value (c);
-
 }
 
 void putc ( void* p, char c)
@@ -66,19 +61,18 @@ int main(void)
 
   initialize();
 
-  init_printf(NULL,putc);
+  //init_printf(NULL,putc);
 
-  //motor_start ();
+  motor_start ();
+
+  TIM4_set_counter_10us (7); // 10ms
 
   while (1)
   {
-//    // control the motor speed and rotation direction using a pc = 0;
-//    value = (adc_get_PS_signal_value () >> 2); // filter and the value is now 10 bits --> max 1023.
-//    value = value - 511; // now middle value is 0. Left half of pot turns motor left and vice-versa
-//    value = value * 1.953; // scale: 5112 * 1.953 = 999.9
-//    motor_set_duty_cycle (value);
-
-    dac_set_value(3000);
+    value = (adc_get_PS_signal_value () >> 2); // filter and the value is now 10 bits --> max 1023.
+    value = value - 511; // now middle value is 0. Left half of pot turns motor left and vice-versa
+    value = value * 1.953; // scale: 5112 * 1.953 = 999.9
+    motor_set_duty_cycle (value);
 
     switch (machine_state)
     {
@@ -146,20 +140,8 @@ void SetSysClockTo64(void)
 
 void initialize (void)
 {
-#ifdef DAC_DEBUG
-//  GPIO_InitTypeDef GPIO_InitStructure;
-//
-//  /* Once the DAC channel is enabled, the corresponding GPIO pin is automatically
-//     connected to the DAC converter. In order to avoid parasitic consumption,
-//     the GPIO pin should be configured in analog */
-//  RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
-//  GPIO_InitStructure.GPIO_Pin =  GPIO_Pin_4;
-//  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN;
-//  GPIO_Init(GPIOA, &GPIO_InitStructure);
-
-#else
-  GPIO_InitTypeDef GPIO_InitStructure;
   /* Config PS_signal pin */
+  GPIO_InitTypeDef GPIO_InitStructure;
   RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
   GPIO_InitStructure.GPIO_Pin = PS_SIGNAL;
   GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
@@ -169,7 +151,6 @@ void initialize (void)
   //blocks while the PS_SIGNAL is low (there is a switch to control this signal
   //this is used to block firmware from running if for example it do a short circuit on the H bridges.
   while (!GPIO_ReadInputDataBit(GPIOA, PS_SIGNAL)) ;
-#endif
 
   SetSysClockTo64(); //configure clock to 64 MHz (max possible speed)
   SystemCoreClockUpdate();
@@ -181,17 +162,14 @@ void initialize (void)
     while (1);
   }
 
-  //adc_init ();
-//  commutation_disable ();
-//  pwm_init ();
-  //gpio_init (); // configure pins just after PWM init
-  //hall_sensor_init ();
+  adc_init ();
+  commutation_disable ();
+  pwm_init ();
+  gpio_init (); // configure pins just after PWM init
+  hall_sensor_init ();
 
   //IMU_init ();
   //usart1_init ();
-//  TIM3_init ();
+  //TIM4_init ();
 
-#ifdef DAC_DEBUG
-  dac_init ();
-#endif
 }

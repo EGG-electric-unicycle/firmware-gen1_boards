@@ -18,16 +18,25 @@ volatile unsigned int hall_sensors_time = 0;
 
 void TIM2_IRQHandler(void)
 {
-  /* "Read" all sensors sequence and execute the BLDC coils commutation */
-  TIM_ITConfig (TIM1, TIM_IT_Update, DISABLE); // disable to avoid concurrency access to update of PWM controller duty-cycle values
-  commutate ();
-  TIM_ITConfig (TIM1, TIM_IT_Update, ENABLE);
+  if (TIM_GetFlagStatus (TIM2, TIM_FLAG_Trigger))
+  {
+    /* "Read" all sensors sequence and execute the BLDC coils commutation */
+    TIM_ITConfig (TIM1, TIM_IT_Update, DISABLE); // disable to avoid concurrency access to update of PWM controller duty-cycle values
+    //commutate ();
+    TIM_ITConfig (TIM1, TIM_IT_Update, ENABLE);
 
-  /* Save current time between each hall sensor signal change */
-  hall_sensors_time = TIM_GetCapture1 (TIM2);
+    /* Save current time between each hall sensor signal change */
+    hall_sensors_time = TIM_GetCapture1 (TIM2);
 
-  // clear interrupt flag
-  TIM_ClearITPendingBit (TIM2, TIM_IT_Trigger);
+    // clear interrupt flag for this interrupt
+    TIM_ClearITPendingBit (TIM2, TIM_IT_Trigger);
+  }
+  else if (TIM_GetFlagStatus (TIM2, TIM_FLAG_Update))
+  {
+
+    // clear interrupt flag for this interrupt
+    TIM_ClearITPendingBit (TIM2, TIM_IT_Update);
+  }
 }
 
 unsigned int get_hall_sensors_10us (void)
@@ -68,11 +77,11 @@ void hall_sensor_init (void)
   TIM_TimeBaseInit(TIM2, &TIM_TimeBaseStructure);
 
   // enable hall sensor
-  // T1F_ED will be connected to  HallSensors InputTIM_ICPSC_DIV1s
+  // T1F_ED will be connected to  HallSensors Inputs
   // TIM2_CH1, TIM2_CH2, TIM2_CH3
   TIM_SelectHallSensor(TIM2, ENABLE);
 
-  // HallSensor event is delivered with signal TI1FTIM_ICPSC_DIV1_ED
+  // HallSensor event is delivered with signal TI1F_ED
   // (this is XOR of the three hall sensor lines)
   // Signal TI1F_ED: falling and rising edge of the inputs is used
   TIM_SelectInputTrigger(TIM2, TIM_TS_TI1F_ED);
@@ -81,7 +90,7 @@ void hall_sensor_init (void)
   TIM_SelectSlaveMode(TIM2, TIM_SlaveMode_Reset);
 
   // Channel 1 in input capture mode
-  // on every TCR edge (build from TI1F_ED which isTIM_ICPSC_DIV1 a HallSensor edge)
+  // on every TCR edge (build from TI1F_ED which is a HallSensor edge)
   // the timervalue is copied into ccr register and a CCR1 Interrupt
   // TIM_IT_CC1 is fired
   TIM_ICInitTypeDef TIM_ICInitStructure;
@@ -95,7 +104,7 @@ void hall_sensor_init (void)
   TIM_ICInit(TIM2, &TIM_ICInitStructure);
 
   /* Enable the TIM2 Trigger Interrupt Request */
-  TIM_ITConfig(TIM2, TIM_IT_Trigger, ENABLE);
+  TIM_ITConfig(TIM2, (TIM_IT_Trigger | TIM_IT_Update), ENABLE);
 
   NVIC_InitTypeDef NVIC_InitStructure;
   /* Configure and enable TIM2 interrupt */

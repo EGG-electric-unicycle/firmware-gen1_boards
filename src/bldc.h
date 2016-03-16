@@ -42,4 +42,8 @@ unsigned int bldc_get_direction (void);
 void bldc_set_state (unsigned int state);
 unsigned int bldc_get_state (void);
 
+unsigned int inc_svm_table_index (unsigned int index);
+unsigned int get_svm_table_index (void);
+void set_svm_table_index (unsigned int value);
+
 #endif

@@ -29,5 +29,6 @@ void pwm_init (void);
 void pwm_set_duty_cycle (int value);
 void pwm_update_duty_cycle (void);
 void pwm_manage (void);
+int pwm_get_duty_cycle (void);
 
 #endif

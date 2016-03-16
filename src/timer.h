@@ -14,5 +14,6 @@
  * overflows at ~1h
  */
 unsigned int micros (void);
+void TIM4_set_counter_10us (unsigned int value);
 
 #endif

@@ -32,12 +32,15 @@ void TIM3_IRQHandler (void)
 // This interrupt fire after each TIM4 overflow, 65536us
 void TIM4_IRQHandler (void)
 {
-
-
-
+  bldc_svm_tick ();
 
   /* Clear TIM4 TIM_IT_Update pending interrupt bit */
   TIM_ClearITPendingBit(TIM4, TIM_IT_Update);
+}
+
+void TIM4_set_counter_10us (unsigned int value)
+{
+  TIM_SetCounter(TIM4, (uint16_t) value);
 }
 
 // TIM3 is only used for implementation of micros()
