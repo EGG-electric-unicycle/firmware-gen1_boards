@@ -65,7 +65,7 @@ int main(void)
 
   motor_start ();
 
-  TIM4_set_counter_10us (7); // 10ms
+  TIM4_set_counter_10us (1800); // 3ms ok
 
   while (1)
   {
@@ -166,10 +166,11 @@ void initialize (void)
   commutation_disable ();
   pwm_init ();
   gpio_init (); // configure pins just after PWM init
-  hall_sensor_init ();
+  //hall_sensor_init ();
 
   //IMU_init ();
   //usart1_init ();
-  //TIM4_init ();
+  //TIM3_init ();
+  TIM4_init ();
 
 }

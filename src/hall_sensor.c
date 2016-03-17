@@ -14,29 +14,57 @@
 
 volatile unsigned int hall_sensors_time = 0;
 
+volatile unsigned int sequential_signal = 0;
+
 #define HALL_SENSORS_MASK ((1 << 0) | (1 << 1) | (1 << 2))
 
 void TIM2_IRQHandler(void)
 {
+  /* Save current time between each hall sensor signal change */
+  hall_sensors_time = (unsigned int) TIM_GetCapture1 (TIM2);
+
+  commutate ();
+  bldc_svm_tick ();
+  // clear interrupt flag for this interrupt
+  TIM_ClearITPendingBit (TIM2, (TIM_IT_Trigger | TIM_IT_Update));
+
+#if 0
+  // Code that will be executed for hall sensor signal change
   if (TIM_GetFlagStatus (TIM2, TIM_FLAG_Trigger))
   {
-    /* "Read" all sensors sequence and execute the BLDC coils commutation */
-    TIM_ITConfig (TIM1, TIM_IT_Update, DISABLE); // disable to avoid concurrency access to update of PWM controller duty-cycle values
-    //commutate ();
-    TIM_ITConfig (TIM1, TIM_IT_Update, ENABLE);
+    // Flag when we are getting a sequencial hall sensor signal
+    if (sequential_signal == 0)
+    {
+      sequential_signal = 1;
+    }
+    else
+    {
+      // Setup current time between each hall sensor signal change to the TIM4 */
+      TIM4_set_counter_10us ((unsigned int) (hall_sensors_time / 6.0));
+    }
 
-    /* Save current time between each hall sensor signal change */
-    hall_sensors_time = TIM_GetCapture1 (TIM2);
+    /* TIM4 counter enable */
+    TIM_Cmd (TIM4, DISABLE);
+    commutate ();
+    /* TIM4 counter enable */
+    TIM_Cmd (TIM4, ENABLE);
 
     // clear interrupt flag for this interrupt
-    TIM_ClearITPendingBit (TIM2, TIM_IT_Trigger);
+    TIM_ClearITPendingBit (TIM2, (TIM_IT_Trigger | TIM_IT_Update));
   }
-  else if (TIM_GetFlagStatus (TIM2, TIM_FLAG_Update))
+  // Code that will be executed for the overflow
+  else //(TIM_GetFlagStatus (TIM2, TIM_FLAG_Update))
   {
+    // Reset sequencial hall sensor signal
+    sequential_signal = 0;
 
-    // clear interrupt flag for this interrupt
+    // Setup current time between each hall sensor signal change to the TIM4 */
+    TIM4_set_counter_10us (3333); // 20000/6 = 3333; 200ms
+
+     clear interrupt flag for this interrupt
     TIM_ClearITPendingBit (TIM2, TIM_IT_Update);
   }
+#endif
 }
 
 unsigned int get_hall_sensors_10us (void)
@@ -70,7 +98,7 @@ void hall_sensor_init (void)
   // timer base configuration
   // 64MHz clock (PCLK1), 64MHz/640 = 1MHz --> 10us each increment of the counter/timer
   TIM_TimeBaseStructure.TIM_Prescaler = (640 -1);
-  TIM_TimeBaseStructure.TIM_Period = 65535; // max of 655.35ms or the Timer will overflow
+  TIM_TimeBaseStructure.TIM_Period = (65000 - 1); // max of 200ms or the Timer will overflow, about the walking speed of 5km/h
   TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
   TIM_TimeBaseStructure.TIM_ClockDivision = 0;
   TIM_TimeBaseStructure.TIM_RepetitionCounter = 0;
@@ -103,8 +131,9 @@ void hall_sensor_init (void)
   TIM_ICInitStructure.TIM_ICFilter = 0;
   TIM_ICInit(TIM2, &TIM_ICInitStructure);
 
-  /* Enable the TIM2 Trigger Interrupt Request */
-  TIM_ITConfig(TIM2, (TIM_IT_Trigger | TIM_IT_Update), ENABLE);
+  /* Enable the TIM2 Trigger and Update Interrupts Request */
+  //TIM_ITConfig(TIM2, (TIM_IT_Trigger | TIM_IT_Update), ENABLE);
+  TIM_ITConfig(TIM2, (TIM_IT_Trigger), ENABLE);
 
   NVIC_InitTypeDef NVIC_InitStructure;
   /* Configure and enable TIM2 interrupt */

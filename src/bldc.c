@@ -87,7 +87,24 @@ void bldc_svm_tick (void)
 
   // Update the index values
   svm_table_index_a = inc_svm_table_index (svm_table_index_a);
+  svm_table_index_a = inc_svm_table_index (svm_table_index_a);
+  svm_table_index_a = inc_svm_table_index (svm_table_index_a);
+  svm_table_index_a = inc_svm_table_index (svm_table_index_a);
+  svm_table_index_a = inc_svm_table_index (svm_table_index_a);
+  svm_table_index_a = inc_svm_table_index (svm_table_index_a);
+
   svm_table_index_b = inc_svm_table_index (svm_table_index_b);
+  svm_table_index_b = inc_svm_table_index (svm_table_index_b);
+  svm_table_index_b = inc_svm_table_index (svm_table_index_b);
+  svm_table_index_b = inc_svm_table_index (svm_table_index_b);
+  svm_table_index_b = inc_svm_table_index (svm_table_index_b);
+  svm_table_index_b = inc_svm_table_index (svm_table_index_b);
+
+  svm_table_index_c = inc_svm_table_index (svm_table_index_c);
+  svm_table_index_c = inc_svm_table_index (svm_table_index_c);
+  svm_table_index_c = inc_svm_table_index (svm_table_index_c);
+  svm_table_index_c = inc_svm_table_index (svm_table_index_c);
+  svm_table_index_c = inc_svm_table_index (svm_table_index_c);
   svm_table_index_c = inc_svm_table_index (svm_table_index_c);
 
   // Scale and apply the duty cycle values
@@ -98,124 +115,46 @@ void bldc_svm_tick (void)
   TIM_SetCompare2(TIM1, (svm_table[svm_table_index_c]) * pwm_scale_factor);
 }
 
-
-
-
-void phase_a_h_off (void)
-{
-  GPIO_InitStructure.GPIO_Pin = BRIDGE_A_HIGH;
-  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
-  GPIO_Init(GPIOA, &GPIO_InitStructure);
-  GPIO_ResetBits(GPIOA, BRIDGE_A_HIGH);
-}
-
-void phase_a_l_off (void)
-{
-  GPIO_InitStructure.GPIO_Pin = BRIDGE_A_LOW;
-  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
-  GPIO_Init(GPIOB, &GPIO_InitStructure);
-  GPIO_SetBits(GPIOB, BRIDGE_A_LOW);
-}
-
-void phase_b_h_off (void)
-{
-  GPIO_InitStructure.GPIO_Pin = BRIDGE_B_HIGH;
-  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
-  GPIO_Init(GPIOA, &GPIO_InitStructure);
-  GPIO_ResetBits(GPIOA, BRIDGE_B_HIGH);
-}
-
-void phase_b_l_off (void)
-{
-  GPIO_InitStructure.GPIO_Pin = BRIDGE_B_LOW;
-  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
-  GPIO_Init(GPIOB, &GPIO_InitStructure);
-  GPIO_SetBits(GPIOB, BRIDGE_B_LOW);
-}
-
-void phase_c_h_off (void)
-{
-  GPIO_InitStructure.GPIO_Pin = BRIDGE_C_HIGH;
-  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
-  GPIO_Init(GPIOA, &GPIO_InitStructure);
-  GPIO_ResetBits(GPIOA, BRIDGE_C_HIGH);
-}
-
-void phase_c_l_off (void)
-{
-  GPIO_InitStructure.GPIO_Pin = BRIDGE_C_LOW;
-  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
-  GPIO_Init(GPIOB, &GPIO_InitStructure);
-  GPIO_SetBits(GPIOB, BRIDGE_C_LOW);
-}
-
-// update duty-cycle controller with phase new states
-void apply_duty_cycle (void)
-{
-  TIM_UpdateDisableConfig (TIM1, ENABLE); // disable update event
-  pwm_update_duty_cycle ();
-  TIM_GenerateEvent(TIM1, TIM_EventSource_Update); // generate update event to update shadow registers / duty-cycle
-  TIM_UpdateDisableConfig (TIM1, DISABLE); // enable update event
-}
-
 void commutation_AB (void)
 {
-  bldc_phase_state.a = NORMAL;
-  bldc_phase_state.b = INVERTED;
-  bldc_phase_state.c = OFF;
-
-  apply_duty_cycle (); // update duty-cycle controller with phase new states
+  svm_table_index_a = 0;
+  svm_table_index_b = 12;
+  svm_table_index_c = 24;
 }
 
 void commutation_AC (void)
 {
-  bldc_phase_state.a = NORMAL;
-  bldc_phase_state.b = OFF;
-  bldc_phase_state.c = INVERTED;
-
-  apply_duty_cycle ();
+  svm_table_index_a = 6;
+  svm_table_index_b = 18;
+  svm_table_index_c = 30;
 }
 
 void commutation_BC (void)
 {
-  bldc_phase_state.a = OFF;
-  bldc_phase_state.b = NORMAL;
-  bldc_phase_state.c = INVERTED;
-
-  apply_duty_cycle ();
+  svm_table_index_a = 12;
+  svm_table_index_b = 24;
+  svm_table_index_c = 0;
 }
 
 void commutation_BA (void)
 {
-  bldc_phase_state.a = INVERTED;
-  bldc_phase_state.b = NORMAL;
-  bldc_phase_state.c = OFF;
-
-  apply_duty_cycle ();
+  svm_table_index_a = 18;
+  svm_table_index_b = 30;
+  svm_table_index_c = 6;
 }
 
 void commutation_CA (void)
 {
-  bldc_phase_state.a = INVERTED;
-  bldc_phase_state.b = OFF;
-  bldc_phase_state.c = NORMAL;
-
-  apply_duty_cycle ();
+  svm_table_index_a = 24;
+  svm_table_index_b = 0;
+  svm_table_index_c = 12;
 }
 
 void commutation_CB (void)
 {
-  bldc_phase_state.a = OFF;
-  bldc_phase_state.b = INVERTED;
-  bldc_phase_state.c = NORMAL;
-
-  apply_duty_cycle ();
+  svm_table_index_a = 30;
+  svm_table_index_b = 6;
+  svm_table_index_c = 18;
 }
 
 void commutation_disable (void)
@@ -245,27 +184,27 @@ unsigned int get_current_sector (void)
   switch (hall_sensors)
   {
     case 1:
-    sector = 6;
-    break;
-
-    case 2:
     sector = 5;
     break;
 
-    case 3:
+    case 2:
     sector = 2;
     break;
 
-    case 4:
+    case 3:
     sector = 3;
     break;
 
-    case 5:
+    case 4:
     sector = 1;
     break;
 
-    case 6:
+    case 5:
     sector = 4;
+    break;
+
+    case 6:
+    sector = 6;
     break;
 
     default:

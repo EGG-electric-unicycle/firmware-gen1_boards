@@ -40,7 +40,7 @@ void TIM4_IRQHandler (void)
 
 void TIM4_set_counter_10us (unsigned int value)
 {
-  TIM_SetCounter(TIM4, (uint16_t) value);
+  TIM_SetAutoreload(TIM4, (uint16_t) value);
 }
 
 // TIM3 is only used for implementation of micros()
@@ -60,7 +60,7 @@ void TIM3_init(void)
   TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
   TIM_TimeBaseInit (TIM3, &TIM_TimeBaseStructure);
 
-  /* Enable the TIM3 gloabal Interrupt */
+  /* Enable the TIM3 global Interrupt */
   NVIC_InitTypeDef NVIC_InitStructure;
   NVIC_InitStructure.NVIC_IRQChannel = TIM3_IRQn;
   NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = TIM3_PRIORITY;
@@ -86,13 +86,15 @@ void TIM4_init(void)
 
   /* Time base configuration */
   TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
-  TIM_TimeBaseStructure.TIM_Period = 65535;
+  TIM_TimeBaseStructure.TIM_Period = 100;
   TIM_TimeBaseStructure.TIM_Prescaler = (640 - 1); // 64MHz clock (PCLK1), 64MHz/640 = 100kHz --> 10us each increment of the counter/timer
   TIM_TimeBaseStructure.TIM_ClockDivision = 0;
   TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
   TIM_TimeBaseInit (TIM4, &TIM_TimeBaseStructure);
 
-  /* Enable the TIM4 gloabal Interrupt */
+  TIM_ARRPreloadConfig (TIM4, TRUE);
+
+  /* Enable the TIM4 global Interrupt */
   NVIC_InitTypeDef NVIC_InitStructure;
   NVIC_InitStructure.NVIC_IRQChannel = TIM4_IRQn;
   NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = TIM4_PRIORITY;
