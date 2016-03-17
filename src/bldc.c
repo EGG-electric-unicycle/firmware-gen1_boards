@@ -98,47 +98,8 @@ void bldc_svm_tick (void)
 
   // Update the index values
   svm_table_index_a = inc_svm_table_index (svm_table_index_a);
-  svm_table_index_a = inc_svm_table_index (svm_table_index_a);
-  svm_table_index_a = inc_svm_table_index (svm_table_index_a);
-  svm_table_index_a = inc_svm_table_index (svm_table_index_a);
-  svm_table_index_a = inc_svm_table_index (svm_table_index_a);
-  svm_table_index_a = inc_svm_table_index (svm_table_index_a); // roda ok
-  svm_table_index_a = inc_svm_table_index (svm_table_index_a); // melhor ainda
-  svm_table_index_a = inc_svm_table_index (svm_table_index_a); // ainda roda bem
-  svm_table_index_a = inc_svm_table_index (svm_table_index_a); // o melhor até agora!! quase sem ruído
-  svm_table_index_a = inc_svm_table_index (svm_table_index_a); // O MELHOR!!! MENOS RUÍDO E MENOR CORRENTE
-//  svm_table_index_a = inc_svm_table_index (svm_table_index_a); // parece que já começa a fazer ruído
-//  svm_table_index_a = inc_svm_table_index (svm_table_index_a); // já faz muito ruído
-
-
   svm_table_index_b = inc_svm_table_index (svm_table_index_b);
-  svm_table_index_b = inc_svm_table_index (svm_table_index_b);
-  svm_table_index_b = inc_svm_table_index (svm_table_index_b);
-  svm_table_index_b = inc_svm_table_index (svm_table_index_b);
-  svm_table_index_b = inc_svm_table_index (svm_table_index_b);
-  svm_table_index_b = inc_svm_table_index (svm_table_index_b);
-  svm_table_index_b = inc_svm_table_index (svm_table_index_b);
-  svm_table_index_b = inc_svm_table_index (svm_table_index_b);
-  svm_table_index_b = inc_svm_table_index (svm_table_index_b);
-  svm_table_index_b = inc_svm_table_index (svm_table_index_b);
-//  svm_table_index_b = inc_svm_table_index (svm_table_index_b);
-//  svm_table_index_b = inc_svm_table_index (svm_table_index_b);
-
-
   svm_table_index_c = inc_svm_table_index (svm_table_index_c);
-  svm_table_index_c = inc_svm_table_index (svm_table_index_c);
-  svm_table_index_c = inc_svm_table_index (svm_table_index_c);
-  svm_table_index_c = inc_svm_table_index (svm_table_index_c);
-  svm_table_index_c = inc_svm_table_index (svm_table_index_c);
-  svm_table_index_c = inc_svm_table_index (svm_table_index_c);
-  svm_table_index_c = inc_svm_table_index (svm_table_index_c);
-  svm_table_index_c = inc_svm_table_index (svm_table_index_c);
-  svm_table_index_c = inc_svm_table_index (svm_table_index_c);
-  svm_table_index_c = inc_svm_table_index (svm_table_index_c);
-//  svm_table_index_c = inc_svm_table_index (svm_table_index_c);
-//  svm_table_index_c = inc_svm_table_index (svm_table_index_c);
-
-
 
   // Scale and apply the duty cycle values
   pwm_scale_factor = pwm_get_duty_cycle () + 999;
@@ -148,92 +109,47 @@ void bldc_svm_tick (void)
   TIM_SetCompare2(TIM1, (svm_table[svm_table_index_c]) * pwm_scale_factor);
 }
 
-
 void commutation_AB (void)
 {
-  svm_table_index_a = 0;
-  svm_table_index_b = 12;
-  svm_table_index_c = 24;
+  svm_table_index_a = 27;
+  svm_table_index_b = 3;
+  svm_table_index_c = 15;
 }
 
 void commutation_AC (void)
 {
-  svm_table_index_a = 30;
-  svm_table_index_b = 6;
-  svm_table_index_c = 18;
+  svm_table_index_a = 21;
+  svm_table_index_b = 33;
+  svm_table_index_c = 9;
 }
 
 void commutation_BC (void)
 {
-  svm_table_index_a = 24;
-  svm_table_index_b = 0;
-  svm_table_index_c = 12;
+  svm_table_index_a = 15;
+  svm_table_index_b = 27;
+  svm_table_index_c = 3;
 }
 
 void commutation_BA (void)
 {
-  svm_table_index_a = 18;
-  svm_table_index_b = 30;
-  svm_table_index_c = 6;
+  svm_table_index_a = 9;
+  svm_table_index_b = 21;
+  svm_table_index_c = 33;
 }
 
 void commutation_CA (void)
 {
-  svm_table_index_a = 12;
-  svm_table_index_b = 24;
-  svm_table_index_c = 0;
+  svm_table_index_a = 3;
+  svm_table_index_b = 15;
+  svm_table_index_c = 27;
 }
 
 void commutation_CB (void)
 {
-  svm_table_index_a = 6;
-  svm_table_index_b = 18;
-  svm_table_index_c = 30;
+  svm_table_index_a = 33;
+  svm_table_index_b = 9;
+  svm_table_index_c = 21;
 }
-
-#if 0
-void commutation_AB (void)
-{
-  svm_table_index_a = 0;
-  svm_table_index_b = 12;
-  svm_table_index_c = 24;
-}
-
-void commutation_AC (void)
-{
-  svm_table_index_a = 6;
-  svm_table_index_b = 18;
-  svm_table_index_c = 30;
-}
-
-void commutation_BC (void)
-{
-  svm_table_index_a = 12;
-  svm_table_index_b = 24;
-  svm_table_index_c = 0;
-}
-
-void commutation_BA (void)
-{
-  svm_table_index_a = 18;
-  svm_table_index_b = 30;
-  svm_table_index_c = 6;
-}
-
-void commutation_CA (void)
-{
-  svm_table_index_a = 24;
-  svm_table_index_b = 0;
-  svm_table_index_c = 12;
-}
-
-void commutation_CB (void)
-{
-  svm_table_index_a = 30;
-  svm_table_index_b = 6;
-  svm_table_index_c = 18;
-}
-#endif
 
 void commutation_disable (void)
 {
@@ -261,38 +177,6 @@ unsigned int get_current_sector (void)
   //Halls sequence: 6, 5, 2, 3, 1, 4 (includes the increment of the next step)
   switch (hall_sensors)
   {
-
-#define hall_seq_3
-
-#ifdef hall_seq_1
-    case 1:3
-    sector = 5;
-    break;
-
-    case 2:
-    sector = 2;
-    break;
-
-    case 3:
-    sector = 3;
-    break;
-
-    case 4:
-    sector = 1;
-    break;
-
-    case 5:
-    sector = 4;
-    break;
-
-    case 6:
-    sector = 6;
-    break;
-
-    default:
-    break;
-#endif
-#ifdef hall_seq_3
     case 1:
     sector = 4;
     break;
@@ -319,203 +203,6 @@ unsigned int get_current_sector (void)
 
     default:
     break;
-#endif
-#ifdef hall_seq_6
-    case 1:
-    sector = 2;
-    break;
-
-    case 2:
-    sector = 3;
-    break;
-
-    case 3:
-    sector = 1;
-    break;
-
-    case 4:
-    sector = 4;
-    break;
-
-    case 5:
-    sector = 6;
-    break;
-
-    case 6:
-    sector = 5;
-    break;
-
-    default:
-    break;
-#endif
-#ifdef hall_seq_31 // 4 6 5 2 3 1 --> 4 1 3 2 5 6
-    case 1:
-    sector = 4;
-    break;
-
-    case 2:
-    sector = 1;
-    break;
-
-    case 3:
-    sector = 3;
-    break;
-
-    case 4:
-    sector = 2;
-    break;
-
-    case 5:
-    sector = 5;
-    break;
-
-    case 6:
-    sector = 6;
-    break;
-
-    default:
-    break;
-#endif
-#ifdef hall_seq_32
-    case 1:
-    sector = 6;
-    break;
-
-    case 2:
-    sector = 4;
-    break;
-
-    case 3:
-    sector = 1;
-    break;
-
-    case 4:
-    sector = 3;
-    break;
-
-    case 5:
-    sector = 2;
-    break;
-
-    case 6:
-    sector = 5;
-    break;
-
-    default:
-    break;
-#endif
-#ifdef hall_seq_33
-    case 1:
-    sector = 5;
-    break;
-
-    case 2:
-    sector = 6;
-    break;
-
-    case 3:
-    sector = 4;
-    break;
-
-    case 4:
-    sector = 1;
-    break;
-
-    case 5:
-    sector = 3;
-    break;
-
-    case 6:
-    sector = 2;
-    break;
-
-    default:
-    break;
-#endif
-#ifdef hall_seq_34
-    case 1:
-    sector = 2;
-    break;
-
-    case 2:
-    sector = 5;
-    break;
-
-    case 3:
-    sector = 6;
-    break;
-
-    case 4:
-    sector = 4;
-    break;
-
-    case 5:
-    sector = 1;
-    break;
-
-    case 6:
-    sector = 3;
-    break;
-
-    default:
-    break;
-#endif
-#ifdef hall_seq_35
-    case 1:
-    sector = 2;
-    break;
-
-    case 2:
-    sector = 5;
-    break;
-
-    case 3:
-    sector = 6;
-    break;
-
-    case 4:
-    sector = 4;
-    break;
-
-    case 5:
-    sector = 1;
-    break;
-
-    case 6:
-    sector = 3;
-    break;
-
-    default:
-    break;
-#endif
-#ifdef hall_seq_36
-    case 1:
-    sector = 3;
-    break;
-
-    case 2:
-    sector = 2;
-    break;
-
-    case 3:
-    sector = 5;
-    break;
-
-    case 4:
-    sector = 6;
-    break;
-
-    case 5:
-    sector = 4;
-    break;
-
-    case 6:
-    sector = 1;
-    break;
-
-    default:
-    break;
-#endif
   }
 
   return sector;

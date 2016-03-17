@@ -87,7 +87,7 @@ void hall_sensor_init (void)
   // timer base configuration
   // 64MHz clock (PCLK1), 64MHz/640 = 1MHz --> 10us each increment of the counter/timer
   TIM_TimeBaseStructure.TIM_Prescaler = (640 -1);
-  TIM_TimeBaseStructure.TIM_Period = (65000 - 1); // max of 200ms or the Timer will overflow, about the walking speed of 5km/h
+  TIM_TimeBaseStructure.TIM_Period = (2000 - 1); // max of 200ms or the Timer will overflow, about the walking speed of 5km/h
   TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
   TIM_TimeBaseStructure.TIM_ClockDivision = 0;
   TIM_TimeBaseStructure.TIM_RepetitionCounter = 0;
@@ -121,7 +121,8 @@ void hall_sensor_init (void)
   TIM_ICInit(TIM2, &TIM_ICInitStructure);
 
   /* Enable the TIM2 Trigger and Update Interrupts Request */
-  TIM_ITConfig(TIM2, (TIM_IT_Trigger | TIM_IT_Update), ENABLE);
+  //TIM_ITConfig(TIM2, (TIM_IT_Trigger | TIM_IT_Update), ENABLE);
+  TIM_ITConfig(TIM2, (TIM_IT_Trigger), ENABLE);
 
   NVIC_InitTypeDef NVIC_InitStructure;
   /* Configure and enable TIM2 interrupt */

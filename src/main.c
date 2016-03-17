@@ -171,6 +171,6 @@ void initialize (void)
   //IMU_init ();
   //usart1_init ();
   //TIM3_init ();
-  //TIM4_init ();
+//  TIM4_init ();
 
 }
