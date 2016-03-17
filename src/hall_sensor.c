@@ -23,12 +23,6 @@ void TIM2_IRQHandler(void)
   /* Save current time between each hall sensor signal change */
   hall_sensors_time = (unsigned int) TIM_GetCapture1 (TIM2);
 
-  commutate ();
-  bldc_svm_tick ();
-  // clear interrupt flag for this interrupt
-  TIM_ClearITPendingBit (TIM2, (TIM_IT_Trigger | TIM_IT_Update));
-
-#if 0
   // Code that will be executed for hall sensor signal change
   if (TIM_GetFlagStatus (TIM2, TIM_FLAG_Trigger))
   {
@@ -40,14 +34,10 @@ void TIM2_IRQHandler(void)
     else
     {
       // Setup current time between each hall sensor signal change to the TIM4 */
-      TIM4_set_counter_10us ((unsigned int) (hall_sensors_time / 6.0));
+      //TIM4_set_counter_10us ((unsigned int) (hall_sensors_time / 6.0));
+      commutate ();
+      bldc_svm_tick ();
     }
-
-    /* TIM4 counter enable */
-    TIM_Cmd (TIM4, DISABLE);
-    commutate ();
-    /* TIM4 counter enable */
-    TIM_Cmd (TIM4, ENABLE);
 
     // clear interrupt flag for this interrupt
     TIM_ClearITPendingBit (TIM2, (TIM_IT_Trigger | TIM_IT_Update));
@@ -61,10 +51,9 @@ void TIM2_IRQHandler(void)
     // Setup current time between each hall sensor signal change to the TIM4 */
     TIM4_set_counter_10us (3333); // 20000/6 = 3333; 200ms
 
-     clear interrupt flag for this interrupt
+    // clear interrupt flag for this interrupt
     TIM_ClearITPendingBit (TIM2, TIM_IT_Update);
   }
-#endif
 }
 
 unsigned int get_hall_sensors_10us (void)
@@ -132,8 +121,7 @@ void hall_sensor_init (void)
   TIM_ICInit(TIM2, &TIM_ICInitStructure);
 
   /* Enable the TIM2 Trigger and Update Interrupts Request */
-  //TIM_ITConfig(TIM2, (TIM_IT_Trigger | TIM_IT_Update), ENABLE);
-  TIM_ITConfig(TIM2, (TIM_IT_Trigger), ENABLE);
+  TIM_ITConfig(TIM2, (TIM_IT_Trigger | TIM_IT_Update), ENABLE);
 
   NVIC_InitTypeDef NVIC_InitStructure;
   /* Configure and enable TIM2 interrupt */
