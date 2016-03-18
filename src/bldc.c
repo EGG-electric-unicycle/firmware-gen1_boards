@@ -64,24 +64,17 @@ unsigned int svm_table [36] =
   885
 };
 
-void bldc_svm_tick (void)
+void apply_duty_cycle (void)
 {
   float duty_cycle;
 
   duty_cycle = pwm_get_duty_cycle ();
-
-  // Set the rotation direction
-  if (duty_cycle >=0)
+  if (duty_cycle <= 0)
   {
-    bldc_set_direction (RIGHT);
-  }
-  else
-  {
-    bldc_set_direction (LEFT);
-    duty_cycle *= -1; // invert the negative signal
+    duty_cycle *= -1; // ivert the signal if duty_cycle is negative, ie: -999 * -1 = 999
   }
 
-  // Scale and apply the duty cycle values
+  // Scale duty_cycle to be [0 <-> 1] and apply it
   duty_cycle /= 1000.0;
   TIM_SetCompare3(TIM1, (svm_table[svm_table_index_a]) * duty_cycle);
   TIM_SetCompare1(TIM1, (svm_table[svm_table_index_b]) * duty_cycle);
@@ -139,7 +132,7 @@ unsigned int get_current_sector (void)
 {
   static unsigned int hall_sensors = 0;
   unsigned int sector;
-  unsigned int i;
+  float duty_cycle;
 
   hall_sensors = (GPIO_ReadInputData (GPIOA) & (HALL_SENSORS_MASK)); // mask other pins
 
@@ -153,35 +146,56 @@ unsigned int get_current_sector (void)
   //  00000100 == 4
   //  00000101 == 5
 
-  //Halls sequence: 6, 5, 2, 3, 1, 4 (includes the increment of the next step)
+  //Halls sequence: 6, 5, 2, 3, 1, 4
   switch (hall_sensors)
   {
     case 1:
-    sector = 4;
-    break;
-
-    case 2:
     sector = 6;
     break;
 
-    case 3:
+    case 2:
     sector = 5;
     break;
 
-    case 4:
+    case 3:
     sector = 2;
     break;
 
-    case 5:
+    case 4:
     sector = 3;
     break;
 
-    case 6:
+    case 5:
     sector = 1;
+    break;
+
+    case 6:
+    sector = 4;
     break;
 
     default:
     break;
+  }
+
+  /* Get the desired rotation direction */
+  duty_cycle = pwm_get_duty_cycle ();
+  if (duty_cycle >=0)
+  {
+    bldc_set_direction (RIGHT);
+  }
+  else
+  {
+    bldc_set_direction (LEFT);
+  }
+
+  /* Increment or decrement sector based on the desired direction */
+  if (bldc_get_direction() == RIGHT)
+  {
+    sector = increment_sector(sector);
+  }
+  else if (bldc_get_direction() == LEFT)
+  {
+    sector = decrement_sector(sector);
   }
 
   return sector;
@@ -192,8 +206,6 @@ void commutate (void)
   volatile unsigned int sector;
 
   sector = get_current_sector ();
-
-  //Coils: AB, AC, BC, BA, CA, CB
   switch (sector)
   {
     case 1:
@@ -224,6 +236,37 @@ void commutate (void)
     commutation_disable ();
     break;
   }
+
+  /* Sector has been selected, now apply the duty_cycle */
+  apply_duty_cycle ();
+}
+
+unsigned int increment_sector (unsigned int sector)
+{
+  if (sector < 6)
+  {
+    sector++;
+  }
+  else // sector = 6
+  {
+    sector = 1;
+  }
+
+  return sector;
+}
+
+unsigned int decrement_sector (unsigned int sector)
+{
+  if (sector > 1)
+  {
+    sector--;
+  }
+  else // sector = 1
+  {
+    sector = 6;
+  }
+
+  return sector;
 }
 
 void bldc_set_direction (unsigned int direction)

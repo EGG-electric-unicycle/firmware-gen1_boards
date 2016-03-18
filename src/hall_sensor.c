@@ -20,43 +20,13 @@ volatile unsigned int sequential_signal = 0;
 
 void TIM2_IRQHandler(void)
 {
+  commutate ();
+
   /* Save current time between each hall sensor signal change */
   hall_sensors_time = (unsigned int) TIM_GetCapture1 (TIM2);
 
-  // Code that will be executed for hall sensor signal change
-  if (TIM_GetFlagStatus (TIM2, TIM_FLAG_Trigger))
-  {
-//    // Flag when we are getting a sequencial hall sensor signal
-//    if (sequential_signal == 0)
-//    {
-//      sequential_signal = 1;
-//    }
-//    else
-//    {
-      // Setup current time between each hall sensor signal change to the TIM4 */
-      //TIM4_set_counter_10us ((unsigned int) (hall_sensors_time / 6.0));
-      commutate ();
-      bldc_svm_tick ();
-//    }
-
-    // clear interrupt flag for this interrupt
-    TIM_ClearITPendingBit (TIM2, (TIM_IT_Trigger | TIM_IT_Update));
-  }
-  // Code that will be executed for the overflow
-  else //(TIM_GetFlagStatus (TIM2, TIM_FLAG_Update))
-  {
-      commutate ();
-      bldc_svm_tick ();
-
-    // Reset sequencial hall sensor signal
-    sequential_signal = 0;
-
-    // Setup current time between each hall sensor signal change to the TIM4 */
-    TIM4_set_counter_10us (3333); // 20000/6 = 3333; 200ms
-
-    // clear interrupt flag for this interrupt
-    TIM_ClearITPendingBit (TIM2, TIM_IT_Update);
-  }
+  // clear interrupt flag for this interrupt
+  TIM_ClearITPendingBit (TIM2, (TIM_IT_Trigger | TIM_IT_Update));
 }
 
 unsigned int get_hall_sensors_10us (void)
