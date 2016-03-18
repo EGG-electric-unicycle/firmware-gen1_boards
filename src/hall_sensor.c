@@ -26,18 +26,18 @@ void TIM2_IRQHandler(void)
   // Code that will be executed for hall sensor signal change
   if (TIM_GetFlagStatus (TIM2, TIM_FLAG_Trigger))
   {
-    // Flag when we are getting a sequencial hall sensor signal
-    if (sequential_signal == 0)
-    {
-      sequential_signal = 1;
-    }
-    else
-    {
+//    // Flag when we are getting a sequencial hall sensor signal
+//    if (sequential_signal == 0)
+//    {
+//      sequential_signal = 1;
+//    }
+//    else
+//    {
       // Setup current time between each hall sensor signal change to the TIM4 */
       //TIM4_set_counter_10us ((unsigned int) (hall_sensors_time / 6.0));
       commutate ();
       bldc_svm_tick ();
-    }
+//    }
 
     // clear interrupt flag for this interrupt
     TIM_ClearITPendingBit (TIM2, (TIM_IT_Trigger | TIM_IT_Update));
@@ -45,6 +45,9 @@ void TIM2_IRQHandler(void)
   // Code that will be executed for the overflow
   else //(TIM_GetFlagStatus (TIM2, TIM_FLAG_Update))
   {
+      commutate ();
+      bldc_svm_tick ();
+
     // Reset sequencial hall sensor signal
     sequential_signal = 0;
 
@@ -121,8 +124,7 @@ void hall_sensor_init (void)
   TIM_ICInit(TIM2, &TIM_ICInitStructure);
 
   /* Enable the TIM2 Trigger and Update Interrupts Request */
-  //TIM_ITConfig(TIM2, (TIM_IT_Trigger | TIM_IT_Update), ENABLE);
-  TIM_ITConfig(TIM2, (TIM_IT_Trigger), ENABLE);
+  TIM_ITConfig(TIM2, (TIM_IT_Trigger | TIM_IT_Update), ENABLE);
 
   NVIC_InitTypeDef NVIC_InitStructure;
   /* Configure and enable TIM2 interrupt */
