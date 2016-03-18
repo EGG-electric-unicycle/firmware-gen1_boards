@@ -14,17 +14,12 @@
 
 #define HALL_SENSORS_MASK ((1 << 0) | (1 << 1) | (1 << 2))
 
-extern GPIO_InitTypeDef GPIO_InitStructure;
-
 unsigned int bldc_machine_state = BLDC_NORMAL;
 static unsigned int _direction = RIGHT;
 
-// We start with the sine waves with 120º of each other
-static unsigned int svm_table_index_a = 0;
-static unsigned int svm_table_index_b = 12;
-static unsigned int svm_table_index_c = 24;
-
-struct Bldc_phase_state bldc_phase_state;
+static unsigned int svm_table_index_a;
+static unsigned int svm_table_index_b;
+static unsigned int svm_table_index_c;
 
 // Space Vector Modulation PWMs values, please read this blog message:
 // http://www.berryjam.eu/2015/04/driving-bldc-gimbals-at-super-slow-speeds-with-arduino/
@@ -69,86 +64,70 @@ unsigned int svm_table [36] =
   885
 };
 
-unsigned int inc_svm_table_index (unsigned int index)
+void bldc_svm_tick (void)
 {
-  // Increment
-//  if (index < 35)
-//  {
-//    index++;
-//  }
-//  else
-//  {
-//    index = 0;
-//  }
+  float duty_cycle;
 
-  // Decrement
-  if (index > 1)
+  duty_cycle = pwm_get_duty_cycle ();
+
+  // Set the rotation direction
+  if (duty_cycle >=0)
   {
-    index--;
+    bldc_set_direction (RIGHT);
   }
   else
   {
-    index = 35;
+    bldc_set_direction (LEFT);
+    duty_cycle *= -1; // invert the negative signal
   }
-}
-
-void bldc_svm_tick (void)
-{
-  float pwm_scale_factor;
-
-  // Update the index values
-  svm_table_index_a = inc_svm_table_index (svm_table_index_a);
-  svm_table_index_b = inc_svm_table_index (svm_table_index_b);
-  svm_table_index_c = inc_svm_table_index (svm_table_index_c);
 
   // Scale and apply the duty cycle values
-  pwm_scale_factor = pwm_get_duty_cycle () + 999;
-  pwm_scale_factor = pwm_scale_factor / 1999.0 ;
-  TIM_SetCompare3(TIM1, (svm_table[svm_table_index_a]) * pwm_scale_factor);
-  TIM_SetCompare1(TIM1, (svm_table[svm_table_index_b]) * pwm_scale_factor);
-  TIM_SetCompare2(TIM1, (svm_table[svm_table_index_c]) * pwm_scale_factor);
+  duty_cycle /= 1000.0;
+  TIM_SetCompare3(TIM1, (svm_table[svm_table_index_a]) * duty_cycle);
+  TIM_SetCompare1(TIM1, (svm_table[svm_table_index_b]) * duty_cycle);
+  TIM_SetCompare2(TIM1, (svm_table[svm_table_index_c]) * duty_cycle);
 }
 
 void commutation_AB (void)
 {
-  svm_table_index_a = 27;
-  svm_table_index_b = 3;
-  svm_table_index_c = 15;
+  svm_table_index_a = 26;
+  svm_table_index_b = 2;
+  svm_table_index_c = 14;
 }
 
 void commutation_AC (void)
 {
-  svm_table_index_a = 21;
-  svm_table_index_b = 33;
-  svm_table_index_c = 9;
+  svm_table_index_a = 20;
+  svm_table_index_b = 32;
+  svm_table_index_c = 8;
 }
 
 void commutation_BC (void)
 {
-  svm_table_index_a = 15;
-  svm_table_index_b = 27;
-  svm_table_index_c = 3;
+  svm_table_index_a = 14;
+  svm_table_index_b = 26;
+  svm_table_index_c = 2;
 }
 
 void commutation_BA (void)
 {
-  svm_table_index_a = 9;
-  svm_table_index_b = 21;
-  svm_table_index_c = 33;
+  svm_table_index_a = 8;
+  svm_table_index_b = 20;
+  svm_table_index_c = 32;
 }
 
 void commutation_CA (void)
 {
-  svm_table_index_a = 3;
-  svm_table_index_b = 15;
-  svm_table_index_c = 27;
+  svm_table_index_a = 2;
+  svm_table_index_b = 14;
+  svm_table_index_c = 26;
 }
 
 void commutation_CB (void)
 {
-  svm_table_index_a = 33;
-  svm_table_index_b = 9;
-  svm_table_index_c = 21;
+  svm_table_index_a = 32;
+  svm_table_index_b = 8;
+  svm_table_index_c = 20;
 }
 
 void commutation_disable (void)
