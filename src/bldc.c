@@ -177,26 +177,16 @@ unsigned int get_current_sector (void)
     break;
   }
 
-  /* Get the desired rotation direction */
-  duty_cycle = pwm_get_duty_cycle ();
-  if (duty_cycle >=0)
-  {
-    bldc_set_direction (RIGHT);
-  }
-  else
-  {
-    bldc_set_direction (LEFT);
-  }
-
-  /* Increment or decrement sector based on the desired direction */
-  if (bldc_get_direction() == RIGHT)
-  {
-    sector = increment_sector(sector);
-  }
-  else if (bldc_get_direction() == LEFT)
-  {
-    sector = decrement_sector(sector);
-  }
+//  /* Get the desired rotation direction */
+//  duty_cycle = pwm_get_duty_cycle ();
+//  if (duty_cycle >=0)
+//  {
+//    bldc_set_direction (RIGHT);
+//  }
+//  else
+//  {
+//    bldc_set_direction (LEFT);
+//  }
 
   return sector;
 }

@@ -65,8 +65,6 @@ int main(void)
 
   motor_start ();
 
-  //TIM4_set_counter_10us (1800); // 3ms ok
-
   while (1)
   {
     value = (adc_get_PS_signal_value () >> 2); // filter and the value is now 10 bits --> max 1023.
