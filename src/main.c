@@ -65,6 +65,8 @@ int main(void)
 
   motor_start ();
 
+//  TIM4_set_counter_10us (5);
+
   while (1)
   {
     value = (adc_get_PS_signal_value () >> 2); // filter and the value is now 10 bits --> max 1023.
@@ -168,7 +170,7 @@ void initialize (void)
 
   //IMU_init ();
   //usart1_init ();
-  //TIM3_init ();
-//  TIM4_init ();
+  TIM3_init ();
+  //TIM4_init ();
 
 }

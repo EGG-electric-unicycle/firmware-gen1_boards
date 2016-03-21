@@ -15,8 +15,16 @@ unsigned int overflow_counter = 0;
 
 unsigned int micros (void)
 {
-  return (TIM_GetCounter (TIM3) + (overflow_counter * 65536));
+  //return (TIM_GetCounter (TIM3) + (overflow_counter * 65536));
+  return (TIM_GetCounter (TIM3));
 }
+
+void micros_reset (void)
+{
+  TIM_SetCounter (TIM3, 0);
+  //overflow_counter = 0;
+}
+
 
 // Used for implementation of micros()
 // This interrupt fire after each TIM3 overflow, 65536us
@@ -32,7 +40,19 @@ void TIM3_IRQHandler (void)
 // This interrupt fire after each TIM4 overflow, 65536us
 void TIM4_IRQHandler (void)
 {
-//  bldc_svm_tick ();
+//static unsigned int flag = 0;
+//
+//  if (flag == 1)
+//  {
+//    flag = 0;
+//    motor_set_duty_cycle (150);
+//  }
+//  else
+//  {
+//    flag = 1;
+//    motor_set_duty_cycle (-150);
+//  }
+
 
   /* Clear TIM4 TIM_IT_Update pending interrupt bit */
   TIM_ClearITPendingBit(TIM4, TIM_IT_Update);
@@ -55,7 +75,7 @@ void TIM3_init(void)
   /* Time base configuration */
   TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
   TIM_TimeBaseStructure.TIM_Period = 65535;
-  TIM_TimeBaseStructure.TIM_Prescaler = (64 - 1); // 64MHz clock (PCLK1), 64MHz/64 = 1MHz --> 1us each increment of the counter/timer
+  TIM_TimeBaseStructure.TIM_Prescaler = (64000 - 1); // 64MHz clock (PCLK1), 64MHz/64 = 1MHz --> 1us each increment of the counter/timer
   TIM_TimeBaseStructure.TIM_ClockDivision = 0;
   TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
   TIM_TimeBaseInit (TIM3, &TIM_TimeBaseStructure);
@@ -87,7 +107,7 @@ void TIM4_init(void)
   /* Time base configuration */
   TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
   TIM_TimeBaseStructure.TIM_Period = 100;
-  TIM_TimeBaseStructure.TIM_Prescaler = (640 - 1); // 64MHz clock (PCLK1), 64MHz/640 = 100kHz --> 10us each increment of the counter/timer
+  TIM_TimeBaseStructure.TIM_Prescaler = (64 - 1); // 64MHz clock (PCLK1), 64MHz/640 = 100kHz --> 10us each increment of the counter/timer
   TIM_TimeBaseStructure.TIM_ClockDivision = 0;
   TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
   TIM_TimeBaseInit (TIM4, &TIM_TimeBaseStructure);

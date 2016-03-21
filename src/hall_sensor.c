@@ -12,7 +12,8 @@
 #include "main.h"
 #include "bldc.h"
 
-volatile unsigned int hall_sensors_time = 0;
+static uint16_t hall_sensors_time = 0;
+
 
 volatile unsigned int sequential_signal = 0;
 
@@ -20,13 +21,28 @@ volatile unsigned int sequential_signal = 0;
 
 void TIM2_IRQHandler(void)
 {
-  commutate ();
+  static uint16_t timer = 0;
 
-  /* Save current time between each hall sensor signal change */
-  hall_sensors_time = (unsigned int) TIM_GetCapture1 (TIM2);
+  if (TIM_GetFlagStatus (TIM2, TIM_FLAG_Trigger))
+  {
+    commutate ();
 
-  // clear interrupt flag for this interrupt
-  TIM_ClearITPendingBit (TIM2, (TIM_IT_Trigger | TIM_IT_Update));
+    /* Save current time between each hall sensor signal change */
+    timer = (unsigned int) TIM_GetCapture1 (TIM2);
+
+    // clear interrupt flag for this interrupt
+    TIM_ClearITPendingBit (TIM2, TIM_IT_Trigger | TIM_IT_Update);
+
+  }
+  else if (TIM_GetFlagStatus (TIM2, TIM_FLAG_Update))
+  {
+    commutate ();
+
+    timer = 50000; // TIM2 overflow value at 500ms
+
+    // clear interrupt flag for this interrupt
+    TIM_ClearITPendingBit (TIM2, TIM_IT_Update);
+  }
 }
 
 unsigned int get_hall_sensors_10us (void)
@@ -59,8 +75,8 @@ void hall_sensor_init (void)
   TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
   // timer base configuration
   // 64MHz clock (PCLK1), 64MHz/640 = 1MHz --> 10us each increment of the counter/timer
-  TIM_TimeBaseStructure.TIM_Prescaler = (640 -1);
-  TIM_TimeBaseStructure.TIM_Period = (2000 - 1); // max of 200ms or the Timer will overflow, about the walking speed of 5km/h
+  TIM_TimeBaseStructure.TIM_Prescaler = (640 - 1);
+  TIM_TimeBaseStructure.TIM_Period = (50000 - 1); // max of 500ms or the Timer will overflow, (200ms about the walking speed of 5km/h)
   TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
   TIM_TimeBaseStructure.TIM_ClockDivision = 0;
   TIM_TimeBaseStructure.TIM_RepetitionCounter = 0;
