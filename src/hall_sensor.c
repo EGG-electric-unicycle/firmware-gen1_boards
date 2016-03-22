@@ -29,16 +29,21 @@ void TIM2_IRQHandler(void)
 
     /* Save current time between each hall sensor signal change */
     timer = (unsigned int) TIM_GetCapture1 (TIM2);
+    TIM4_set_counter_10us ((unsigned int) (timer / 3.0));
+    TIM_SetCounter(TIM4, 0);
+    TIM_Cmd (TIM3, ENABLE);
 
     // clear interrupt flag for this interrupt
     TIM_ClearITPendingBit (TIM2, TIM_IT_Trigger | TIM_IT_Update);
-
   }
   else if (TIM_GetFlagStatus (TIM2, TIM_FLAG_Update))
   {
     commutate ();
 
     timer = 50000; // TIM2 overflow value at 500ms
+    TIM4_set_counter_10us ((unsigned int) (timer / 3.0));
+    TIM_SetCounter(TIM4, 0);
+    TIM_Cmd (TIM3, ENABLE);
 
     // clear interrupt flag for this interrupt
     TIM_ClearITPendingBit (TIM2, TIM_IT_Update);

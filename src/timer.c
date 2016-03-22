@@ -40,19 +40,20 @@ void TIM3_IRQHandler (void)
 // This interrupt fire after each TIM4 overflow, 65536us
 void TIM4_IRQHandler (void)
 {
-//static unsigned int flag = 0;
-//
-//  if (flag == 1)
-//  {
-//    flag = 0;
-//    motor_set_duty_cycle (150);
-//  }
-//  else
-//  {
-//    flag = 1;
-//    motor_set_duty_cycle (-150);
-//  }
+  static unsigned int c = 0;
 
+  if (c < 2)
+  {
+    c++;
+
+    bldc_tick ();
+  }
+
+  if (c >= 2)
+  {
+    c = 0;
+    TIM_Cmd (TIM3, DISABLE);
+  }
 
   /* Clear TIM4 TIM_IT_Update pending interrupt bit */
   TIM_ClearITPendingBit(TIM4, TIM_IT_Update);

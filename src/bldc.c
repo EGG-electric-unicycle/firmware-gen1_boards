@@ -164,7 +164,6 @@ unsigned int get_current_sector (void)
     //  00000100 == 4
     //  00000101 == 5
 
-    //Halls sequence: 4, 6, 5, 2, 3, 1
     switch (hall_sensors)
     {
       case 1: // right 1, 3, 2, 5, 6, 4
@@ -199,7 +198,7 @@ unsigned int get_current_sector (void)
   {
     switch (hall_sensors)
     {
-      case 1: // left
+      case 1: // left 4, 6, 5, 2, 3, 1
       sector = 4;
       break;
 
@@ -226,6 +225,51 @@ unsigned int get_current_sector (void)
   }
 
   return sector;
+}
+
+unsigned int dec_svm_table_index (unsigned int index)
+{
+  // Decrement
+  if (index > 1)
+  {
+    index--;
+  }
+  else
+  {
+    index = 35;
+  }
+}
+
+unsigned int inc_svm_table_index (unsigned int index)
+{
+  // Increment
+  if (index < 35)
+  {
+    index++;
+  }
+  else
+  {
+    index = 0;
+  }
+}
+
+void bldc_tick (void)
+{
+  // Update the index values
+  if (_direction == RIGHT)
+  {
+    svm_table_index_a = dec_svm_table_index (svm_table_index_a);
+    svm_table_index_b = dec_svm_table_index (svm_table_index_b);
+    svm_table_index_c = dec_svm_table_index (svm_table_index_c);
+  }
+  else if (_direction == LEFT)
+  {
+    svm_table_index_a = inc_svm_table_index (svm_table_index_a);
+    svm_table_index_b = inc_svm_table_index (svm_table_index_b);
+    svm_table_index_c = inc_svm_table_index (svm_table_index_c);
+  }
+
+  apply_duty_cycle ();
 }
 
 void commutate (void)
