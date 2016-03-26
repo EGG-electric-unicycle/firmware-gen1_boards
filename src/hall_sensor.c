@@ -22,6 +22,7 @@ volatile unsigned int sequential_signal = 0;
 void TIM2_IRQHandler(void)
 {
   static uint16_t timer = 0;
+  static uint16_t t1 = 0, t2 = 0;
 
   if (TIM_GetFlagStatus (TIM2, TIM_FLAG_Trigger))
   {
@@ -29,9 +30,6 @@ void TIM2_IRQHandler(void)
 
     /* Save current time between each hall sensor signal change */
     timer = (unsigned int) TIM_GetCapture1 (TIM2);
-    TIM4_set_counter_10us ((unsigned int) (timer / 3.0));
-    TIM_SetCounter(TIM4, 0);
-    TIM_Cmd (TIM3, ENABLE);
 
     // clear interrupt flag for this interrupt
     TIM_ClearITPendingBit (TIM2, TIM_IT_Trigger | TIM_IT_Update);
@@ -41,13 +39,17 @@ void TIM2_IRQHandler(void)
     commutate ();
 
     timer = 50000; // TIM2 overflow value at 500ms
-    TIM4_set_counter_10us ((unsigned int) (timer / 3.0));
-    TIM_SetCounter(TIM4, 0);
-    TIM_Cmd (TIM3, ENABLE);
 
     // clear interrupt flag for this interrupt
     TIM_ClearITPendingBit (TIM2, TIM_IT_Update);
   }
+
+  /* Register the hall sensors time and apply a low pass filter */
+  // kind of low pass filter
+  hall_sensors_time = t1*0.3 + t2*0.3 + timer*0.4;
+
+  t1 = t2;
+  t2 = timer;
 }
 
 unsigned int get_hall_sensors_10us (void)
@@ -69,10 +71,10 @@ void hall_sensor_init (void)
    * 35km/h --> 35 / 4.032 = 8.7
    * each impulse for 35km/h --> 21.7 / 8.7 = 2.5ms
    *
-   * Each impulse need to be divided by 6 because we are using a space_vector_table that have 6 steps for each impulse
-   * 2.5 / 6 = 417us
+   * Each impulse need to be divided by 3
+   * 2.5 / 3 = 834us
    *
-   * Timer increment clock for capture signals can be 10us and so we will have a resolution of 400/10 = 40
+   * Timer increment clock for capture signals can be 10us and so we will have a resolution of 800/10 = 80
    * for the max speed of 35km/h which should be good
    *
    */

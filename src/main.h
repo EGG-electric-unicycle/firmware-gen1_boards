@@ -26,6 +26,12 @@
 //#define USART1_DEBUG
 #define DAC_DEBUG
 
+// Motor
+#define MOTOR_MAX_CURRENT	0.8 // Define max motor current (used on adc.c)
+#define MOTOR_MAX_SPEED 	10000 // meter per hour
+#define MOTOR_MIN_SPEED 	5000 // meter per hour -- walking speed is 5km/h
+#define MOTOR_SPEED_CONVERSION 	8.565 // convert hall sensor signal period (each 10us) to motor speed
+
 extern unsigned int machine_state;
 void delay_ms (unsigned int ms);
 void printDouble(double v, int decimalDigits);

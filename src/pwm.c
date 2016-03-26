@@ -34,18 +34,18 @@ void PWM_PERIOD_INTERRUPT (void)
     bldc_set_state (BLDC_NORMAL);
   }
 
-  // at each 1.024ms (64us * 16)
-  counter++;
-  if (counter >= 16)
-  {
-    // manage PWM only if BLDC is in normal state
-    if (bldc_get_state () == BLDC_NORMAL)
-    {
-      //pwm_manage (); //manage the increase/decrease rate of PWM duty-cycle and setup new values on the PWM controller
-    }
-
-    counter = 1;
-  }
+//  // at each 1.024ms (64us * 16)
+//  counter++;
+//  if (counter >= 16)
+//  {
+//    // manage PWM only if BLDC is in normal state
+//    if (bldc_get_state () == BLDC_NORMAL)
+//    {
+//      //pwm_manage (); //manage the increase/decrease rate of PWM duty-cycle and setup new values on the PWM controller
+//    }
+//
+//    counter = 1;
+//  }
 
   /* Clear TIM1 TIM_IT_Update pending interrupt bit */
   TIM_ClearITPendingBit(TIM1, TIM_IT_Update);
@@ -152,7 +152,8 @@ void pwm_update_duty_cycle (void)
 void pwm_set_duty_cycle (int value)
 {
 #define DUTY_CYCLE_MAX_VALUE	1000
-#define DUTY_CYCLE_MIN_VALUE	-999
+//#define DUTY_CYCLE_MIN_VALUE	-999
+#define DUTY_CYCLE_MIN_VALUE	0
 
   // limit the input values
   if (value >= DUTY_CYCLE_MAX_VALUE)

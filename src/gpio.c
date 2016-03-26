@@ -30,7 +30,7 @@ void gpio_init (void)
 
   GPIO_InitStructure.GPIO_Pin = (LED_2_BATTERY_INDICATOR | LED_3_BATTERY_INDICATOR | LED_4_BATTERY_INDICATOR | LED_POWER_SWITCHER);
   GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_OD;
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
   GPIO_Init(GPIOB, &GPIO_InitStructure);
 
   GPIO_InitStructure.GPIO_Pin = LED_1_BATTERY_INDICATOR;

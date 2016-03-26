@@ -10,6 +10,8 @@
 #include "stm32f10x_tim.h"
 #include "stm32f10x_rcc.h"
 #include "main.h"
+#include "gpio.h"
+#include "motor.h"
 
 unsigned int overflow_counter = 0;
 
@@ -36,24 +38,28 @@ void TIM3_IRQHandler (void)
   TIM_ClearITPendingBit(TIM3, TIM_IT_Update);
 }
 
-// Used for Space Vactor Modulation BLDC control
-// This interrupt fire after each TIM4 overflow, 65536us
 void TIM4_IRQHandler (void)
 {
-  static unsigned int c = 0;
+  // call the motor manage speed function
+  motor_manage_speed ();
 
-  if (c < 2)
-  {
-    c++;
-
-    bldc_tick ();
-  }
-
-  if (c >= 2)
-  {
-    c = 0;
-    TIM_Cmd (TIM3, DISABLE);
-  }
+//  static unsigned int c = 0;
+//
+//  c++;
+//  if (c < 3)
+//  {
+//    bldc_tick ();
+//
+//    if (c == 1) GPIO_SetBits(GPIOB, LED_2_BATTERY_INDICATOR);
+//  }
+//
+//  if (c >= 2)
+//  {
+//    c = 0;
+//    TIM_Cmd (TIM3, DISABLE);
+//
+//    GPIO_ResetBits(GPIOB, LED_2_BATTERY_INDICATOR);
+//  }
 
   /* Clear TIM4 TIM_IT_Update pending interrupt bit */
   TIM_ClearITPendingBit(TIM4, TIM_IT_Update);
@@ -96,7 +102,7 @@ void TIM3_init(void)
   TIM_Cmd (TIM3, ENABLE);
 }
 
-// TIM4 is only used for Space Vactor Modulation BLDC control
+// Used for speed control
 void TIM4_init(void)
 {
   // enable TIM4 clock
@@ -108,7 +114,7 @@ void TIM4_init(void)
   /* Time base configuration */
   TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
   TIM_TimeBaseStructure.TIM_Period = 100;
-  TIM_TimeBaseStructure.TIM_Prescaler = (64 - 1); // 64MHz clock (PCLK1), 64MHz/640 = 100kHz --> 10us each increment of the counter/timer
+  TIM_TimeBaseStructure.TIM_Prescaler = (640 - 1); // 64MHz clock (PCLK1), 64MHz/640 = 100kHz --> 10us each increment of the counter/timer
   TIM_TimeBaseStructure.TIM_ClockDivision = 0;
   TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
   TIM_TimeBaseInit (TIM4, &TIM_TimeBaseStructure);

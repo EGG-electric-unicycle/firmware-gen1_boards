@@ -47,6 +47,15 @@ void SysTick_Handler(void) // runs every 1ms
 
   // for delay_ms ()
   _ms++;
+
+//  if (c == 0) {
+//      GPIO_SetBits(GPIOB, LED_2_BATTERY_INDICATOR);
+//      c = 1;
+//  }
+//  else if (c == 1) {
+//      GPIO_ResetBits(GPIOB, LED_2_BATTERY_INDICATOR);
+//      c = 0;
+//  }
 }
 
 void putc ( void* p, char c)
@@ -56,7 +65,7 @@ void putc ( void* p, char c)
 
 int main(void)
 {
-  static int value;
+  static unsigned int value;
   static unsigned int duty = 0;
 
   initialize();
@@ -69,10 +78,8 @@ int main(void)
 
   while (1)
   {
-    value = (adc_get_PS_signal_value () >> 2); // filter and the value is now 10 bits --> max 1023.
-    value = value - 511; // now middle value is 0. Left half of pot turns motor left and vice-versa
-    value = value * 1.953; // scale: 5112 * 1.953 = 999.9
-    motor_set_duty_cycle (value);
+    value = adc_get_PS_signal_value (); // value is from 0 up to 4096
+    motor_set_motor_speed (value + 5000); // 0 -> 9096; MAX of ~9km/h
 
     switch (machine_state)
     {
@@ -168,9 +175,6 @@ void initialize (void)
   gpio_init (); // configure pins just after PWM init
   hall_sensor_init ();
 
-  //IMU_init ();
-  //usart1_init ();
-  TIM3_init ();
   TIM4_init ();
-
+  TIM4_set_counter_10us (100); // interrupt each 1ms
 }

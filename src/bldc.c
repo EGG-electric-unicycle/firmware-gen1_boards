@@ -227,7 +227,7 @@ unsigned int get_current_sector (void)
   return sector;
 }
 
-unsigned int dec_svm_table_index (unsigned int index)
+unsigned int inc_svm_table_index (unsigned int index)
 {
   // Decrement
   if (index > 1)
@@ -240,7 +240,7 @@ unsigned int dec_svm_table_index (unsigned int index)
   }
 }
 
-unsigned int inc_svm_table_index (unsigned int index)
+unsigned int dec_svm_table_index (unsigned int index)
 {
   // Increment
   if (index < 35)

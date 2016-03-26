@@ -13,6 +13,8 @@
 #include "main.h"
 #include "bldc.h"
 
+static unsigned int _motor_speed_target = 0;
+
 unsigned int motor_get_speed (void)
 {
   unsigned int motor_speed;
@@ -113,5 +115,36 @@ void motor_set_direction (unsigned int direction)
 unsigned int motor_get_direction (void)
 {
   return bldc_get_direction ();
+}
+
+// Called at aevery 1ms
+void motor_manage_speed (void)
+{
+  float motor_speed;
+  float error;
+  float kp = 0.05;
+  float out = 0;
+
+  motor_speed = (float) (get_hall_sensors_10us () * MOTOR_SPEED_CONVERSION); // get motor speed in meters per hou
+  error = (float) (_motor_speed_target - motor_speed); // get the error from the target to current value
+
+  out = error * kp;
+
+  pwm_set_duty_cycle (out); // 0 --> 1000;
+}
+
+// Speed in meter per hour
+void motor_set_motor_speed (unsigned int value)
+{
+  if (value >= MOTOR_MAX_SPEED)
+  {
+    value = MOTOR_MAX_SPEED;
+  }
+  else if (value <= MOTOR_MIN_SPEED)
+  {
+    value = MOTOR_MIN_SPEED;
+  }
+
+  _motor_speed_target = value;
 }
 

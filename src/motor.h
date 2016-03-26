@@ -13,3 +13,4 @@ void motor_coast (void);
 void motor_set_duty_cycle (int value);
 void motor_set_direction (unsigned int direction);
 unsigned int motor_get_direction (void);
+void motor_manage_speed (void);
