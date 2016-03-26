@@ -19,10 +19,9 @@ extern GPIO_InitTypeDef GPIO_InitStructure;
 unsigned int bldc_machine_state = BLDC_NORMAL;
 static unsigned int _direction = RIGHT;
 
-// We start with the sine waves with 120º of each other
-static unsigned int svm_table_index_a = 0;
-static unsigned int svm_table_index_b = 12;
-static unsigned int svm_table_index_c = 24;
+static unsigned int svm_table_index_a;
+static unsigned int svm_table_index_b;
+static unsigned int svm_table_index_c;
 
 struct Bldc_phase_state bldc_phase_state;
 
@@ -76,10 +75,11 @@ void apply_duty_cycle (void)
   duty_cycle = pwm_get_duty_cycle ();
   if (duty_cycle <= 0)
   {
-    duty_cycle *= -1; // ivert the signal if duty_cycle is negative, ie: -999 * -1 = 999
+    duty_cycle *= -1; // invert the signal if duty_cycle is negative, ie: -999 * -1 = 999
   }
 
   // Scale duty_cycle to be [0 <-> 1] and apply it
+  duty_cycle = MIN_POSITIVE_DUTY_CYCLE + ((float) duty_cycle * FACTOR_DUTY_CYCLE);
   duty_cycle /= 1000.0;
   TIM_SetCompare3(TIM1, (svm_table[svm_table_index_a]) * duty_cycle);
   TIM_SetCompare1(TIM1, (svm_table[svm_table_index_b]) * duty_cycle);
@@ -225,51 +225,6 @@ unsigned int get_current_sector (void)
   }
 
   return sector;
-}
-
-unsigned int dec_svm_table_index (unsigned int index)
-{
-  // Decrement
-  if (index > 1)
-  {
-    index--;
-  }
-  else
-  {
-    index = 35;
-  }
-}
-
-unsigned int inc_svm_table_index (unsigned int index)
-{
-  // Increment
-  if (index < 35)
-  {
-    index++;
-  }
-  else
-  {
-    index = 0;
-  }
-}
-
-void bldc_tick (void)
-{
-  // Update the index values
-  if (_direction == RIGHT)
-  {
-    svm_table_index_a = dec_svm_table_index (svm_table_index_a);
-    svm_table_index_b = dec_svm_table_index (svm_table_index_b);
-    svm_table_index_c = dec_svm_table_index (svm_table_index_c);
-  }
-  else if (_direction == LEFT)
-  {
-    svm_table_index_a = inc_svm_table_index (svm_table_index_a);
-    svm_table_index_b = inc_svm_table_index (svm_table_index_b);
-    svm_table_index_c = inc_svm_table_index (svm_table_index_c);
-  }
-
-  apply_duty_cycle ();
 }
 
 void commutate (void)

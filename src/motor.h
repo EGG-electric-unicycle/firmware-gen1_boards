@@ -13,3 +13,9 @@ void motor_coast (void);
 void motor_set_duty_cycle (int value);
 void motor_set_direction (unsigned int direction);
 unsigned int motor_get_direction (void);
+
+/*
+ * MIN MOTOR SPEED = duty cycle interrupt period of 128ms
+ * 833us --> 35km/h; 128ms --> 0.23km/h
+ *
+ */

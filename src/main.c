@@ -56,6 +56,13 @@ void putc ( void* p, char c)
 
 int main(void)
 {
+  /*
+   * With this code, the motor runs with Space Vector Modulation(SVM) table and it runs silently
+   * The potentiomenter defines the amplitude of the SVM values. The motor runs on both directions,
+   * each half side of the potentiometer serves for define the SVM amplitude for each direction.
+   *
+   */
+
   static int value;
   static unsigned int duty = 0;
 
@@ -64,8 +71,6 @@ int main(void)
   //init_printf(NULL,putc);
 
   motor_start ();
-
-//  TIM4_set_counter_10us (5);
 
   while (1)
   {
@@ -168,9 +173,8 @@ void initialize (void)
   gpio_init (); // configure pins just after PWM init
   hall_sensor_init ();
 
-  //IMU_init ();
-  //usart1_init ();
-  TIM3_init ();
-  TIM4_init ();
-
+//  IMU_init ();
+//  usart1_init ();
+//  TIM3_init ();
+//  TIM4_init ();
 }

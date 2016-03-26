@@ -24,27 +24,12 @@ float pwm_scale_factor = 0;
  */
 void PWM_PERIOD_INTERRUPT (void)
 {
-  static unsigned int counter = 1;
-
   // if current is now under the max value, enable PWM signal again
   if ((bldc_get_state () == BLDC_OVER_MAX_CURRENT) &&
       is_current_under_max ())
   {
     TIM_CtrlPWMOutputs (TIM1, ENABLE); // enable PWM signals
     bldc_set_state (BLDC_NORMAL);
-  }
-
-  // at each 1.024ms (64us * 16)
-  counter++;
-  if (counter >= 16)
-  {
-    // manage PWM only if BLDC is in normal state
-    if (bldc_get_state () == BLDC_NORMAL)
-    {
-      //pwm_manage (); //manage the increase/decrease rate of PWM duty-cycle and setup new values on the PWM controller
-    }
-
-    counter = 1;
   }
 
   /* Clear TIM1 TIM_IT_Update pending interrupt bit */
@@ -112,42 +97,6 @@ void pwm_init (void)
   TIM_CtrlPWMOutputs (TIM1, DISABLE);
 }
 
-// Function to update the duty cycle PWM values
-void pwm_update_duty_cycle (void)
-{
-//  // We start with the sine waves with 120º of each other
-//  static unsigned int index_a = 0;
-//  static unsigned int index_b = 12;
-//  static unsigned int index_c = 24;
-//
-//  // see if motor should rotate left or right
-//  if (pwm_duty_cycle >= 0)
-//  {
-//    // Go to next step of the sine table
-////    index_a = increment_space_vector_table_index (index_a);
-////    index_b = increment_space_vector_table_index (index_b);
-////    index_c = increment_space_vector_table_index (index_c);
-//
-//    bldc_set_direction (RIGHT);
-//  }
-//  else // pwm_duty_cycle >= 0
-//  {
-//    // Go to next step of the sine table
-//    index_a = decrement_space_vector_table_index (index_a);
-//    index_b = decrement_space_vector_table_index (index_b);
-//    index_c = decrement_space_vector_table_index (index_c);
-//
-//    bldc_set_direction (LEFT);
-//  }
-//
-//  // Scale and apply the duty cycle values
-//  pwm_scale_factor = pwm_duty_cycle + 999;
-//  pwm_scale_factor = pwm_scale_factor / 1999.0 ;
-//  TIM_SetCompare3(TIM1, (space_vector_table[index_a]) * pwm_scale_factor);
-//  TIM_SetCompare1(TIM1, (space_vector_table[index_b]) * pwm_scale_factor);
-//  TIM_SetCompare2(TIM1, (space_vector_table[index_c]) * pwm_scale_factor);
-}
-
 // Function to set duty cycle PWM value
 void pwm_set_duty_cycle (int value)
 {
@@ -164,9 +113,7 @@ void pwm_set_duty_cycle (int value)
     value = DUTY_CYCLE_MIN_VALUE;
   }
 
-  pwm_duty_cycle_target = value;
-
-pwm_duty_cycle = value;
+  pwm_duty_cycle = value;
 }
 
 int pwm_get_duty_cycle (void)
@@ -174,23 +121,3 @@ int pwm_get_duty_cycle (void)
   return pwm_duty_cycle;
 }
 
-
-// This function need to be called every 1ms
-// manages the increase/decrease of PWM duty-cycle value at a specific rate
-void pwm_manage (void)
-{
-  if (pwm_duty_cycle == pwm_duty_cycle_target)
-  {
-    return; // nothing to do, return
-  }
-  else if (pwm_duty_cycle < pwm_duty_cycle_target)
-  {
-    pwm_duty_cycle += PWM_DUTY_CYCLE_STEP;
-  }
-  else if (pwm_duty_cycle > pwm_duty_cycle_target)
-  {
-    pwm_duty_cycle -= PWM_DUTY_CYCLE_STEP;
-  }
-
-  //pwm_update_duty_cycle ();
-}

@@ -40,20 +40,7 @@ void TIM3_IRQHandler (void)
 // This interrupt fire after each TIM4 overflow, 65536us
 void TIM4_IRQHandler (void)
 {
-  static unsigned int c = 0;
 
-  if (c < 2)
-  {
-    c++;
-
-    bldc_tick ();
-  }
-
-  if (c >= 2)
-  {
-    c = 0;
-    TIM_Cmd (TIM3, DISABLE);
-  }
 
   /* Clear TIM4 TIM_IT_Update pending interrupt bit */
   TIM_ClearITPendingBit(TIM4, TIM_IT_Update);
@@ -96,7 +83,6 @@ void TIM3_init(void)
   TIM_Cmd (TIM3, ENABLE);
 }
 
-// TIM4 is only used for Space Vactor Modulation BLDC control
 void TIM4_init(void)
 {
   // enable TIM4 clock
