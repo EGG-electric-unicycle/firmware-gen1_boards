@@ -29,8 +29,6 @@ void motor_set_speed (unsigned int speed)
 
 void motor_start (void)
 {
-  //commutate (); // do the first commutation -- will update the PWM driver with correct start values
-
   TIM_CtrlPWMOutputs (TIM1, ENABLE); // enable now the signals to motor
 
   TIM_Cmd (TIM1, ENABLE); // start now the PWM / motor control
@@ -117,7 +115,7 @@ unsigned int motor_get_direction (void)
   return bldc_get_direction ();
 }
 
-// Called at aevery 1ms
+// Called at every 10ms
 void motor_manage_speed (void)
 {
   float motor_speed;
@@ -125,7 +123,7 @@ void motor_manage_speed (void)
   float kp = 0.05;
   float out = 0;
 
-  motor_speed = (float) (get_hall_sensors_10us () * MOTOR_SPEED_CONVERSION); // get motor speed in meters per hou
+  motor_speed = (float) (get_hall_sensors_10us () * MOTOR_SPEED_CONVERSION); // get motor speed in meters per hour
   error = (float) (_motor_speed_target - motor_speed); // get the error from the target to current value
 
   out = error * kp;

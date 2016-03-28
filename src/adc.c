@@ -41,11 +41,8 @@ unsigned int adc_watchdog_highthreshold = ADC_WATCHDOG_HIGHTHRESHOLD;
 static unsigned int adc_values[3];
 
 
-/* INTERRUPT
- *
- * This interrupt happens when current is over the defined threshold and will disable the duty-cycle
- *
- */
+// INTERRUPT
+//This interrupt happens when current is over the defined threshold and will disable the duty-cycle
 void MAX_CURRENT_INTERRUPT(void)
 {
   if (ADC_GetFlagStatus (ADC1, ADC_FLAG_AWD) == SET)

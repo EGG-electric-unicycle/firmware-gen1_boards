@@ -65,7 +65,14 @@ void putc ( void* p, char c)
 
 int main(void)
 {
-  static unsigned int value;
+  /*
+   * With this code, the motor runs with Space Vector Modulation(SVM) table and it runs silently
+   * The potentiomenter defines the amplitude of the SVM values. The motor runs on both directions,
+   * each half side of the potentiometer serves for define the SVM amplitude for each direction.
+   *
+   */
+
+  static int value;
   static unsigned int duty = 0;
 
   initialize();
@@ -73,13 +80,12 @@ int main(void)
   //init_printf(NULL,putc);
 
   motor_start ();
-
-//  TIM4_set_counter_10us (5);
+  TIM4_set_counter_10us (1000); // 10ms tick for speed management
 
   while (1)
   {
     value = adc_get_PS_signal_value (); // value is from 0 up to 4096
-    motor_set_motor_speed (value + 5000); // 0 -> 9096; MAX of ~9km/h
+    motor_set_motor_speed (value); // 0 -> 9096; MAX of ~9km/h
 
     switch (machine_state)
     {
@@ -175,6 +181,8 @@ void initialize (void)
   gpio_init (); // configure pins just after PWM init
   hall_sensor_init ();
 
+//  IMU_init ();
+//  usart1_init ();
+//  TIM3_init ();
   TIM4_init ();
-  TIM4_set_counter_10us (100); // interrupt each 1ms
 }

@@ -43,24 +43,6 @@ void TIM4_IRQHandler (void)
   // call the motor manage speed function
   motor_manage_speed ();
 
-//  static unsigned int c = 0;
-//
-//  c++;
-//  if (c < 3)
-//  {
-//    bldc_tick ();
-//
-//    if (c == 1) GPIO_SetBits(GPIOB, LED_2_BATTERY_INDICATOR);
-//  }
-//
-//  if (c >= 2)
-//  {
-//    c = 0;
-//    TIM_Cmd (TIM3, DISABLE);
-//
-//    GPIO_ResetBits(GPIOB, LED_2_BATTERY_INDICATOR);
-//  }
-
   /* Clear TIM4 TIM_IT_Update pending interrupt bit */
   TIM_ClearITPendingBit(TIM4, TIM_IT_Update);
 }
@@ -101,6 +83,7 @@ void TIM3_init(void)
   /* TIM3 counter enable */
   TIM_Cmd (TIM3, ENABLE);
 }
+
 
 // Used for speed control
 void TIM4_init(void)

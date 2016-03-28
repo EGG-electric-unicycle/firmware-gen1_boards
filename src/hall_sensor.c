@@ -47,7 +47,6 @@ void TIM2_IRQHandler(void)
   /* Register the hall sensors time and apply a low pass filter */
   // kind of low pass filter
   hall_sensors_time = t1*0.3 + t2*0.3 + timer*0.4;
-
   t1 = t2;
   t2 = timer;
 }
@@ -72,7 +71,7 @@ void hall_sensor_init (void)
    * each impulse for 35km/h --> 21.7 / 8.7 = 2.5ms
    *
    * Each impulse need to be divided by 3
-   * 2.5 / 3 = 834us
+   * 2.5 / 3 = 833us
    *
    * Timer increment clock for capture signals can be 10us and so we will have a resolution of 800/10 = 80
    * for the max speed of 35km/h which should be good
