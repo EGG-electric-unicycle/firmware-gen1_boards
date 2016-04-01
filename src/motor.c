@@ -121,6 +121,9 @@ void motor_manage_speed (void)
   float motor_speed;
   float error;
   float kp = 0.1;
+  float	p_term = 0;
+  float ki = 0.005;
+  float	i_term = 0;
   float out = 0;
 
 /*
@@ -140,7 +143,10 @@ void motor_manage_speed (void)
   motor_speed = 2921739.13 / ((float) get_hall_sensors_10us ());
 
   error = (float) (_motor_speed_target - motor_speed); // get the error from the target to current value
-  out = error * kp;
+  p_term = error * kp;
+  i_term += error * ki;
+//  out = p_term;
+  out = p_term + i_term;
   pwm_set_duty_cycle (out); // 0 --> 1000;
 }
 

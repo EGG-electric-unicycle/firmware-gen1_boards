@@ -80,7 +80,7 @@ int main(void)
   //init_printf(NULL,putc);
 
   motor_start ();
-  TIM4_set_counter_10us (1000); // 10ms tick for speed management
+  TIM4_set_counter_10us (100); // 10ms tick for speed management
 
   while (1)
   {
