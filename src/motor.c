@@ -120,14 +120,27 @@ void motor_manage_speed (void)
 {
   float motor_speed;
   float error;
-  float kp = 0.05;
+  float kp = 0.1;
   float out = 0;
 
-  motor_speed = (float) (get_hall_sensors_10us () * MOTOR_SPEED_CONVERSION); // get motor speed in meters per hour
+/*
+ * speed (meters/hour) = 4032 / (138 * hall_sensor_period)
+ * 4032 is the meters per hour (4.032km) that one rotation per second for wheel of 14''
+ * 138 is the 46 magnets * 3 hall sensors
+ * hall_sensor_period is measured in seconds
+ * Examples:
+ * 4032 / (138 * 0.000833) = 35075 --> ~35km/h
+ * 4032 / (138 * 0.0059) = 35075 --> ~5km/h (the walking speed)
+ *
+ * speed (meters/hour) = 4032x10^6 / (138 * hall_sensor_period_us)
+ * speed (meters/hour) = 29217391.3 / hall_sensor_period_us
+ * speed (meters/hour) = 2921739.13 / hall_sensor_period_10us
+ */
+
+  motor_speed = 2921739.13 / ((float) get_hall_sensors_10us ());
+
   error = (float) (_motor_speed_target - motor_speed); // get the error from the target to current value
-
   out = error * kp;
-
   pwm_set_duty_cycle (out); // 0 --> 1000;
 }
 
