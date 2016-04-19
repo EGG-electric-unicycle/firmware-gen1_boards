@@ -115,20 +115,29 @@ unsigned int motor_get_direction (void)
   return bldc_get_direction ();
 }
 
-// Called at every 10ms
-void motor_manage_speed (void)
+// Called at every xxms
+void motor_ramp_speed_controller (void)
+{
+//  static signed int speed = 0;
+//
+//  if ()
+}
+
+
+// Called at every xxms
+void motor_speed_controller (void)
 {
   float motor_speed;
   float error;
-  float kp = 0.1;
+  static float out = 0;
+
+  //float kp = 0.02; // ok for 50ms loop
+  float kp = 0.01; // ok for 50ms loop
   float	p_term = 0;
-  float ki = 0.005;
-  float	i_term = 0;
-  float out = 0;
 
 /*
  * speed (meters/hour) = 4032 / (138 * hall_sensor_period)
- * 4032 is the meters per hour (4.032km) that one rotation per second for wheel of 14''
+ * 4032 is the metes per hour (4.032km) that one rotation per second for wheel of 14''
  * 138 is the 46 magnets * 3 hall sensors
  * hall_sensor_period is measured in seconds
  * Examples:
@@ -137,17 +146,21 @@ void motor_manage_speed (void)
  *
  * speed (meters/hour) = 4032x10^6 / (138 * hall_sensor_period_us)
  * speed (meters/hour) = 29217391.3 / hall_sensor_period_us
- * speed (meters/hour) = 2921739.13 / hall_sensor_period_10us
+ * speed (meters/houMOTOR_MAX_CURRENTr) = 2921739.13 / hall_sensor_period_10us
  */
-
   motor_speed = 2921739.13 / ((float) get_hall_sensors_10us ());
 
-  error = (float) (_motor_speed_target - motor_speed); // get the error from the target to current value
-  p_term = error * kp;
-  i_term += error * ki;
-//  out = p_term;
-  out = p_term + i_term;
-  pwm_set_duty_cycle (out); // 0 --> 1000;
+  error =  ((float) _motor_speed_target) - motor_speed; // get the error from the target to current value
+
+  out += error * kp;
+  if (out < 0) out = 0;
+
+  pwm_set_duty_cycle ((int) out); // 0 --> 1000;
+
+  // ??
+//  __motor_speed_target = _motor_speed_target;
+//  if (__motor_speed_target >= 0) motor_set_direction (RIGHT);
+//  else motor_set_direction (LEFT);
 }
 
 // Speed in meter per hour

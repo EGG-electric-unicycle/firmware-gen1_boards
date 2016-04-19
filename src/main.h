@@ -28,7 +28,7 @@
 
 // Motor
 #define MOTOR_MAX_CURRENT	0.8 // Define max motor current (used on adc.c)
-#define MOTOR_MAX_SPEED 	10000 // meter per hour
+#define MOTOR_MAX_SPEED 	20000 // meter per hour
 //#define MOTOR_MIN_SPEED 	5000 // meter per hour -- walking speed is 5km/h
 #define MOTOR_MIN_SPEED 	0 // meter per hour -- walking speed is 5km/h
 #define MOTOR_SPEED_CONVERSION 	0.5574 // convert hall sensor signal period (each 10us) to motor speed

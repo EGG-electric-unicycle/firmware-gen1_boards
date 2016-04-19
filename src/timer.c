@@ -40,8 +40,8 @@ void TIM3_IRQHandler (void)
 
 void TIM4_IRQHandler (void)
 {
-  // call the motor manage speed function
-  motor_manage_speed ();
+  //IMU_balance_controller ();
+  motor_speed_controller ();
 
   /* Clear TIM4 TIM_IT_Update pending interrupt bit */
   TIM_ClearITPendingBit(TIM4, TIM_IT_Update);

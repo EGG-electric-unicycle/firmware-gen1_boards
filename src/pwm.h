@@ -27,7 +27,7 @@
 #define PWM_PERIOD_INTERRUPT		TIM1_UP_IRQHandler
 
 void pwm_init (void);
-void pwm_set_duty_cycle (int value);
+void pwm_set_duty_cycle (unsigned int value);
 void pwm_update_duty_cycle (void);
 void pwm_manage (void);
 int pwm_get_duty_cycle (void);

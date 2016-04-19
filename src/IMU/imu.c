@@ -74,7 +74,68 @@ BOOL IMU_init(void)
   }
 }
 
-BOOL IMU_read(void)
+// called at each 10ms
+BOOL IMU_balance_controller(void)
+{
+  float acc_x;
+  float acc_y;
+  float acc_z;
+  static float angle;
+  static float old_angle1;
+  static float old_angle2;
+  static float old_angle3;
+  static float gyro_rate;
+  float dt;
+  unsigned int micros_new;
+  static unsigned int micros_old = 0;
+  static unsigned int timer_1s = 0;
+
+  float current_error = 0;
+  static float sum_error = 0;
+  float integral_term = 0;
+  float derivative_term = 0;
+  static float previous_error = 0;
+
+  float kp_speed = 50;
+  float speed = 0;
+
+
+  // read the accel and gyro sensor values
+  MPU6050_GetRawAccelGyro (accel_gyro);
+
+  acc_x = accel_gyro[0];
+  acc_y = accel_gyro[1];
+  acc_z = accel_gyro[2];
+  gyro_rate = accel_gyro[5] * GYRO_SENSITIVITY;
+
+  // calc dt, using micro seconds value
+  micros_new = micros ();
+  dt = (micros_new - micros_old) / 1000000.0;
+  micros_old = micros_new;
+
+  angle = atan2(acc_x, acc_y); //calc angle between X and Y axis, in rads
+  angle = (angle + PI) * RAD_TO_DEG; //convert from rads to degres
+//  angle = 0.98 * (angle + (gyro_rate * dt)) + 0.02 * (acc_y); //use the complementary filter.
+
+  angle = (0.25 * angle) + (0.25 * old_angle1) + (0.25 * old_angle2) + (0.25 * old_angle3);
+  old_angle1 = angle;
+  old_angle2 = old_angle1;
+  old_angle3 = old_angle2;
+
+  // keep zero value angle when the board is on balance
+  angle = INITIAL_ANGLE - angle;
+
+  if (angle > 15) angle = 15;
+  if (angle < -15) angle = -15;
+
+  speed = angle * kp_speed;
+
+  // pass the desired speed to the speed controller
+  motor_set_motor_speed ((signed int) speed);
+}
+
+#if 0
+BOOL IMU_balance_controller(void)
 {
   float acc_x;
   float acc_y;
@@ -173,3 +234,4 @@ BOOL IMU_read(void)
 //    //printf ("angle: %3.3f : \n", angle);
 //  }
 }
+#endif

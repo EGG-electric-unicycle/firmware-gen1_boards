@@ -72,11 +72,11 @@ void apply_duty_cycle (void)
 {
   float duty_cycle;
 
-  duty_cycle = pwm_get_duty_cycle ();
-  if (duty_cycle <= 0)
-  {
-    duty_cycle *= -1; // invert the signal if duty_cycle is negative, ie: -999 * -1 = 999
-  }
+  duty_cycle = (float) (pwm_get_duty_cycle ());
+//  if (duty_cycle <= 0)
+//  {
+//    duty_cycle *= -1; // invert the signal if duty_cycle is negative, ie: -999 * -1 = 999
+//  }
 
   // Scale duty_cycle to be [0 <-> 1] and apply it
   duty_cycle = MIN_POSITIVE_DUTY_CYCLE + ((float) duty_cycle * FACTOR_DUTY_CYCLE);
@@ -137,18 +137,18 @@ unsigned int get_current_sector (void)
 {
   static unsigned int hall_sensors = 0;
   unsigned int sector;
-  float duty_cycle;
-
-  /* Get the desired rotation direction */
-  duty_cycle = pwm_get_duty_cycle ();
-  if (duty_cycle >=0)
-  {
-    bldc_set_direction (RIGHT);
-  }
-  else
-  {
-    bldc_set_direction (LEFT);
-  }
+//  float duty_cycle;
+//
+//  /* Get the desired rotation direction */
+//  duty_cycle = pwm_get_duty_cycle ();
+//  if (duty_cycle >=0)
+//  {
+//    bldc_set_direction (RIGHT);
+//  }
+//  else
+//  {
+//    bldc_set_direction (LEFT);
+//  }
 
   hall_sensors = (GPIO_ReadInputData (GPIOA) & (HALL_SENSORS_MASK)); // mask other pins
 

@@ -13,7 +13,7 @@
 #include "pwm.h"
 #include "bldc.h"
 
-int pwm_duty_cycle = 0;
+static unsigned int pwm_duty_cycle = 0;
 unsigned int pwm_duty_cycle_target = 0;
 float pwm_scale_factor = 0;
 
@@ -95,7 +95,7 @@ void pwm_init (void)
 }
 
 // Function to set duty cycle PWM value
-void pwm_set_duty_cycle (int value)
+void pwm_set_duty_cycle (unsigned int value)
 {
 #define DUTY_CYCLE_MAX_VALUE	1000
 //#define DUTY_CYCLE_MIN_VALUE	-999

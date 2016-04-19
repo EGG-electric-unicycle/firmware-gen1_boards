@@ -72,7 +72,7 @@ int main(void)
    *
    */
 
-  static int value;
+  static unsigned int value;
   static unsigned int duty = 0;
 
   initialize();
@@ -80,11 +80,11 @@ int main(void)
   //init_printf(NULL,putc);
 
   motor_start ();
-  TIM4_set_counter_10us (100); // 10ms tick for speed management
+  TIM4_set_counter_10us (10000); // 10ms tick for speed management
 
   while (1)
   {
-    value = adc_get_PS_signal_value (); // value is from 0 up to 4096
+    value = (adc_get_PS_signal_value () * 5); // value is from 0 up to 4096
     motor_set_motor_speed (value); // 0 -> 9096; MAX of ~9km/h
 
     switch (machine_state)
@@ -183,6 +183,6 @@ void initialize (void)
 
 //  IMU_init ();
 //  usart1_init ();
-//  TIM3_init ();
+  TIM3_init ();
   TIM4_init ();
 }
