@@ -40,8 +40,6 @@ void TIM3_IRQHandler (void)
 
 void TIM4_IRQHandler (void)
 {
-  //IMU_balance_controller ();
-  motor_speed_controller ();
 
   /* Clear TIM4 TIM_IT_Update pending interrupt bit */
   TIM_ClearITPendingBit(TIM4, TIM_IT_Update);
@@ -84,8 +82,6 @@ void TIM3_init(void)
   TIM_Cmd (TIM3, ENABLE);
 }
 
-
-// Used for speed control
 void TIM4_init(void)
 {
   // enable TIM4 clock

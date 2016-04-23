@@ -47,15 +47,6 @@ void SysTick_Handler(void) // runs every 1ms
 
   // for delay_ms ()
   _ms++;
-
-//  if (c == 0) {
-//      GPIO_SetBits(GPIOB, LED_2_BATTERY_INDICATOR);
-//      c = 1;
-//  }
-//  else if (c == 1) {
-//      GPIO_ResetBits(GPIOB, LED_2_BATTERY_INDICATOR);
-//      c = 0;
-//  }
 }
 
 void putc ( void* p, char c)
@@ -65,27 +56,15 @@ void putc ( void* p, char c)
 
 int main(void)
 {
-  /*
-   * With this code, the motor runs with Space Vector Modulation(SVM) table and it runs silently
-   * The potentiomenter defines the amplitude of the SVM values. The motor runs on both directions,
-   * each half side of the potentiometer serves for define the SVM amplitude for each direction.
-   *
-   */
-
-  static unsigned int value;
-  static unsigned int duty = 0;
 
   initialize();
 
-  //init_printf(NULL,putc);
-
   motor_start ();
-  TIM4_set_counter_10us (10000); // 10ms tick for speed management
 
   while (1)
   {
-    value = (adc_get_PS_signal_value () * 5); // value is from 0 up to 4096
-    motor_set_motor_speed (value); // 0 -> 9096; MAX of ~9km/h
+
+    balance_controller ();
 
     switch (machine_state)
     {
@@ -181,8 +160,8 @@ void initialize (void)
   gpio_init (); // configure pins just after PWM init
   hall_sensor_init ();
 
-//  IMU_init ();
+  IMU_init ();
 //  usart1_init ();
   TIM3_init ();
-  TIM4_init ();
+//  TIM4_init ();
 }

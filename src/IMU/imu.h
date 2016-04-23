@@ -81,3 +81,5 @@ void IMU_startDMAtransfer();
  * Filter interface, implemented as per above filter define
  */
 float callFilter(float oldAngle, float newAngle, float newRate,int looptime);
+
+void balance_controller(void);

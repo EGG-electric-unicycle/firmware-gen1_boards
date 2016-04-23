@@ -75,7 +75,7 @@ BOOL IMU_init(void)
 }
 
 // called at each 10ms
-BOOL IMU_balance_controller(void)
+void balance_controller(void)
 {
   float acc_x;
   float acc_y;
@@ -96,12 +96,10 @@ BOOL IMU_balance_controller(void)
   float derivative_term = 0;
   static float previous_error = 0;
 
-  float kp_speed = 50;
   float speed = 0;
 
-
   // read the accel and gyro sensor values
-  MPU6050_GetRawAccelGyro (accel_gyro);
+  MPU6050_GetRawAccelGyro (accel_gyro); // takes abut 15ms to be executed!!!
 
   acc_x = accel_gyro[0];
   acc_y = accel_gyro[1];
@@ -125,113 +123,11 @@ BOOL IMU_balance_controller(void)
   // keep zero value angle when the board is on balance
   angle = INITIAL_ANGLE - angle;
 
-  if (angle > 15) angle = 15;
-  if (angle < -15) angle = -15;
+  if (angle > 3) angle = 3;
+  if (angle < -3) angle = -3;
 
+  float kp_speed = 15;
   speed = angle * kp_speed;
 
-  // pass the desired speed to the speed controller
-  motor_set_motor_speed ((signed int) speed);
+  motor_set_duty_cycle ((int) speed); // -1000 <-> 1000
 }
-
-#if 0
-BOOL IMU_balance_controller(void)
-{
-  float acc_x;
-  float acc_y;
-  float acc_z;
-  static float angle;
-  static float old_angle1;
-  static float old_angle2;
-  static float old_angle3;
-  static float gyro_rate;
-  float dt;
-  unsigned int micros_new;
-  static unsigned int micros_old = 0;
-  static unsigned int timer_1s = 0;
-
-  float current_error = 0;
-  static float sum_error = 0;
-  float integral_term = 0;
-  float derivative_term = 0;
-  static float previous_error = 0;
-  float duty_cycle = 0;
-
-
-  // read the accel and gyro sensor values
-  MPU6050_GetRawAccelGyro (accel_gyro);
-
-  acc_x = accel_gyro[0];
-  acc_y = accel_gyro[1];
-  acc_z = accel_gyro[2];
-  gyro_rate = accel_gyro[5] * GYRO_SENSITIVITY;
-
-  // calc dt, using micro seconds value
-  micros_new = micros ();
-  dt = (micros_new - micros_old) / 1000000.0;
-  micros_old = micros_new;
-
-  angle = atan2(acc_x, acc_z); //calc angle between X and Y axis, in rads
-  angle = (angle + PI) * RAD_TO_DEG; //convert from rads to degres
-//  angle = 0.98 * (angle + (gyro_rate * dt)) + 0.02 * (acc_y); //use the complementary filter.
-
-  angle = (0.25 * angle) + (0.25 * old_angle1) + (0.25 * old_angle2) + (0.25 * old_angle3);
-  old_angle1 = angle;
-  old_angle2 = old_angle1;
-  old_angle3 = old_angle2;
-
-  //control the motor now using the angle value
-  // for testing the board in horizontal
-  // z = 2047 when the board is parallel to ground
-  // angle measure between x and z axis
-  // angle after Complementary filter: 180 degres with board on horizontal
-  //
-  // Make the system work with max inclination of +- 5 degres --> 175 up to 185
-//  angle -= 180;
-//  if (angle > 4) angle = 5;
-//  if (angle < -4) angle = -5;
-//  angle *= 60;
-//  motor_set_duty_cycle ((int) angle); // duty-cycle between -300 and 300 only! on this test
-
-  //printf ("a %3.2f", angle);
-
-  current_error = angle - INITIAL_ANGLE; //error
-  sum_error += current_error;
-
-  if (sum_error > SUM_ERROR_MAX) sum_error = SUM_ERROR_MAX;
-  else if (sum_error < SUM_ERROR_MIN) sum_error = SUM_ERROR_MIN;
-
-  //Ki*SumE/(Kp*Fs*X)
-  integral_term = sum_error * dt * KI / KP * 10.0; // 0.0005
-  derivative_term = current_error - previous_error;
-
-  if(derivative_term > 0.1) derivative_term = 0.1;
-  else if (derivative_term < -0.1) derivative_term = -0.1;
-
-  // Kd(curErr-prevErr)*Ts/(Kp*X)
-  derivative_term = derivative_term * KD * dt / KP;
-
-  if(derivative_term > 120) derivative_term = 120;
-  else if (derivative_term < -120) derivative_term = -120;
-
-  duty_cycle = (current_error + integral_term + derivative_term);
-  duty_cycle *= KP;
-
-  motor_set_duty_cycle ((int) duty_cycle);
-
-  //printf ("d %3.2f\n", duty_cycle);
-
-  previous_error = current_error;
-
-//  timer_1s++;
-//  if (timer_1s > 99)
-//  {
-//    timer_1s = 0;
-//
-//    //printf ("x: %3.3f :", acc_x);
-//    //printf ("y: %3.3f :", acc_y);
-//    //printf ("z: %3.3f :", acc_z);
-//    //printf ("angle: %3.3f : \n", angle);
-//  }
-}
-#endif
