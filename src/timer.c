@@ -40,6 +40,16 @@ void TIM3_IRQHandler (void)
 
 void TIM4_IRQHandler (void)
 {
+  static unsigned int c = 0;
+
+  commutate_timer ();
+
+  c++;
+  if (c >= 5)
+  {
+    c = 0;
+    TIM_Cmd (TIM4, DISABLE);
+  }
 
   /* Clear TIM4 TIM_IT_Update pending interrupt bit */
   TIM_ClearITPendingBit(TIM4, TIM_IT_Update);
@@ -112,5 +122,5 @@ void TIM4_init(void)
   TIM_ITConfig (TIM4, TIM_IT_Update, ENABLE);
 
   /* TIM4 counter enable */
-  TIM_Cmd (TIM4, ENABLE);
+  //TIM_Cmd (TIM4, ENABLE);
 }

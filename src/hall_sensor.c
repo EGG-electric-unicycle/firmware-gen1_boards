@@ -49,6 +49,10 @@ void TIM2_IRQHandler(void)
   hall_sensors_time = t1*0.3 + t2*0.3 + timer*0.4;
   t1 = t2;
   t2 = timer;
+
+  //
+  TIM4_set_counter_10us ((unsigned int) (timer / 6.0));
+  TIM_Cmd (TIM4, ENABLE);
 }
 
 unsigned int get_hall_sensors_10us (void)
@@ -80,7 +84,7 @@ void hall_sensor_init (void)
 
   TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
   // timer base configuration
-  // 64MHz clock (PCLK1), 64MHz/640 = 1MHz --> 10us each increment of the counter/timer
+  // 64MHz clock (PCLK1), 64MHz/640 = 100kHz --> 10us each0.1M increment of the counter/timer
   TIM_TimeBaseStructure.TIM_Prescaler = (640 - 1);
   TIM_TimeBaseStructure.TIM_Period = (50000 - 1); // max of 500ms or the Timer will overflow, (200ms about the walking speed of 5km/h)
   TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;

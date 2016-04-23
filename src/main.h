@@ -27,7 +27,7 @@
 //#define DAC_DEBUG
 
 // Motor
-#define MOTOR_MAX_CURRENT	1 // Define max motor current (used on adc.c)
+#define MOTOR_MAX_CURRENT	2 // Define max motor current (used on adc.c)
 #define MOTOR_MAX_SPEED 	20000 // meter per hour
 //#define MOTOR_MIN_SPEED 	5000 // meter per hour -- walking speed is 5km/h
 #define MOTOR_MIN_SPEED 	0 // meter per hour -- walking speed is 5km/h

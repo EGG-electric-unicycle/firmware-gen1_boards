@@ -126,7 +126,10 @@ void balance_controller(void)
   if (angle > 3) angle = 3;
   if (angle < -3) angle = -3;
 
-  float kp_speed = 15;
+  if (angle < 0.5) angle = 0;
+  if (angle < -0.5) angle = 0;
+
+  float kp_speed = 50;
   speed = angle * kp_speed;
 
   motor_set_duty_cycle ((int) speed); // -1000 <-> 1000

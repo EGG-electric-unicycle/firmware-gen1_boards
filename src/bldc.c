@@ -75,7 +75,7 @@ void apply_duty_cycle (void)
   duty_cycle = (float) (pwm_get_duty_cycle ());
 
   // Scale duty_cycle to be [0 <-> 1] and apply it
-  duty_cycle = MIN_POSITIVE_DUTY_CYCLE + ((float) duty_cycle * FACTOR_DUTY_CYCLE);
+  duty_cycle = MIN_DUTY_CYCLE + ((float) duty_cycle * FACTOR_DUTY_CYCLE);
   duty_cycle /= 1000.0;
   TIM_SetCompare3(TIM1, (svm_table[svm_table_index_a]) * duty_cycle);
   TIM_SetCompare1(TIM1, (svm_table[svm_table_index_b]) * duty_cycle);
@@ -122,6 +122,18 @@ void commutation_CB (void)
   svm_table_index_a = 32;
   svm_table_index_b = 8;
   svm_table_index_c = 20;
+}
+
+void svm_table_index_dec (void)
+{
+  if (svm_table_index_a > 0) svm_table_index_a--;
+  else svm_table_index_a = 35;
+
+  if (svm_table_index_b > 0) svm_table_index_b--;
+  else svm_table_index_b = 35;
+
+  if (svm_table_index_c > 0) svm_table_index_c--;
+  else svm_table_index_c = 35;
 }
 
 void commutation_disable (void)
@@ -248,6 +260,13 @@ void commutate (void)
     commutation_disable ();
     break;
   }
+
+  apply_duty_cycle ();
+}
+
+void commutate_timer (void)
+{
+  svm_table_index_dec ();
 
   apply_duty_cycle ();
 }

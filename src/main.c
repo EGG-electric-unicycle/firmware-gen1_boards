@@ -56,15 +56,18 @@ void putc ( void* p, char c)
 
 int main(void)
 {
+  static float value;
 
   initialize();
 
   motor_start ();
 
+  bldc_set_direction (RIGHT);
+
   while (1)
   {
-
-    balance_controller ();
+    value = adc_get_PS_signal_value () / 4.0; // value is from 0 up to 4096
+    pwm_set_duty_cycle ((unsigned int) value);
 
     switch (machine_state)
     {
@@ -160,8 +163,8 @@ void initialize (void)
   gpio_init (); // configure pins just after PWM init
   hall_sensor_init ();
 
-  IMU_init ();
+//  IMU_init ();
 //  usart1_init ();
-  TIM3_init ();
-//  TIM4_init ();
+//  TIM3_init ();
+  TIM4_init ();
 }
