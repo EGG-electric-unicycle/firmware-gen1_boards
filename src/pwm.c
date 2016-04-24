@@ -112,11 +112,19 @@ void pwm_update_duty_cycle (void)
 {
   unsigned int duty_cycle_normal;
   unsigned int duty_cycle_inverted;
+  int pwm_duty_cycle_t;
+
+  pwm_duty_cycle_t = pwm_duty_cycle;
+
+  if (pwm_duty_cycle_t > 0) pwm_duty_cycle_t += 100;
+  else pwm_duty_cycle_t -= 100;
+
+  if (pwm_duty_cycle_t > 200) pwm_duty_cycle_t = 200;
+  if (pwm_duty_cycle_t < -200) pwm_duty_cycle_t = -200;
 
   // Calc the correct value of duty cycle and inverted duty cycle
-  duty_cycle_normal = (unsigned int) ((pwm_duty_cycle + 999) * 1.024); // scale to correct value
+  duty_cycle_normal = (unsigned int) ((pwm_duty_cycle_t + 999) * 1.024); // scale to correct value
   duty_cycle_inverted = 2047 - duty_cycle_normal;
-
 
   if (duty_cycle_normal > 0)
   {
@@ -187,24 +195,29 @@ void pwm_set_duty_cycle (int value)
   }
 
   pwm_duty_cycle_target = value;
+
+  ///
+  ///
+pwm_duty_cycle = value;
+pwm_update_duty_cycle ();
 }
 
 // This function need to be called every 1ms
 // manages the increase/decrease of PWM duty-cycle value at a specific rate
 void pwm_manage (void)
 {
-  if (pwm_duty_cycle == pwm_duty_cycle_target)
-  {
-    return; // nothing to do, return
-  }
-  else if (pwm_duty_cycle < pwm_duty_cycle_target)
-  {
-    pwm_duty_cycle += PWM_DUTY_CYCLE_STEP;
-  }
-  else if (pwm_duty_cycle > pwm_duty_cycle_target)
-  {
-    pwm_duty_cycle -= PWM_DUTY_CYCLE_STEP;
-  }
-
+//  if (pwm_duty_cycle == pwm_duty_cycle_target)
+//  {
+//    return; // nothing to do, return
+//  }
+//  else if (pwm_duty_cycle < pwm_duty_cycle_target)
+//  {
+//    pwm_duty_cycle += PWM_DUTY_CYCLE_STEP;
+//  }
+//  else if (pwm_duty_cycle > pwm_duty_cycle_target)
+//  {
+//    pwm_duty_cycle -= PWM_DUTY_CYCLE_STEP;
+//  }
+//
   pwm_update_duty_cycle ();
 }

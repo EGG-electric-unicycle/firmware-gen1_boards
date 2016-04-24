@@ -14,177 +14,130 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
 #include "stm32f10x.h"
 #include "imu.h"
-
-/**
- * Implementation of IMU interface for MPU6050
- */
-#ifdef IMU_IS_MPU6050
-
+#include "math.h"
 #include "MPU6050/MPU6050.h"
+//#include "tinystdio/tinystdio.h"
+#include "motor.h"
 
+// X axis gives the front/rear inclination of the wheel
+// Z axis gives the lateral inclination of the wheel
 
+static s16 accel_gyro[6];
+static float accel_gyro_average[6];
 
-#ifdef IMU_MODE_POLL
-BOOL IMU_init() {
-   MPU6050_I2C_Init();
-   MPU6050_Initialize();
-   return MPU6050_TestConnection();
-}
-
-
-void IMU_getData(float* fwBkAngle, uint8_t* sideLean);
-   
-}
-
-#elif IMU_MODE_DMA
-
-void (*IMU_dataAvail)(float*, uint8_t*);
-
-BOOL IMU_init(void (*dataAvailable)(float*, uint8_t*)) {
-   IMU_dataAvail = dataAvailable;
-   MPU6050_I2C_Init();
-   MPU6050_Initialize();
-   return MPU6050_TestConnection();
-}
-
-void IMU_startDMAtransfer() {
-   I2C_DMA_Read(MPU6050_DEFAULT_ADDRESS, MPU6050_RA_ACCEL_XOUT_H);
-}
-
-#endif
-
-float fwBkOldAngle = 0.0;
-float leftRightOldAngle = 0.0;
-
-void IMU_MPU6050_rawConvert(int16_t upDownAccel, int16_t frontBackAccel,
-                            int16_t leftRightAccel, int16_t frontBackGyro,
-			    int16_t leftRightGyro,
-			    float* fwBkAngle, uint8_t* sideLean) {
-   // calculate angle from accelerations (assuming 2g scale)
-   
-   
- /*  // PI/2 - acos([frontBackAccel|leftRightAccel]/16383,5)
-   float fwBkAccelAngle       = PI/2.0 - acos(frontBackAccel/16383.5);
-   float leftRightAccelAngle  = PI/2.0 - acos(leftRightAccel/16383.5);
-   
-   // calculate gyro rate in rad/s
-   float fwBkGyroRadS = 0.0;
-   float fwBkGyroRadS = 0.0;
-   
-   *fwBkAngle = callFilter(fwBkOldAngle, fwBkAccelAngle, fwBkGyroRadS, int looptime);
-   fwBkOldAngle = *fwBkAngle;
-   
-   
-   float leftRightAngle = callFilter(leftRightOldAngle, leftRightAccelAngle,
-                                     leftRightGyroRadS, int looptime);
-   leftRightOldAngle = leftRightAngle;
-   
-   if (leftRightAngle > DEG45) {
-      *sideLean = 2;
-   } else if (leftRightAngle < -DEG45) {
-      *sideLean = 1;
-   } else {
-      *sideLean = 0;
-   }*/
-
-}
-
-#endif
-
-
-/**
- * Filter implementations and selection
- */
-
-#ifdef IMU_FILTER_COMPL
-// a=tau / (tau + loop time)
-float tau=0.075;
-float a=0.0;
-
-float Complementary(float oldAngle, float newAngle, float newRate,int looptime) {
-    float dtC = ((float)looptime)/1000.0;
-    a = tau/(tau+dtC);
-    oldAngle = a* (oldAngle + newRate * dtC) + (1-a) * (newAngle);
-    return oldAngle;
-}
-#endif
-
-
-
-#ifdef IMU_FILTER_COMPL2
-float Complementary2(float oldAngle, float newAngle, float newRate,int looptime) {
-    float k=10;
-    float dtc2=((float)looptime)/1000.0;
-
-    x1 = (newAngle -   oldAngle)*k*k;
-    y1 = dtc2*x1 + y1;
-    x2 = y1 + (newAngle -   oldAngle)*2*k + newRate;
-    oldAngle = dtc2*x2 + oldAngle;
-
-    return oldAngle;
-}
-
-
-#ifdef IMU_FILTER_KALMAN
-// KasBot V1 - Kalman filter module
-
-float Q_angle  =  0.01; //0.001
-float Q_gyro   =  0.0003;  //0.003
-float R_angle  =  0.01;  //0.03
-
-float x_bias = 0;
-float P_00 = 0, P_01 = 0, P_10 = 0, P_11 = 0;
-float  y, S;
-float K_0, K_1;
-
-// newAngle = angle measured with atan2 using the accelerometer
-// newRate = angle measured using the gyro
-// looptime = loop time in millis()
-
-float kalmanCalculate(float oldAngle, float newAngle, float newRate,int looptime)
+BOOL IMU_init(void)
 {
-    float dt = ((float)looptime)/1000.0;
-    oldAngle += dt * (newRate - x_bias);
-    P_00 +=  - dt * (P_10 + P_01) + Q_angle * dt;
-    P_01 +=  - dt * P_11;
-    P_10 +=  - dt * P_11;
-    P_11 +=  + Q_gyro * dt;
+  unsigned int i;
 
-    y = newAngle - oldAngle;
-    S = P_00 + R_angle;
-    K_0 = P_00 / S;
-    K_1 = P_10 / S;
+  MPU6050_I2C_Init();
+  MPU6050_Initialize();
 
-    oldAngle +=  K_0 * y;
-    x_bias  +=  K_1 * y;
-    P_00 -= K_0 * P_00;
-    P_01 -= K_0 * P_01;
-    P_10 -= K_1 * P_00;
-    P_11 -= K_1 * P_01;
+  // if the MPU6050 is ready, make "calibration"
+  // read the sensor values and average
+  if (MPU6050_TestConnection())
+  {
+    accel_gyro_average[0] = 0;
+    accel_gyro_average[1] = 0;
+    accel_gyro_average[2] = 0;
+    accel_gyro_average[3] = 0;
+    accel_gyro_average[4] = 0;
+    accel_gyro_average[5] = 0;
 
-    return oldAngle;
+    for (i = 0; i <= 10; i++)
+    {
+      MPU6050_GetRawAccelGyro (accel_gyro);
+
+      accel_gyro_average[0] += accel_gyro[0];
+      accel_gyro_average[1] += accel_gyro[1];
+      accel_gyro_average[2] += accel_gyro[2];
+      accel_gyro_average[3] += accel_gyro[3];
+      accel_gyro_average[4] += accel_gyro[4];
+      accel_gyro_average[5] += accel_gyro[5];
+
+      delay_ms(50); //wait for 50ms for the gyro to stable
+    }
+
+    accel_gyro_average[0] /= 10;
+    accel_gyro_average[1] /= 10;
+    accel_gyro_average[2] /= 10;
+    accel_gyro_average[3] /= 10;
+    accel_gyro_average[4] /= 10;
+    accel_gyro_average[5] /= 10;
+
+    return TRUE;
+  }
+  else
+  {
+    return FALSE;
+  }
 }
-#endif
 
+// called at each 10ms
+void balance_controller(void)
+{
+  float acc_x;
+  float acc_y;
+  float acc_z;
+  static float angle;
+  static float old_angle1;
+  static float old_angle2;
+  static float old_angle3;
+  static float gyro_rate;
+  float dt;
+  unsigned int micros_new;
+  static unsigned int micros_old = 0;
+  static unsigned int timer_1s = 0;
 
-// Filter interface function
-// newAngle = angle measured with atan2 using the accelerometer
-// newRate = angle measured using the gyro
-// looptime = loop time in millis()
-float callFilter(float oldAngle, float newAngle, float newRate,int looptime) {
-   #ifdef IMU_FILTER_COMPL
-   return Complementary(oldAngle, newAngle, newRate, looptime);
-   #elif IMU_FILTER_COMPL2
-   return Complementary2(oldAngle, newAngle, newRate, looptime);
-   #elif IMU_FILTER_KALMAN
-   return kalmanCalculate(oldAngle, newAngle, newRate, looptime)
-   #endif
+  float current_error = 0;
+  static float old_error = 0;
+  float progressive_term = 0;
+  static float integrative_term = 0;
+  float derivative_term = 0;
+  float duty_cycle = 0;
+
+  float speed = 0;
+
+  // read the accel and gyro sensor values
+  MPU6050_GetRawAccelGyro (accel_gyro); // takes abut 15ms to be executed!!!
+
+  acc_x = accel_gyro[0];
+  acc_y = accel_gyro[1];
+  acc_z = accel_gyro[2];
+  gyro_rate = accel_gyro[5] * GYRO_SENSITIVITY;
+
+  // calc dt, using micro seconds value
+  micros_new = micros ();
+  dt = (micros_new - micros_old) / 1000000.0;
+  micros_old = micros_new;
+
+  angle = atan2(acc_x, acc_y); //calc angle between X and Y axis, in rads
+  angle = (angle + PI) * RAD_TO_DEG; //convert from rads to degres
+//  angle = 0.98 * (angle + (gyro_rate * dt)) + 0.02 * (acc_y); //use the complementary filter.
+
+  angle = (0.25 * angle) + (0.25 * old_angle1) + (0.25 * old_angle2) + (0.25 * old_angle3);
+  old_angle1 = angle;
+  old_angle2 = old_angle1;
+  old_angle3 = old_angle2;
+
+  // zero value error when the board is on balance
+  current_error = INITIAL_ANGLE - angle;
+
+#define ANGLE_MAX 2
+  if (angle > ANGLE_MAX) angle = ANGLE_MAX;
+  if (angle < -ANGLE_MAX) angle = -ANGLE_MAX;
+
+  float kp = 1;
+  float ki = 1;
+  float kd = 1;
+  float angle_old;
+
+  progressive_term = current_error * kp;
+  integrative_term += current_error * ki;
+  derivative_term = (current_error - old_error) * kd;
+  old_error = current_error;
+
+  duty_cycle = progressive_term + integrative_term + derivative_term;
+  motor_set_duty_cycle ((int) duty_cycle); // -1000 <-> 1000
 }
-
-//int16_t  AccelGyro[6]={0};
-//MPU6050_GetRawAccelGyro(AccelGyro);
-
-#endif

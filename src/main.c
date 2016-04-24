@@ -25,21 +25,24 @@
 #include "pwm.h"
 
 unsigned int machine_state = COAST;
+static unsigned int _ms;
 
 void SetSysClockTo64(void);
 void initialize (void);
 
+void delay_ms (unsigned int ms)
+{
+  _ms = 1;
+  while (ms >= _ms) ;
+}
+
 void SysTick_Handler(void) // runs every 1ms
 {
   static unsigned int c = 0;
+  static unsigned int timer_imu = 0;
 
-  //pwm_manage (); // manage the pwm duty-cycle
-
-//  if (c++ > 999)
-//  {
-//    commutate_sector ();
-//    c = 0;
-//  }
+  // for delay_ms ()
+  _ms++;
 }
 
 int main(void)
@@ -52,11 +55,13 @@ int main(void)
 
   while (1)
   {
-    // control the motor speed and rotation direction using a potentiometer on PS_SIGNAL pin
-    value = (adc_get_PS_signal_value () >> 2); // filter and the value is now 10 bits --> max 1023.
-    value = value - 511; // now middle value is 0. Left half of pot turns motor left and vice-versa
-    value = value * 1.953; // scale: 512 * 1.953 = 999.9
-    motor_set_duty_cycle (value);
+//    // control the motor speed and rotation direction using a potentiometer on PS_SIGNAL pin
+//    value = (adc_get_PS_signal_value () >> 2); // filter and the value is now 10 bits --> max 1023.
+//    value = value - 511; // now middle value is 0. Left half of pot turns motor left and vice-versa
+//    value = value * 1.953; // scale: 512 * 1.953 = 999.9
+//    motor_set_duty_cycle (value);
+
+    balance_controller ();
 
     switch (machine_state)
     {
@@ -140,8 +145,12 @@ void initialize (void)
   SetSysClockTo64(); //configure clock to 64 MHz (max possible speed)
   SystemCoreClockUpdate();
 
-  // This will affect the configuration for all interrupts
-  //NVIC_PriorityGroupConfig(NVIC_PriorityGroup_4); //4 bits for preemp priority 0 bit for sub priority
+  /* Setup SysTick Timer for 1 millisecond interrupts, also enables Systick and Systick-Interrupt */
+  if (SysTick_Config(SystemCoreClock / 1000))
+  {
+    /* Capture error */
+    while (1);
+  }
 
   adc_init ();
   commutation_disable ();
@@ -149,10 +158,6 @@ void initialize (void)
   gpio_init (); // configure pins just after PWM init
   hall_sensor_init ();
 
-  /* Setup SysTick Timer for 1 millisecond interrupts, also enables Systick and Systick-Interrupt */
-  if (SysTick_Config(SystemCoreClock / 1000))
-  {
-    /* Capture error */
-    while (1);
-  }
+  IMU_init ();
+  TIM3_init ();
 }
